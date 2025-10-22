@@ -2416,10 +2416,26 @@ const lunarBiz = {
           return;
         }
 
+        // 更宽松的日期格式匹配，支持 YYYY-MM-DD 和点击选择器设置的格式
         const match = value.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
         if (!match) {
-          if (typeof showToast === 'function') {
-            showToast('日期格式需为 YYYY-MM-DD', 'warning');
+            // 如果不是标准格式，尝试直接解析
+            const parsed = new Date(value);
+            if (!isNaN(parsed.getTime())) {
+              this.selectedDate = parsed;
+              this.currentDate = new Date(parsed);
+              this.render();
+              
+              // 格式化回标准格式
+              const year = parsed.getFullYear();
+              const month = String(parsed.getMonth() + 1).padStart(2, '0');
+              const day = String(parsed.getDate()).padStart(2, '0');
+              this.input.value = year + '-' + month + '-' + day;
+              
+              const event = new Event('change', { bubbles: false });
+              this.input.dispatchEvent(event);
+            } else {
+              console.warn('无法解析的日期格式:', value);
           }
           return;
         }
