@@ -5,9 +5,13 @@ compatibility_flags = ["nodejs_compat"]
 
 [env.production]
 name = "subscription-manager"
+workers_dev = false
+preview_urls = false
 
 [env.staging]
 name = "subscription-manager-staging"
+workers_dev = true
+preview_urls = true
 
 # KV 命名空间配置
 [[kv_namespaces]]
