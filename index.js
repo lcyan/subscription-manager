@@ -2226,7 +2226,7 @@ const lunarBiz = {
           if (this._manualInputHandler) {
             this.input.removeEventListener('blur', this._manualInputHandler);
           }
-          this._manualInputHandler = () => this.syncFromInputValue(false);
+          this._manualInputHandler = () => this.syncFromInputValue();
           this.input.addEventListener('blur', this._manualInputHandler);
 
           if (this._manualKeydownHandler) {
@@ -2327,9 +2327,9 @@ const lunarBiz = {
           }
         };
         document.addEventListener('click', this._outsideClickHandler);
-
-        // 初始化显示（不显示警告提示）
-        this.syncFromInputValue(false);
+        
+        // 初始化显示
+        this.syncFromInputValue();
         this.render();
         this.renderYearGrid();
       }
@@ -2406,7 +2406,7 @@ const lunarBiz = {
         }
       }
 
-      syncFromInputValue(showWarning = true) {
+      syncFromInputValue() {
         if (!this.input) {
           return;
         }
@@ -2418,7 +2418,7 @@ const lunarBiz = {
 
         const match = value.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
         if (!match) {
-          if (showWarning && typeof showToast === 'function') {
+          if (typeof showToast === 'function') {
             showToast('日期格式需为 YYYY-MM-DD', 'warning');
           }
           return;
@@ -2429,7 +2429,7 @@ const lunarBiz = {
         const day = Number(match[3]);
         const parsed = new Date(year, month - 1, day);
         if (isNaN(parsed.getTime()) || parsed.getFullYear() !== year || parsed.getMonth() !== month - 1 || parsed.getDate() !== day) {
-          if (showWarning && typeof showToast === 'function') {
+          if (typeof showToast === 'function') {
             showToast('请输入有效的日期', 'warning');
           }
           return;
@@ -2765,24 +2765,24 @@ const lunarBiz = {
 		const lunar = lunarCalendar.solar2lunar(start.getFullYear(), start.getMonth() + 1, start.getDate());
 		let nextLunar = addLunarPeriod(lunar, periodValue, periodUnit);
 		const solar = lunar2solar(nextLunar);
-
-		// 使用与公历相同的方式创建日期
-		const expiry = new Date(startDate); // 从原始日期开始
-		expiry.setFullYear(solar.year);
-		expiry.setMonth(solar.month - 1);
-		expiry.setDate(solar.day);
+		
+		// 使用与公历相同的方式创建日期  
+		const expiry = new Date(startDate); // 从原始日期开始  
+		expiry.setFullYear(solar.year);  
+		expiry.setMonth(solar.month - 1);  
+		expiry.setDate(solar.day);  
 		document.getElementById('expiryDate').value = expiry.toISOString().split('T')[0];
 		console.log('start:', start);
 		console.log('nextLunar:', nextLunar);
 		console.log('expiry:', expiry);
 		console.log('expiryDate:', document.getElementById('expiryDate').value);
-
-		console.log('solar from lunar2solar:', solar);
+		
+		console.log('solar from lunar2solar:', solar);  
 		console.log('solar.year:', solar.year, 'solar.month:', solar.month, 'solar.day:', solar.day);
-		console.log('expiry.getTime():', expiry.getTime());
+		console.log('expiry.getTime():', expiry.getTime());  
 		console.log('expiry.toString():', expiry.toString());
-
-
+		
+		
 	  } else {
 		// 公历推算
 		const start = new Date(startDate);
@@ -2798,14 +2798,6 @@ const lunarBiz = {
 		console.log('start:', start);
 		console.log('expiry:', expiry);
 		console.log('expiryDate:', document.getElementById('expiryDate').value);
-	  }
-
-	  // 手动同步日期选择器状态（不显示警告）
-	  if (window.startDatePicker && typeof window.startDatePicker.syncFromInputValue === 'function') {
-		window.startDatePicker.syncFromInputValue(false);
-	  }
-	  if (window.expiryDatePicker && typeof window.expiryDatePicker.syncFromInputValue === 'function') {
-		window.expiryDatePicker.syncFromInputValue(false);
 	  }
 
 	  // 更新农历显示
@@ -5220,58 +5212,45 @@ ${reminderText}
 async function sendNotificationToAllChannels(title, commonContent, config, logPrefix = '[定时任务]', options = {}) {
   const metadata = options.metadata || {};
     if (!config.ENABLED_NOTIFIERS || config.ENABLED_NOTIFIERS.length === 0) {
-        console.log(`${logPrefix} ⚠️  未启用任何通知渠道，请在系统配置中启用至少一个通知方式`);
+        console.log(`${logPrefix} 未启用任何通知渠道。`);
         return;
     }
-
-    console.log(`${logPrefix} 📢 已启用的通知渠道: ${config.ENABLED_NOTIFIERS.join(', ')}`);
-    let successCount = 0;
-    let failCount = 0;
 
     if (config.ENABLED_NOTIFIERS.includes('notifyx')) {
         const notifyxContent = `## ${title}\n\n${commonContent}`;
         const success = await sendNotifyXNotification(title, notifyxContent, `订阅提醒`, config);
-        console.log(`${logPrefix} ${success ? '✅' : '❌'} NotifyX通知 ${success ? '成功' : '失败'}`);
-        success ? successCount++ : failCount++;
+        console.log(`${logPrefix} 发送NotifyX通知 ${success ? '成功' : '失败'}`);
     }
     if (config.ENABLED_NOTIFIERS.includes('telegram')) {
         const telegramContent = `*${title}*\n\n${commonContent}`;
         const success = await sendTelegramNotification(telegramContent, config);
-        console.log(`${logPrefix} ${success ? '✅' : '❌'} Telegram通知 ${success ? '成功' : '失败'}`);
-        success ? successCount++ : failCount++;
+        console.log(`${logPrefix} 发送Telegram通知 ${success ? '成功' : '失败'}`);
     }
     if (config.ENABLED_NOTIFIERS.includes('webhook')) {
         const webhookContent = commonContent.replace(/(\**|\*|##|#|`)/g, '');
         const success = await sendWebhookNotification(title, webhookContent, config, metadata);
-        console.log(`${logPrefix} ${success ? '✅' : '❌'} Webhook通知 ${success ? '成功' : '失败'}`);
-        success ? successCount++ : failCount++;
+        console.log(`${logPrefix} 发送Webhook通知 ${success ? '成功' : '失败'}`);
     }
     if (config.ENABLED_NOTIFIERS.includes('wechatbot')) {
         const wechatbotContent = commonContent.replace(/(\**|\*|##|#|`)/g, '');
         const success = await sendWechatBotNotification(title, wechatbotContent, config);
-        console.log(`${logPrefix} ${success ? '✅' : '❌'} 企业微信机器人通知 ${success ? '成功' : '失败'}`);
-        success ? successCount++ : failCount++;
+        console.log(`${logPrefix} 发送企业微信机器人通知 ${success ? '成功' : '失败'}`);
     }
     if (config.ENABLED_NOTIFIERS.includes('weixin')) {
         const weixinContent = `【${title}】\n\n${commonContent.replace(/(\**|\*|##|#|`)/g, '')}`;
         const result = await sendWeComNotification(weixinContent, config);
-        console.log(`${logPrefix} ${result.success ? '✅' : '❌'} 企业微信通知 ${result.success ? '成功' : '失败'}. ${result.message}`);
-        result.success ? successCount++ : failCount++;
+        console.log(`${logPrefix} 发送企业微信通知 ${result.success ? '成功' : '失败'}. ${result.message}`);
     }
     if (config.ENABLED_NOTIFIERS.includes('email')) {
         const emailContent = commonContent.replace(/(\**|\*|##|#|`)/g, '');
         const success = await sendEmailNotification(title, emailContent, config);
-        console.log(`${logPrefix} ${success ? '✅' : '❌'} 邮件通知 ${success ? '成功' : '失败'}`);
-        success ? successCount++ : failCount++;
+        console.log(`${logPrefix} 发送邮件通知 ${success ? '成功' : '失败'}`);
     }
     if (config.ENABLED_NOTIFIERS.includes('bark')) {
         const barkContent = commonContent.replace(/(\**|\*|##|#|`)/g, '');
         const success = await sendBarkNotification(title, barkContent, config);
-        console.log(`${logPrefix} ${success ? '✅' : '❌'} Bark通知 ${success ? '成功' : '失败'}`);
-        success ? successCount++ : failCount++;
+        console.log(`${logPrefix} 发送Bark通知 ${success ? '成功' : '失败'}`);
     }
-
-    console.log(`${logPrefix} 📊 通知发送统计: 成功 ${successCount} 个, 失败 ${failCount} 个`);
 }
 
 async function sendTelegramNotification(message, config) {
@@ -5470,41 +5449,19 @@ async function checkExpiringSubscriptions(env) {
     const config = await getConfig(env);
     const timezone = config?.TIMEZONE || 'UTC';
     const currentTime = getCurrentTimeInTimezone(timezone);
-
-    console.log('='.repeat(80));
-    console.log('[定时任务] 🚀 开始执行订阅检查任务');
-    console.log('[定时任务] ⏰ UTC时间: ' + new Date().toISOString());
-    console.log('[定时任务] 🌍 时区: ' + timezone + ' (' + formatTimezoneDisplay(timezone) + ')');
-    console.log('[定时任务] 📅 本地时间: ' + currentTime.toLocaleString('zh-CN', {timeZone: timezone}));
-    console.log('[定时任务] 📢 通知渠道: ' + (config.ENABLED_NOTIFIERS && config.ENABLED_NOTIFIERS.length > 0 ? config.ENABLED_NOTIFIERS.join(', ') : '未配置'));
-    console.log('='.repeat(80));
+    console.log('[定时任务] 开始检查即将到期的订阅 UTC: ' + new Date().toISOString() + ', ' + timezone + ': ' + currentTime.toLocaleString('zh-CN', {timeZone: timezone}));
 
     const currentMidnight = getTimezoneMidnightTimestamp(currentTime, timezone); // 统一计算当天的零点时间，避免多次格式化
 
-    // 通知时段控制逻辑优化：默认允许发送，除非明确配置了时段限制
-    let shouldNotifyThisHour = true; // 默认允许发送
-
-    if (config.NOTIFICATION_HOURS && Array.isArray(config.NOTIFICATION_HOURS) && config.NOTIFICATION_HOURS.length > 0) {
-      const rawNotificationHours = config.NOTIFICATION_HOURS;
-      const normalizedNotificationHours = rawNotificationHours
-        .map(value => String(value).trim())
-        .filter(value => value.length > 0)
-        .map(value => value === '*' ? '*' : value.toUpperCase() === 'ALL' ? 'ALL' : value.padStart(2, '0'));
-
-      const allowAllHours = normalizedNotificationHours.includes('*') || normalizedNotificationHours.includes('ALL');
-
-      if (!allowAllHours && normalizedNotificationHours.length > 0) {
-        // 只有明确配置了具体时段，才进行时段检查
-        const hourFormatter = new Intl.DateTimeFormat('en-US', { timeZone: timezone, hour12: false, hour: '2-digit' });
-        const currentHour = hourFormatter.format(currentTime);
-        shouldNotifyThisHour = normalizedNotificationHours.includes(currentHour);
-        console.log('[定时任务] 通知时段检查 - 当前小时: ' + currentHour + ', 配置时段: ' + normalizedNotificationHours.join(',') + ', 是否发送: ' + shouldNotifyThisHour);
-      } else {
-        console.log('[定时任务] 通知时段配置为全天发送 (*)');
-      }
-    } else {
-      console.log('[定时任务] 未配置通知时段限制，默认全天发送');
-    }
+    const rawNotificationHours = Array.isArray(config.NOTIFICATION_HOURS) ? config.NOTIFICATION_HOURS : [];
+    const normalizedNotificationHours = rawNotificationHours
+      .map(value => String(value).trim())
+      .filter(value => value.length > 0)
+      .map(value => value === '*' ? '*' : value.toUpperCase() === 'ALL' ? 'ALL' : value.padStart(2, '0'));
+    const allowAllHours = normalizedNotificationHours.includes('*') || normalizedNotificationHours.includes('ALL');
+    const hourFormatter = new Intl.DateTimeFormat('en-US', { timeZone: timezone, hour12: false, hour: '2-digit' });
+    const currentHour = hourFormatter.format(currentTime);
+    const shouldNotifyThisHour = allowAllHours || normalizedNotificationHours.length === 0 || normalizedNotificationHours.includes(currentHour);
 
     const subscriptions = await getAllSubscriptions(env);
     console.log('[定时任务] 共找到 ' + subscriptions.length + ' 个订阅');
@@ -5657,14 +5614,10 @@ for (const subscription of subscriptions) {
     }
 
     if (expiringSubscriptions.length > 0) {
-      console.log('[定时任务] ✅ 找到 ' + expiringSubscriptions.length + ' 个需要提醒的订阅');
-
       if (!shouldNotifyThisHour) {
-        console.log('[定时任务] ⏰ 当前时段不在通知时段内，跳过发送通知（订阅仍会自动续订）');
+        console.log('[定时任务] 当前小时 ' + currentHour + ' 未配置为推送时间，跳过发送通知');
         expiringSubscriptions.length = 0;
       } else {
-        console.log('[定时任务] 📤 开始发送通知...');
-
         // 按到期时间排序
         expiringSubscriptions.sort((a, b) => a.daysRemaining - b.daysRemaining);
 
@@ -5676,21 +5629,10 @@ for (const subscription of subscriptions) {
         await sendNotificationToAllChannels(title, commonContent, config, '[定时任务]', {
           metadata: { tags: metadataTags }
         });
-
-        console.log('[定时任务] ✅ 通知发送完成');
       }
-    } else {
-      console.log('[定时任务] ℹ️  当前没有需要提醒的订阅');
     }
-
-    console.log('='.repeat(80));
-    console.log('[定时任务] ✅ 订阅检查任务执行完成');
-    console.log('='.repeat(80));
   } catch (error) {
-    console.error('='.repeat(80));
-    console.error('[定时任务] ❌ 检查即将到期的订阅失败:', error);
-    console.error('[定时任务] 错误堆栈:', error.stack);
-    console.error('='.repeat(80));
+    console.error('[定时任务] 检查即将到期的订阅失败:', error);
   }
 }
 
