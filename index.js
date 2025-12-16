@@ -428,7 +428,7 @@ const loginPage = `
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>订阅管理系统</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <style>
     .login-container {
@@ -536,7 +536,7 @@ const adminPage = `
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>订阅管理系统</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <style>
     .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); transition: all 0.3s; }
@@ -855,6 +855,9 @@ const adminPage = `
           <span id="systemTimeDisplay" class="ml-4 text-base text-indigo-600 font-normal"></span>
         </div>
         <div class="flex items-center space-x-4">
+          <a href="/admin/dashboard" class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+            <i class="fas fa-chart-line mr-1"></i>仪表盘
+          </a>
           <a href="/admin" class="text-indigo-600 border-b-2 border-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
             <i class="fas fa-list mr-1"></i>订阅列表
           </a>
@@ -906,22 +909,25 @@ const adminPage = `
         <table class="w-full divide-y divide-gray-200 responsive-table">
           <thead class="bg-gray-50">
             <tr>
-              <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 25%;">
+              <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 23%;">
                 名称
               </th>
-              <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 15%;">
+              <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 13%;">
                 类型
               </th>
-              <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 20%;">
+              <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 18%;">
                 到期时间 <i class="fas fa-sort-up ml-1 text-indigo-500" title="按到期时间升序排列"></i>
               </th>
-              <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 15%;">
+              <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 10%;">
+                金额
+              </th>
+              <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 13%;">
                 提醒设置
               </th>
               <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 10%;">
                 状态
               </th>
-              <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 15%;">
+              <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 13%;">
                 操作
               </th>
             </tr>
@@ -958,20 +964,72 @@ const adminPage = `
           
           <div>
             <label for="customType" class="block text-sm font-medium text-gray-700 mb-1">订阅类型</label>
-            <input type="text" id="customType" placeholder="例如：流媒体、云服务、软件、生日等"
+            <input type="text" id="customType" list="customTypeList" placeholder="选择或输入自定义类型"
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            <datalist id="customTypeList">
+              <option value="流媒体">
+              <option value="视频平台">
+              <option value="音乐平台">
+              <option value="云服务">
+              <option value="软件订阅">
+              <option value="域名">
+              <option value="服务器">
+              <option value="会员服务">
+              <option value="学习平台">
+              <option value="健身/运动">
+              <option value="游戏">
+              <option value="新闻/杂志">
+              <option value="生日">
+              <option value="纪念日">
+              <option value="其他">
+            </datalist>
             <div class="error-message text-red-500"></div>
           </div>
 
           <div>
             <label for="category" class="block text-sm font-medium text-gray-700 mb-1">分类标签</label>
-            <input type="text" id="category" placeholder="例如：个人、家庭、公司"
+            <input type="text" id="category" list="categoryList" placeholder="选择或输入自定义标签"
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-            <p class="mt-1 text-xs text-gray-500">可输入多个标签并使用“/”分隔，便于筛选和统计</p>
+            <datalist id="categoryList">
+              <option value="个人">
+              <option value="家庭">
+              <option value="工作">
+              <option value="公司">
+              <option value="娱乐">
+              <option value="学习">
+              <option value="开发">
+              <option value="生产力">
+              <option value="社交">
+              <option value="健康">
+              <option value="财务">
+            </datalist>
+            <p class="mt-1 text-xs text-gray-500">可输入多个标签并使用"/"分隔，便于筛选和统计</p>
             <div class="error-message text-red-500"></div>
           </div>
         </div>
-        
+
+        <!-- 金额 -->
+        <div class="mb-4">
+          <label for="amount" class="block text-sm font-medium text-gray-700 mb-1">
+            金额（元）
+            <span class="text-gray-400 text-xs ml-1">可选</span>
+          </label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
+              ¥
+            </span>
+            <input
+              type="number"
+              id="amount"
+              step="0.01"
+              min="0"
+              placeholder="例如: 15.00"
+              class="pl-8 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+          <p class="mt-1 text-xs text-gray-500">用于统计支出和生成仪表盘</p>
+        </div>
+
         <div class="mb-4 flex items-center space-x-6">
           <label class="lunar-toggle">
             <input type="checkbox" id="showLunar" class="form-checkbox h-4 w-4 text-indigo-600">
@@ -1989,6 +2047,13 @@ const lunarBiz = {
           : (reminder.unit === 'hour' ? '<div class="text-xs text-gray-500 mt-1">小时级提醒</div>' : '');
         const reminderHtml = '<div><i class="fas fa-bell mr-1"></i>' + reminder.displayText + '</div>' + reminderExtra;
 
+        const amountHtml = subscription.amount
+          ? '<div class="flex items-center gap-1">' +
+              '<i class="fas fa-yen-sign text-green-500"></i>' +
+              '<span class="text-sm font-medium text-gray-900">¥' + subscription.amount.toFixed(2) + '</span>' +
+            '</div>'
+          : '<span class="text-xs text-gray-400">未设置</span>';
+
         row.innerHTML =
           '<td data-label="名称" class="px-4 py-3"><div class="td-content-wrapper">' +
             nameHtml +
@@ -2009,6 +2074,9 @@ const lunarBiz = {
             '<div class="text-xs text-gray-500 mt-1">' + daysLeftText + '</div>' +
             startDateHtml +
           '</div></td>' +
+          '<td data-label="金额" class="px-4 py-3"><div class="td-content-wrapper">' +
+            amountHtml +
+          '</div></td>' +
           '<td data-label="提醒设置" class="px-4 py-3"><div class="td-content-wrapper">' +
             reminderHtml +
           '</div></td>' +
@@ -2016,7 +2084,9 @@ const lunarBiz = {
           '<td data-label="操作" class="px-4 py-3">' +
             '<div class="action-buttons-wrapper">' +
               '<button class="edit btn-primary text-white px-2 py-1 rounded text-xs whitespace-nowrap" data-id="' + subscription.id + '"><i class="fas fa-edit mr-1"></i>编辑</button>' +
+              '<button class="view-history bg-purple-500 hover:bg-purple-600 text-white px-2 py-1 rounded text-xs whitespace-nowrap" data-id="' + subscription.id + '" title="查看支付历史"><i class="fas fa-history mr-1"></i>历史</button>' +
               '<button class="test-notify btn-info text-white px-2 py-1 rounded text-xs whitespace-nowrap" data-id="' + subscription.id + '"><i class="fas fa-paper-plane mr-1"></i>测试</button>' +
+              '<button class="renew-now btn-success text-white px-2 py-1 rounded text-xs whitespace-nowrap" data-id="' + subscription.id + '" title="立即续订一个周期"><i class="fas fa-sync-alt mr-1"></i>续订</button>' +
               '<button class="delete btn-danger text-white px-2 py-1 rounded text-xs whitespace-nowrap" data-id="' + subscription.id + '"><i class="fas fa-trash-alt mr-1"></i>删除</button>' +
               (subscription.isActive
                 ? '<button class="toggle-status btn-warning text-white px-2 py-1 rounded text-xs whitespace-nowrap" data-id="' + subscription.id + '" data-action="deactivate"><i class="fas fa-pause-circle mr-1"></i>停用</button>'
@@ -2041,6 +2111,14 @@ const lunarBiz = {
 
       document.querySelectorAll('.test-notify').forEach(button => {
         button.addEventListener('click', testSubscriptionNotification);
+      });
+
+      document.querySelectorAll('.renew-now').forEach(button => {
+        button.addEventListener('click', renewSubscriptionNow);
+      });
+
+      document.querySelectorAll('.view-history').forEach(button => {
+        button.addEventListener('click', viewPaymentHistory);
       });
 
       attachHoverListeners();
@@ -2116,7 +2194,502 @@ const lunarBiz = {
             button.disabled = false;
         }
     }
-    
+
+    async function renewSubscriptionNow(e) {
+        const button = e.target.tagName === 'BUTTON' ? e.target : e.target.parentElement;
+        const id = button.dataset.id;
+
+        try {
+            const response = await fetch('/api/subscriptions/' + id);
+            const subscription = await response.json();
+            showRenewFormModal(subscription);
+        } catch (error) {
+            console.error('获取订阅信息失败:', error);
+            showToast('获取订阅信息时发生错误', 'error');
+        }
+    }
+
+    function showRenewFormModal(subscription) {
+        const today = new Date().toISOString().split('T')[0];
+        const expiryDate = new Date(subscription.expiryDate);
+        const formattedExpiry = expiryDate.toLocaleDateString('zh-CN');
+        const defaultAmount = subscription.amount || 0;
+        const periodUnit = subscription.periodUnit === 'day' ? '天' :
+                          subscription.periodUnit === 'month' ? '月' : '年';
+
+        const modalHtml = \`
+            <div id="renewFormModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" onclick="closeRenewFormModal(event)">
+                <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white" onclick="event.stopPropagation()">
+                    <div class="flex justify-between items-center pb-3 border-b">
+                        <h3 class="text-xl font-semibold text-gray-900">
+                            <i class="fas fa-sync-alt mr-2"></i>手动续订 - \${subscription.name}
+                        </h3>
+                        <button onclick="closeRenewFormModal()" class="text-gray-400 hover:text-gray-500">
+                            <i class="fas fa-times text-2xl"></i>
+                        </button>
+                    </div>
+
+                    <form id="renewForm" class="mt-4 space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">支付日期</label>
+                            <input type="date" id="renewPaymentDate" value="\${today}"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">支付金额 (¥)</label>
+                            <input type="number" id="renewAmount" value="\${defaultAmount}" step="0.01" min="0"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">续订周期数</label>
+                            <div class="flex items-center space-x-2">
+                                <input type="number" id="renewPeriodMultiplier" value="1" min="1" max="120"
+                                       class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                       oninput="updateNewExpiryPreview()">
+                                <span class="text-gray-600">\${periodUnit}</span>
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500">一次性续订多个周期（如12个月）</p>
+                        </div>
+
+                        <div class="bg-blue-50 rounded-lg p-3">
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="text-gray-600">当前到期:</span>
+                                <span class="font-medium">\${formattedExpiry}</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">新到期日:</span>
+                                <span class="font-medium text-blue-600" id="newExpiryPreview">计算中...</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">备注 (可选)</label>
+                            <input type="text" id="renewNote" placeholder="例如：年度优惠、价格调整"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+
+                        <div class="flex justify-end space-x-3 pt-3">
+                            <button type="button" onclick="closeRenewFormModal()"
+                                    class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-md">
+                                取消
+                            </button>
+                            <button type="submit" id="confirmRenewBtn"
+                                    class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-md">
+                                <i class="fas fa-check mr-1"></i>确认续订
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        \`;
+
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+        // 保存订阅信息到表单
+        document.getElementById('renewForm').dataset.subscriptionId = subscription.id;
+        document.getElementById('renewForm').dataset.subscriptionData = JSON.stringify(subscription);
+
+        // 初始化新到期日预览
+        updateNewExpiryPreview();
+
+        // 绑定表单提交事件
+        document.getElementById('renewForm').addEventListener('submit', handleRenewFormSubmit);
+        document.getElementById('renewPeriodMultiplier').addEventListener('input', updateNewExpiryPreview);
+    }
+
+    function updateNewExpiryPreview() {
+        const form = document.getElementById('renewForm');
+        if (!form) return;
+
+        const subscription = JSON.parse(form.dataset.subscriptionData);
+        const multiplier = parseInt(document.getElementById('renewPeriodMultiplier').value) || 1;
+
+        const expiryDate = new Date(subscription.expiryDate);
+        const newExpiryDate = new Date(expiryDate);
+
+        if (subscription.useLunar) {
+            // 农历续订的预览比较复杂，简化显示
+            document.getElementById('newExpiryPreview').textContent = '农历计算中...';
+        } else {
+            const totalPeriodValue = subscription.periodValue * multiplier;
+            if (subscription.periodUnit === 'day') {
+                newExpiryDate.setDate(expiryDate.getDate() + totalPeriodValue);
+            } else if (subscription.periodUnit === 'month') {
+                newExpiryDate.setMonth(expiryDate.getMonth() + totalPeriodValue);
+            } else if (subscription.periodUnit === 'year') {
+                newExpiryDate.setFullYear(expiryDate.getFullYear() + totalPeriodValue);
+            }
+            document.getElementById('newExpiryPreview').textContent = newExpiryDate.toLocaleDateString('zh-CN');
+        }
+    }
+
+    async function handleRenewFormSubmit(e) {
+        e.preventDefault();
+
+        const form = e.target;
+        const subscriptionId = form.dataset.subscriptionId;
+        const confirmBtn = document.getElementById('confirmRenewBtn');
+
+        const options = {
+            paymentDate: document.getElementById('renewPaymentDate').value,
+            amount: parseFloat(document.getElementById('renewAmount').value) || 0,
+            periodMultiplier: parseInt(document.getElementById('renewPeriodMultiplier').value) || 1,
+            note: document.getElementById('renewNote').value || '手动续订'
+        };
+
+        const originalBtnContent = confirmBtn.innerHTML;
+        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>续订中...';
+        confirmBtn.disabled = true;
+
+        try {
+            const response = await fetch('/api/subscriptions/' + subscriptionId + '/renew', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(options)
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                showToast(result.message || '续订成功', 'success');
+                closeRenewFormModal();
+                await loadSubscriptions(false);
+            } else {
+                showToast(result.message || '续订失败', 'error');
+                confirmBtn.innerHTML = originalBtnContent;
+                confirmBtn.disabled = false;
+            }
+        } catch (error) {
+            console.error('续订失败:', error);
+            showToast('续订时发生错误', 'error');
+            confirmBtn.innerHTML = originalBtnContent;
+            confirmBtn.disabled = false;
+        }
+    }
+
+    window.closeRenewFormModal = function(event) {
+        if (event && event.target.id !== 'renewFormModal') {
+            return;
+        }
+        const modal = document.getElementById('renewFormModal');
+        if (modal) {
+            modal.remove();
+        }
+    };
+
+    async function viewPaymentHistory(e) {
+        const button = e.target.tagName === 'BUTTON' ? e.target : e.target.parentElement;
+        const id = button.dataset.id;
+
+        try {
+            const response = await fetch('/api/subscriptions/' + id + '/payments');
+            const result = await response.json();
+
+            if (!result.success) {
+                showToast(result.message || '获取支付历史失败', 'error');
+                return;
+            }
+
+            const payments = result.payments || [];
+            const subscriptionResponse = await fetch('/api/subscriptions/' + id);
+            const subscriptionData = await subscriptionResponse.json();
+            const subscription = subscriptionData;
+
+            showPaymentHistoryModal(subscription, payments);
+        } catch (error) {
+            console.error('获取支付历史失败:', error);
+            showToast('获取支付历史时发生错误', 'error');
+        }
+    }
+
+    function showPaymentHistoryModal(subscription, payments) {
+        const totalAmount = payments.reduce((sum, p) => sum + (p.amount || 0), 0);
+        const paymentCount = payments.length;
+
+        let paymentsHtml = '';
+        if (payments.length === 0) {
+            paymentsHtml = '<div class="text-center text-gray-500 py-8">暂无支付记录</div>';
+        } else {
+            paymentsHtml = payments.reverse().map(payment => {
+                const typeLabel = payment.type === 'initial' ? '初始订阅' :
+                                payment.type === 'manual' ? '手动续订' :
+                                payment.type === 'auto' ? '自动续订' : '未知';
+                const typeClass = payment.type === 'initial' ? 'bg-blue-100 text-blue-800' :
+                                payment.type === 'manual' ? 'bg-green-100 text-green-800' :
+                                payment.type === 'auto' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800';
+                const date = new Date(payment.date);
+                const formattedDate = date.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' });
+                const formattedTime = date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+
+                // 计费周期格式化
+                let periodHtml = '';
+                if (payment.periodStart && payment.periodEnd) {
+                    const periodStart = new Date(payment.periodStart);
+                    const periodEnd = new Date(payment.periodEnd);
+                    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+                    const startStr = periodStart.toLocaleDateString('zh-CN', options);
+                    const endStr = periodEnd.toLocaleDateString('zh-CN', options);
+                    periodHtml = '<div class="mt-1 ml-6 text-xs text-gray-500"><i class="fas fa-clock mr-1"></i>计费周期: ' + startStr + ' - ' + endStr + '</div>';
+                }
+
+                const noteHtml = payment.note ? '<div class="mt-1 ml-6 text-sm text-gray-600">' + payment.note + '</div>' : '';
+                const paymentDataJson = JSON.stringify(payment).replace(/"/g, '&quot;');
+                return \`
+                    <div class="border-b border-gray-200 py-3 hover:bg-gray-50">
+                        <div class="flex justify-between items-start gap-3">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-calendar-alt text-gray-400"></i>
+                                    <span class="font-medium">\${formattedDate} \${formattedTime}</span>
+                                    <span class="px-2 py-1 rounded text-xs font-medium \${typeClass}">\${typeLabel}</span>
+                                </div>
+                                \${periodHtml}
+                                \${noteHtml}
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="text-right">
+                                    <div class="text-lg font-bold text-gray-900">¥\${payment.amount.toFixed(2)}</div>
+                                </div>
+                                <div class="flex gap-1">
+                                    <button onclick="editPaymentRecord('\${subscription.id}', '\${payment.id}')"
+                                            class="text-blue-600 hover:text-blue-800 px-2 py-1"
+                                            title="编辑">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button onclick="deletePaymentRecord('\${subscription.id}', '\${payment.id}')"
+                                            class="text-red-600 hover:text-red-800 px-2 py-1"
+                                            title="删除">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                \`;
+            }).join('');
+        }
+
+        const modalHtml = \`
+            <div id="paymentHistoryModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" onclick="closePaymentHistoryModal(event)">
+                <div class="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white" onclick="event.stopPropagation()">
+                    <div class="flex justify-between items-center pb-3 border-b">
+                        <h3 class="text-xl font-semibold text-gray-900">
+                            <i class="fas fa-history mr-2"></i>\${subscription.name} - 支付历史
+                        </h3>
+                        <button onclick="closePaymentHistoryModal()" class="text-gray-400 hover:text-gray-500">
+                            <i class="fas fa-times text-2xl"></i>
+                        </button>
+                    </div>
+
+                    <div class="mt-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-4 mb-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="text-center">
+                                <div class="text-sm text-gray-600">累计支出</div>
+                                <div class="text-2xl font-bold text-purple-600">¥\${totalAmount.toFixed(2)}</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-sm text-gray-600">支付次数</div>
+                                <div class="text-2xl font-bold text-blue-600">\${paymentCount}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 max-h-96 overflow-y-auto">
+                        \${paymentsHtml}
+                    </div>
+
+                    <div class="mt-4 flex justify-end">
+                        <button onclick="closePaymentHistoryModal()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">
+                            关闭
+                        </button>
+                    </div>
+                </div>
+            </div>
+        \`;
+
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+
+    window.closePaymentHistoryModal = function(event) {
+        if (event && event.target.id !== 'paymentHistoryModal') {
+            return;
+        }
+        const modal = document.getElementById('paymentHistoryModal');
+        if (modal) {
+            modal.remove();
+        }
+    };
+
+    window.deletePaymentRecord = async function(subscriptionId, paymentId) {
+        if (!confirm('确认删除此支付记录？删除后将重新计算统计数据。')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(\`/api/subscriptions/\${subscriptionId}/payments/\${paymentId}\`, {
+                method: 'DELETE'
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                showToast(result.message || '支付记录已删除', 'success');
+                // 关闭当前模态框
+                closePaymentHistoryModal();
+                // 刷新订阅列表
+                await loadSubscriptions(false);
+            } else {
+                showToast(result.message || '删除失败', 'error');
+            }
+        } catch (error) {
+            console.error('删除支付记录失败:', error);
+            showToast('删除时发生错误', 'error');
+        }
+    };
+
+    window.editPaymentRecord = async function(subscriptionId, paymentId) {
+        try {
+            // 获取订阅信息
+            const subResponse = await fetch(\`/api/subscriptions/\${subscriptionId}\`);
+            const subscription = await subResponse.json();
+
+            // 获取支付历史
+            const payResponse = await fetch(\`/api/subscriptions/\${subscriptionId}/payments\`);
+            const payResult = await payResponse.json();
+
+            const payment = payResult.payments.find(p => p.id === paymentId);
+            if (!payment) {
+                showToast('支付记录不存在', 'error');
+                return;
+            }
+
+            showEditPaymentModal(subscription, payment);
+        } catch (error) {
+            console.error('获取支付记录失败:', error);
+            showToast('获取支付记录时发生错误', 'error');
+        }
+    };
+
+    function showEditPaymentModal(subscription, payment) {
+        const paymentDate = new Date(payment.date);
+        const formattedDate = paymentDate.toISOString().split('T')[0];
+
+        const modalHtml = \`
+            <div id="editPaymentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" onclick="closeEditPaymentModal(event)">
+                <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white" onclick="event.stopPropagation()">
+                    <div class="flex justify-between items-center pb-3 border-b">
+                        <h3 class="text-xl font-semibold text-gray-900">
+                            <i class="fas fa-edit mr-2"></i>编辑支付记录
+                        </h3>
+                        <button onclick="closeEditPaymentModal()" class="text-gray-400 hover:text-gray-500">
+                            <i class="fas fa-times text-2xl"></i>
+                        </button>
+                    </div>
+
+                    <form id="editPaymentForm" class="mt-4 space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">订阅名称</label>
+                            <input type="text" value="\${subscription.name}" disabled
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">支付日期</label>
+                            <input type="date" id="editPaymentDate" value="\${formattedDate}"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">支付金额 (¥)</label>
+                            <input type="number" id="editPaymentAmount" value="\${payment.amount}" step="0.01" min="0"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">备注</label>
+                            <input type="text" id="editPaymentNote" value="\${payment.note || ''}"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+
+                        <div class="flex justify-end space-x-3 pt-3">
+                            <button type="button" onclick="closeEditPaymentModal()"
+                                    class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-md">
+                                取消
+                            </button>
+                            <button type="submit" id="confirmEditBtn"
+                                    class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md">
+                                <i class="fas fa-check mr-1"></i>保存
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        \`;
+
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+        // 保存信息到表单
+        document.getElementById('editPaymentForm').dataset.subscriptionId = subscription.id;
+        document.getElementById('editPaymentForm').dataset.paymentId = payment.id;
+
+        // 绑定表单提交事件
+        document.getElementById('editPaymentForm').addEventListener('submit', handleEditPaymentSubmit);
+    }
+
+    async function handleEditPaymentSubmit(e) {
+        e.preventDefault();
+
+        const form = e.target;
+        const subscriptionId = form.dataset.subscriptionId;
+        const paymentId = form.dataset.paymentId;
+        const confirmBtn = document.getElementById('confirmEditBtn');
+
+        const paymentData = {
+            date: document.getElementById('editPaymentDate').value,
+            amount: parseFloat(document.getElementById('editPaymentAmount').value) || 0,
+            note: document.getElementById('editPaymentNote').value
+        };
+
+        const originalBtnContent = confirmBtn.innerHTML;
+        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>保存中...';
+        confirmBtn.disabled = true;
+
+        try {
+            const response = await fetch(\`/api/subscriptions/\${subscriptionId}/payments/\${paymentId}\`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(paymentData)
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                showToast(result.message || '支付记录已更新', 'success');
+                closeEditPaymentModal();
+                closePaymentHistoryModal();
+                await loadSubscriptions(false);
+            } else {
+                showToast(result.message || '更新失败', 'error');
+                confirmBtn.innerHTML = originalBtnContent;
+                confirmBtn.disabled = false;
+            }
+        } catch (error) {
+            console.error('更新支付记录失败:', error);
+            showToast('更新时发生错误', 'error');
+            confirmBtn.innerHTML = originalBtnContent;
+            confirmBtn.disabled = false;
+        }
+    }
+
+    window.closeEditPaymentModal = function(event) {
+        if (event && event.target.id !== 'editPaymentModal') {
+            return;
+        }
+        const modal = document.getElementById('editPaymentModal');
+        if (modal) {
+            modal.remove();
+        }
+    };
+
     async function toggleSubscriptionStatus(e) {
       const id = e.target.dataset.id || e.target.parentElement.dataset.id;
       const action = e.target.dataset.action || e.target.parentElement.dataset.action;
@@ -2226,7 +2799,7 @@ const lunarBiz = {
           if (this._manualInputHandler) {
             this.input.removeEventListener('blur', this._manualInputHandler);
           }
-          this._manualInputHandler = () => this.syncFromInputValue(false);
+          this._manualInputHandler = () => this.syncFromInputValue();
           this.input.addEventListener('blur', this._manualInputHandler);
 
           if (this._manualKeydownHandler) {
@@ -2327,9 +2900,9 @@ const lunarBiz = {
           }
         };
         document.addEventListener('click', this._outsideClickHandler);
-
-        // 初始化显示（不显示警告提示）
-        this.syncFromInputValue(false);
+        
+        // 初始化显示
+        this.syncFromInputValue();
         this.render();
         this.renderYearGrid();
       }
@@ -2406,7 +2979,7 @@ const lunarBiz = {
         }
       }
 
-      syncFromInputValue(showWarning = true) {
+      syncFromInputValue() {
         if (!this.input) {
           return;
         }
@@ -2418,7 +2991,7 @@ const lunarBiz = {
 
         const match = value.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
         if (!match) {
-          if (showWarning && typeof showToast === 'function') {
+          if (typeof showToast === 'function') {
             showToast('日期格式需为 YYYY-MM-DD', 'warning');
           }
           return;
@@ -2429,7 +3002,7 @@ const lunarBiz = {
         const day = Number(match[3]);
         const parsed = new Date(year, month - 1, day);
         if (isNaN(parsed.getTime()) || parsed.getFullYear() !== year || parsed.getMonth() !== month - 1 || parsed.getDate() !== day) {
-          if (showWarning && typeof showToast === 'function') {
+          if (typeof showToast === 'function') {
             showToast('请输入有效的日期', 'warning');
           }
           return;
@@ -2765,24 +3338,24 @@ const lunarBiz = {
 		const lunar = lunarCalendar.solar2lunar(start.getFullYear(), start.getMonth() + 1, start.getDate());
 		let nextLunar = addLunarPeriod(lunar, periodValue, periodUnit);
 		const solar = lunar2solar(nextLunar);
-
-		// 使用与公历相同的方式创建日期
-		const expiry = new Date(startDate); // 从原始日期开始
-		expiry.setFullYear(solar.year);
-		expiry.setMonth(solar.month - 1);
-		expiry.setDate(solar.day);
+		
+		// 使用与公历相同的方式创建日期  
+		const expiry = new Date(startDate); // 从原始日期开始  
+		expiry.setFullYear(solar.year);  
+		expiry.setMonth(solar.month - 1);  
+		expiry.setDate(solar.day);  
 		document.getElementById('expiryDate').value = expiry.toISOString().split('T')[0];
 		console.log('start:', start);
 		console.log('nextLunar:', nextLunar);
 		console.log('expiry:', expiry);
 		console.log('expiryDate:', document.getElementById('expiryDate').value);
-
-		console.log('solar from lunar2solar:', solar);
+		
+		console.log('solar from lunar2solar:', solar);  
 		console.log('solar.year:', solar.year, 'solar.month:', solar.month, 'solar.day:', solar.day);
-		console.log('expiry.getTime():', expiry.getTime());
+		console.log('expiry.getTime():', expiry.getTime());  
 		console.log('expiry.toString():', expiry.toString());
-
-
+		
+		
 	  } else {
 		// 公历推算
 		const start = new Date(startDate);
@@ -2798,14 +3371,6 @@ const lunarBiz = {
 		console.log('start:', start);
 		console.log('expiry:', expiry);
 		console.log('expiryDate:', document.getElementById('expiryDate').value);
-	  }
-
-	  // 手动同步日期选择器状态（不显示警告）
-	  if (window.startDatePicker && typeof window.startDatePicker.syncFromInputValue === 'function') {
-		window.startDatePicker.syncFromInputValue(false);
-	  }
-	  if (window.expiryDatePicker && typeof window.expiryDatePicker.syncFromInputValue === 'function') {
-		window.expiryDatePicker.syncFromInputValue(false);
 	  }
 
 	  // 更新农历显示
@@ -2844,6 +3409,7 @@ const lunarBiz = {
         customType: document.getElementById('customType').value.trim(),
         category: document.getElementById('category').value.trim(),
         notes: document.getElementById('notes').value.trim() || '',
+        amount: document.getElementById('amount').value ? parseFloat(document.getElementById('amount').value) : null,
         isActive: document.getElementById('isActive').checked,
         autoRenew: document.getElementById('autoRenew').checked,
         startDate: document.getElementById('startDate').value,
@@ -2905,6 +3471,7 @@ const lunarBiz = {
           document.getElementById('customType').value = subscription.customType || '';
           document.getElementById('category').value = subscription.category || '';
           document.getElementById('notes').value = subscription.notes || '';
+          document.getElementById('amount').value = subscription.amount || '';
           document.getElementById('isActive').checked = subscription.isActive !== false;
           document.getElementById('autoRenew').checked = subscription.autoRenew !== false;
           document.getElementById('startDate').value = subscription.startDate ? subscription.startDate.split('T')[0] : '';
@@ -3125,7 +3692,7 @@ const configPage = `
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>系统配置 - 订阅管理系统</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <style>
     .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); transition: all 0.3s; }
@@ -3172,6 +3739,9 @@ const configPage = `
           <span id="systemTimeDisplay" class="ml-4 text-base text-indigo-600 font-normal"></span>
         </div>
         <div class="flex items-center space-x-4">
+          <a href="/admin/dashboard" class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+            <i class="fas fa-chart-line mr-1"></i>仪表盘
+          </a>
           <a href="/admin" class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
             <i class="fas fa-list mr-1"></i>订阅列表
           </a>
@@ -4012,6 +4582,157 @@ const configPage = `
 // 与前端一致的分类切割正则，用于提取标签信息
 const CATEGORY_SEPARATOR_REGEX = /[\/,，\s]+/;
 
+
+function dashboardPage() {
+  return `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>仪表盘 - SubsTracker</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <style>
+    .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); transition: all 0.3s; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); }
+    .stat-card{background:white;border-radius:12px;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:transform 0.2s,box-shadow 0.2s}
+    .stat-card:hover{transform:translateY(-4px);box-shadow:0 4px 16px rgba(0,0,0,0.15)}
+    .stat-card-header{color:#6b7280;font-size:0.875rem;font-weight:500;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.5rem}
+    .stat-card-value{font-size:2rem;font-weight:700;color:#1f2937;margin-bottom:0.25rem}
+    .stat-card-subtitle{color:#9ca3af;font-size:0.875rem}
+    .stat-card-trend{display:inline-flex;align-items:center;gap:0.25rem;font-size:0.875rem;margin-top:0.5rem;padding:0.25rem 0.5rem;border-radius:6px}
+    .stat-card-trend.up{color:#10b981;background:#d1fae5}
+    .stat-card-trend.down{color:#ef4444;background:#fee2e2}
+    .stat-card-trend.flat{color:#6b7280;background:#f3f4f6}
+    .list-item{display:flex;align-items:center;justify-content:space-between;padding:1rem;border-radius:8px;transition:background 0.2s}
+    .list-item:hover{background:#f9fafb}
+    .list-item:not(:last-child){border-bottom:1px solid #f3f4f6}
+    .list-item-content{flex:1}
+    .list-item-name{font-weight:600;color:#1f2937;margin-bottom:0.25rem}
+    .list-item-meta{display:flex;align-items:center;gap:1rem;font-size:0.875rem;color:#6b7280;flex-wrap:wrap}
+    .list-item-amount{font-size:1.125rem;font-weight:700;color:#10b981}
+    .list-item-badge{display:inline-block;padding:0.25rem 0.75rem;border-radius:12px;font-size:0.75rem;font-weight:500;background:#e0e7ff;color:#4f46e5}
+    .ranking-item{margin-bottom:1rem}
+    .ranking-item-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem}
+    .ranking-item-name{font-weight:600;color:#1f2937}
+    .ranking-item-value{display:flex;align-items:center;gap:0.5rem;font-size:0.875rem}
+    .ranking-item-amount{font-weight:700;color:#1f2937}
+    .ranking-item-percentage{color:#10b981}
+    .ranking-progress{width:100%;height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden}
+    .ranking-progress-bar{height:100%;border-radius:4px;transition:width 0.6s ease}
+    .ranking-progress-bar.color-1{background:linear-gradient(90deg,#6366f1,#8b5cf6)}
+    .ranking-progress-bar.color-2{background:linear-gradient(90deg,#10b981,#059669)}
+    .ranking-progress-bar.color-3{background:linear-gradient(90deg,#f59e0b,#d97706)}
+    .ranking-progress-bar.color-4{background:linear-gradient(90deg,#ef4444,#dc2626)}
+    .ranking-progress-bar.color-5{background:linear-gradient(90deg,#8b5cf6,#7c3aed)}
+    .empty-state{text-align:center;padding:3rem 1rem;color:#9ca3af}
+    .empty-state-icon{font-size:3rem;margin-bottom:1rem;opacity:0.5}
+    .empty-state-text{font-size:0.875rem}
+    .loading-skeleton{background:linear-gradient(90deg,#f3f4f6 25%,#e5e7eb 50%,#f3f4f6 75%);background-size:200% 100%;animation:loading 1.5s infinite;height:100px;border-radius:8px}
+    @keyframes loading{0%{background-position:200% 0}100%{background-position:-200% 0}}
+  </style>
+</head>
+<body class="bg-gray-50">
+  <nav class="bg-white shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <i class="fas fa-calendar-check text-indigo-600 text-2xl mr-2"></i>
+          <span class="font-bold text-xl text-gray-800">订阅管理系统</span>
+        </div>
+        <div class="flex items-center space-x-4">
+          <a href="/admin/dashboard" class="text-indigo-600 border-b-2 border-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
+            <i class="fas fa-chart-line mr-1"></i>仪表盘
+          </a>
+          <a href="/admin" class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+            <i class="fas fa-list mr-1"></i>订阅列表
+          </a>
+          <a href="/admin/config" class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+            <i class="fas fa-cog mr-1"></i>系统配置
+          </a>
+          <a href="/api/logout" class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+            <i class="fas fa-sign-out-alt mr-1"></i>退出登录
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-6">
+      <h2 class="text-2xl font-bold text-gray-800">📊 仪表板</h2>
+      <p class="text-sm text-gray-500 mt-1">订阅费用和活动概览</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6" id="statsGrid">
+      <div class="loading-skeleton"></div>
+      <div class="loading-skeleton"></div>
+      <div class="loading-skeleton"></div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+      <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i class="fas fa-calendar-check text-blue-500"></i>
+          <h3 class="text-lg font-medium text-gray-900">最近支付</h3>
+        </div>
+        <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-xs font-medium rounded-full">过去7天</span>
+      </div>
+      <div class="p-6" id="recentPayments">
+        <div class="loading-skeleton"></div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+      <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i class="fas fa-clock text-yellow-500"></i>
+          <h3 class="text-lg font-medium text-gray-900">即将续费</h3>
+        </div>
+        <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-xs font-medium rounded-full">未来7天</span>
+      </div>
+      <div class="p-6" id="upcomingRenewals">
+        <div class="loading-skeleton"></div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i class="fas fa-chart-bar text-purple-500"></i>
+            <h3 class="text-lg font-medium text-gray-900">按类型支出排行</h3>
+          </div>
+          <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-xs font-medium rounded-full">年度统计</span>
+        </div>
+        <div class="p-6" id="expenseByType">
+          <div class="loading-skeleton"></div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i class="fas fa-folder text-green-500"></i>
+            <h3 class="text-lg font-medium text-gray-900">按分类支出统计</h3>
+          </div>
+          <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-xs font-medium rounded-full">年度统计</span>
+        </div>
+        <div class="p-6" id="expenseByCategory">
+          <div class="loading-skeleton"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function loadDashboardData(){try{const r=await fetch('/api/dashboard/stats');const d=await r.json();if(!d.success)throw new Error(d.message||'加载失败');const data=d.data;document.getElementById('statsGrid').innerHTML=\`<div class="stat-card"><div class="stat-card-header">月度支出</div><div class="stat-card-value">¥\${data.monthlyExpense.amount.toFixed(2)}</div><div class="stat-card-subtitle">本月支出</div><div class="stat-card-trend \${data.monthlyExpense.trendDirection}"><i class="fas fa-arrow-\${data.monthlyExpense.trendDirection==='up'?'up':data.monthlyExpense.trendDirection==='down'?'down':'right'}"></i>\${data.monthlyExpense.trend}%</div></div><div class="stat-card"><div class="stat-card-header">年度支出</div><div class="stat-card-value">¥\${data.yearlyExpense.amount.toFixed(2)}</div><div class="stat-card-subtitle">月均支出</div><div class="stat-card-subtitle" style="margin-top:0.5rem">¥\${data.yearlyExpense.monthlyAverage.toFixed(2)}</div></div><div class="stat-card"><div class="stat-card-header">活跃订阅</div><div class="stat-card-value">\${data.activeSubscriptions.active}</div><div class="stat-card-subtitle">总订阅数: \${data.activeSubscriptions.total}</div>\${data.activeSubscriptions.expiringSoon>0?\`<div class="stat-card-trend down"><i class="fas fa-exclamation-circle"></i>\${data.activeSubscriptions.expiringSoon} 即将到期</div>\`:''}</div>\`;const rp=document.getElementById('recentPayments');rp.innerHTML=data.recentPayments.length===0?'<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">过去7天内没有支付记录</div></div>':data.recentPayments.map(s=>\`<div class="list-item"><div class="list-item-content"><div class="list-item-name">\${s.name}</div><div class="list-item-meta"><span><i class="fas fa-calendar"></i> 支付于:\${new Date(s.paymentDate).toLocaleDateString('zh-CN')}</span>\${s.customType?\`<span class="list-item-badge">\${s.customType}</span>\`:''}</div></div><div class="list-item-amount">¥\${(s.amount||0).toFixed(2)}</div></div>\`).join('');const ur=document.getElementById('upcomingRenewals');ur.innerHTML=data.upcomingRenewals.length===0?'<div class="empty-state"><div class="empty-state-icon">✅</div><div class="empty-state-text">未来7天内没有即将续费的订阅</div></div>':data.upcomingRenewals.map(s=>\`<div class="list-item"><div class="list-item-content"><div class="list-item-name">\${s.name}</div><div class="list-item-meta"><span><i class="fas fa-clock"></i> 将于:\${new Date(s.renewalDate).toLocaleDateString('zh-CN')}</span><span style="color:#f59e0b;font-weight:600">\${s.daysUntilRenewal} 天后</span>\${s.customType?\`<span class="list-item-badge">\${s.customType}</span>\`:''}</div></div><div class="list-item-amount">¥\${(s.amount||0).toFixed(2)}</div></div>\`).join('');const et=document.getElementById('expenseByType');et.innerHTML=data.expenseByType.length===0?'<div class="empty-state"><div class="empty-state-icon">📊</div><div class="empty-state-text">暂无支出数据</div></div>':data.expenseByType.map((item,i)=>\`<div class="ranking-item"><div class="ranking-item-header"><div class="ranking-item-name">\${item.type}</div><div class="ranking-item-value"><span class="ranking-item-amount">¥\${item.amount.toFixed(2)}</span><span class="ranking-item-percentage">\${item.percentage}%</span></div></div><div class="ranking-progress"><div class="ranking-progress-bar color-\${(i%5)+1}" style="width:\${item.percentage}%"></div></div></div>\`).join('');const ec=document.getElementById('expenseByCategory');ec.innerHTML=data.expenseByCategory.length===0?'<div class="empty-state"><div class="empty-state-icon">📂</div><div class="empty-state-text">暂无支出数据</div></div>':data.expenseByCategory.map((item,i)=>\`<div class="ranking-item"><div class="ranking-item-header"><div class="ranking-item-name">\${item.category}</div><div class="ranking-item-value"><span class="ranking-item-amount">¥\${item.amount.toFixed(2)}</span><span class="ranking-item-percentage">\${item.percentage}%</span></div></div><div class="ranking-progress"><div class="ranking-progress-bar color-\${(i%5)+1}" style="width:\${item.percentage}%"></div></div></div>\`).join('')}catch(e){console.error('加载仪表盘数据失败:',e);document.getElementById('statsGrid').innerHTML='<div class="empty-state"><div class="empty-state-icon">❌</div><div class="empty-state-text">加载失败:'+e.message+'</div></div>'}}
+    loadDashboardData();
+    setInterval(loadDashboardData, 60000);
+  </script>
+</body>
+</html>`;
+}
 function extractTagsFromSubscriptions(subscriptions = []) {
   const tagSet = new Set();
   (subscriptions || []).forEach(sub => {
@@ -4064,6 +4785,12 @@ const admin = {
 
       if (pathname === '/admin/config') {
         return new Response(configPage,{
+          headers: { 'Content-Type': 'text/html; charset=utf-8' }
+        });
+      }
+
+      if (pathname === '/admin/dashboard') {
+        return new Response(dashboardPage(),{
           headers: { 'Content-Type': 'text/html; charset=utf-8' }
         });
       }
@@ -4222,6 +4949,54 @@ const api = {
       }
     }
 
+    if (path === '/dashboard/stats' && method === 'GET') {
+      try {
+        const subscriptions = await getAllSubscriptions(env);
+        const timezone = config?.TIMEZONE || 'UTC';
+
+        const monthlyExpense = calculateMonthlyExpense(subscriptions,timezone);
+        const yearlyExpense = calculateYearlyExpense(subscriptions,timezone);
+        const recentPayments = getRecentPayments(subscriptions,timezone);
+        const upcomingRenewals = getUpcomingRenewals(subscriptions,timezone);
+        const expenseByType = getExpenseByType(subscriptions,timezone);
+        const expenseByCategory = getExpenseByCategory(subscriptions,timezone);
+
+        const activeSubscriptions = subscriptions.filter(s => s.isActive);
+        const now = getCurrentTimeInTimezone(timezone);
+        const sevenDaysLater = new Date(now.getTime() + 7 * MS_PER_DAY);
+        const expiringSoon = activeSubscriptions.filter(s => {
+          const expiryDate = new Date(s.expiryDate);
+          return expiryDate >= now && expiryDate <= sevenDaysLater;
+        }).length;
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            data: {
+              monthlyExpense,
+              yearlyExpense,
+              activeSubscriptions: {
+                active: activeSubscriptions.length,
+                total: subscriptions.length,
+                expiringSoon
+              },
+              recentPayments,
+              upcomingRenewals,
+              expenseByType,
+              expenseByCategory
+            }
+          }),
+          { headers: { 'Content-Type': 'application/json' } }
+        );
+      } catch (error) {
+        console.error('获取仪表盘统计失败:',error);
+        return new Response(
+          JSON.stringify({ success: false,message: '获取统计数据失败: ' + error.message }),
+          { status: 500,headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
     if (path === '/test-notification' && method === 'POST') {
       try {
         const body = await request.json();
@@ -4363,6 +5138,39 @@ const api = {
       if (parts[3] === 'test-notify' && method === 'POST') {
         const result = await testSingleSubscriptionNotification(id,env);
         return new Response(JSON.stringify(result),{ status: result.success ? 200 : 500,headers: { 'Content-Type': 'application/json' } });
+      }
+
+      if (parts[3] === 'renew' && method === 'POST') {
+        let options = {};
+        try {
+          const body = await request.json();
+          options = body || {};
+        } catch (e) {
+          // 如果没有请求体，使用默认空对象
+        }
+        const result = await manualRenewSubscription(id,env,options);
+        return new Response(JSON.stringify(result),{ status: result.success ? 200 : 400,headers: { 'Content-Type': 'application/json' } });
+      }
+
+      if (parts[3] === 'payments' && method === 'GET') {
+        const subscription = await getSubscription(id,env);
+        if (!subscription) {
+          return new Response(JSON.stringify({ success: false,message: '订阅不存在' }),{ status: 404,headers: { 'Content-Type': 'application/json' } });
+        }
+        return new Response(JSON.stringify({ success: true,payments: subscription.paymentHistory || [] }),{ headers: { 'Content-Type': 'application/json' } });
+      }
+
+      if (parts[3] === 'payments' && parts[4] && method === 'DELETE') {
+        const paymentId = parts[4];
+        const result = await deletePaymentRecord(id,paymentId,env);
+        return new Response(JSON.stringify(result),{ status: result.success ? 200 : 400,headers: { 'Content-Type': 'application/json' } });
+      }
+
+      if (parts[3] === 'payments' && parts[4] && method === 'PUT') {
+        const paymentId = parts[4];
+        const paymentData = await request.json();
+        const result = await updatePaymentRecord(id,paymentId,paymentData,env);
+        return new Response(JSON.stringify(result),{ status: result.success ? 200 : 400,headers: { 'Content-Type': 'application/json' } });
       }
 
       if (method === 'GET') {
@@ -4688,6 +5496,7 @@ async function createSubscription(subscription,env) {
 
     const reminderSetting = resolveReminderSetting(subscription);
 
+    const initialPaymentDate = subscription.startDate || currentTime.toISOString();
     const newSubscription = {
       id: Date.now().toString(), // 前端使用本地时间戳
       name: subscription.name,
@@ -4702,6 +5511,18 @@ async function createSubscription(subscription,env) {
       reminderDays: reminderSetting.unit === 'day' ? reminderSetting.value : undefined,
       reminderHours: reminderSetting.unit === 'hour' ? reminderSetting.value : undefined,
       notes: subscription.notes || '',
+      amount: subscription.amount || null,
+      currency: 'CNY',
+      lastPaymentDate: initialPaymentDate,
+      paymentHistory: subscription.amount ? [{
+        id: Date.now().toString(),
+        date: initialPaymentDate,
+        amount: subscription.amount,
+        type: 'initial',
+        note: '初始订阅',
+        periodStart: subscription.startDate || initialPaymentDate,
+        periodEnd: subscription.expiryDate
+      }] : [],
       isActive: subscription.isActive !== false,
       autoRenew: subscription.autoRenew !== false,
       useLunar: useLunar,
@@ -4794,6 +5615,9 @@ async function updateSubscription(id,subscription,env) {
       reminderDays: reminderSetting.unit === 'day' ? reminderSetting.value : undefined,
       reminderHours: reminderSetting.unit === 'hour' ? reminderSetting.value : undefined,
       notes: subscription.notes || '',
+      amount: subscription.amount !== undefined ? subscription.amount : subscriptions[index].amount,
+      currency: subscriptions[index].currency || 'CNY',
+      lastPaymentDate: subscriptions[index].lastPaymentDate || subscriptions[index].startDate || subscriptions[index].createdAt || currentTime.toISOString(),
       isActive: subscription.isActive !== undefined ? subscription.isActive : subscriptions[index].isActive,
       autoRenew: subscription.autoRenew !== undefined ? subscription.autoRenew : (subscriptions[index].autoRenew !== undefined ? subscriptions[index].autoRenew : true),
       useLunar: useLunar,
@@ -4822,6 +5646,199 @@ async function deleteSubscription(id,env) {
     return { success: true };
   } catch (error) {
     return { success: false,message: '删除订阅失败' };
+  }
+}
+
+async function manualRenewSubscription(id,env,options = {}) {
+  try {
+    const subscriptions = await getAllSubscriptions(env);
+    const index = subscriptions.findIndex(s => s.id === id);
+
+    if (index === -1) {
+      return { success: false,message: '订阅不存在' };
+    }
+
+    const subscription = subscriptions[index];
+
+    if (!subscription.periodValue || !subscription.periodUnit) {
+      return { success: false,message: '订阅未设置续订周期' };
+    }
+
+    const config = await getConfig(env);
+    const timezone = config?.TIMEZONE || 'UTC';
+    const currentTime = getCurrentTimeInTimezone(timezone);
+
+    // 支持自定义参数
+    const paymentDate = options.paymentDate ? new Date(options.paymentDate) : currentTime;
+    const amount = options.amount !== undefined ? options.amount : subscription.amount || 0;
+    const periodMultiplier = options.periodMultiplier || 1; // 支持续订多个周期
+    const note = options.note || '手动续订';
+
+    let expiryDate = new Date(subscription.expiryDate);
+    let newExpiryDate;
+
+    if (subscription.useLunar) {
+      const lunar = lunarCalendar.solar2lunar(
+        expiryDate.getFullYear(),
+        expiryDate.getMonth() + 1,
+        expiryDate.getDate()
+      );
+      // 支持多周期续订
+      let nextLunar = lunar;
+      for (let i = 0; i < periodMultiplier; i++) {
+        nextLunar = lunarBiz.addLunarPeriod(nextLunar,subscription.periodValue,subscription.periodUnit);
+      }
+      const solar = lunarBiz.lunar2solar(nextLunar);
+      newExpiryDate = new Date(solar.year,solar.month - 1,solar.day);
+    } else {
+      newExpiryDate = new Date(expiryDate);
+      const totalPeriodValue = subscription.periodValue * periodMultiplier;
+      if (subscription.periodUnit === 'day') {
+        newExpiryDate.setDate(expiryDate.getDate() + totalPeriodValue);
+      } else if (subscription.periodUnit === 'month') {
+        newExpiryDate.setMonth(expiryDate.getMonth() + totalPeriodValue);
+      } else if (subscription.periodUnit === 'year') {
+        newExpiryDate.setFullYear(expiryDate.getFullYear() + totalPeriodValue);
+      }
+    }
+
+    const paymentRecord = {
+      id: Date.now().toString(),
+      date: paymentDate.toISOString(),
+      amount: amount,
+      type: 'manual',
+      note: note,
+      periodStart: expiryDate.toISOString(),
+      periodEnd: newExpiryDate.toISOString()
+    };
+
+    const paymentHistory = subscription.paymentHistory || [];
+    paymentHistory.push(paymentRecord);
+
+    subscriptions[index] = {
+      ...subscription,
+      expiryDate: newExpiryDate.toISOString(),
+      lastPaymentDate: paymentDate.toISOString(),
+      paymentHistory
+    };
+
+    await env.SUBSCRIPTIONS_KV.put('subscriptions',JSON.stringify(subscriptions));
+
+    return { success: true,subscription: subscriptions[index],message: '续订成功' };
+  } catch (error) {
+    console.error('手动续订失败:',error);
+    return { success: false,message: '续订失败: ' + error.message };
+  }
+}
+
+async function deletePaymentRecord(subscriptionId,paymentId,env) {
+  try {
+    const subscriptions = await getAllSubscriptions(env);
+    const index = subscriptions.findIndex(s => s.id === subscriptionId);
+
+    if (index === -1) {
+      return { success: false,message: '订阅不存在' };
+    }
+
+    const subscription = subscriptions[index];
+    const paymentHistory = subscription.paymentHistory || [];
+    const paymentIndex = paymentHistory.findIndex(p => p.id === paymentId);
+
+    if (paymentIndex === -1) {
+      return { success: false,message: '支付记录不存在' };
+    }
+
+    const deletedPayment = paymentHistory[paymentIndex];
+
+    // 删除支付记录
+    paymentHistory.splice(paymentIndex,1);
+
+    // 回退订阅周期和更新 lastPaymentDate
+    let newExpiryDate = subscription.expiryDate;
+    let newLastPaymentDate = subscription.lastPaymentDate;
+
+    if (paymentHistory.length > 0) {
+      // 找到剩余支付记录中 periodEnd 最晚的那条（最新的续订）
+      const sortedByPeriodEnd = [...paymentHistory].sort((a,b) => {
+        const dateA = a.periodEnd ? new Date(a.periodEnd) : new Date(0);
+        const dateB = b.periodEnd ? new Date(b.periodEnd) : new Date(0);
+        return dateB - dateA;
+      });
+
+      // 订阅的到期日期应该是最新续订的 periodEnd
+      if (sortedByPeriodEnd[0].periodEnd) {
+        newExpiryDate = sortedByPeriodEnd[0].periodEnd;
+      }
+
+      // 找到最新的支付记录日期
+      const sortedByDate = [...paymentHistory].sort((a,b) => new Date(b.date) - new Date(a.date));
+      newLastPaymentDate = sortedByDate[0].date;
+    } else {
+      // 如果没有支付记录了，回退到初始状态
+      // expiryDate 保持不变或使用 periodStart（如果删除的记录有）
+      if (deletedPayment.periodStart) {
+        newExpiryDate = deletedPayment.periodStart;
+      }
+      newLastPaymentDate = subscription.startDate || subscription.createdAt || subscription.expiryDate;
+    }
+
+    subscriptions[index] = {
+      ...subscription,
+      expiryDate: newExpiryDate,
+      paymentHistory,
+      lastPaymentDate: newLastPaymentDate
+    };
+
+    await env.SUBSCRIPTIONS_KV.put('subscriptions',JSON.stringify(subscriptions));
+
+    return { success: true,subscription: subscriptions[index],message: '支付记录已删除' };
+  } catch (error) {
+    console.error('删除支付记录失败:',error);
+    return { success: false,message: '删除失败: ' + error.message };
+  }
+}
+
+async function updatePaymentRecord(subscriptionId,paymentId,paymentData,env) {
+  try {
+    const subscriptions = await getAllSubscriptions(env);
+    const index = subscriptions.findIndex(s => s.id === subscriptionId);
+
+    if (index === -1) {
+      return { success: false,message: '订阅不存在' };
+    }
+
+    const subscription = subscriptions[index];
+    const paymentHistory = subscription.paymentHistory || [];
+    const paymentIndex = paymentHistory.findIndex(p => p.id === paymentId);
+
+    if (paymentIndex === -1) {
+      return { success: false,message: '支付记录不存在' };
+    }
+
+    // 更新支付记录
+    paymentHistory[paymentIndex] = {
+      ...paymentHistory[paymentIndex],
+      date: paymentData.date || paymentHistory[paymentIndex].date,
+      amount: paymentData.amount !== undefined ? paymentData.amount : paymentHistory[paymentIndex].amount,
+      note: paymentData.note !== undefined ? paymentData.note : paymentHistory[paymentIndex].note
+    };
+
+    // 更新 lastPaymentDate 为最新的支付记录日期
+    const sortedPayments = [...paymentHistory].sort((a,b) => new Date(b.date) - new Date(a.date));
+    const newLastPaymentDate = sortedPayments[0].date;
+
+    subscriptions[index] = {
+      ...subscription,
+      paymentHistory,
+      lastPaymentDate: newLastPaymentDate
+    };
+
+    await env.SUBSCRIPTIONS_KV.put('subscriptions',JSON.stringify(subscriptions));
+
+    return { success: true,subscription: subscriptions[index],message: '支付记录已更新' };
+  } catch (error) {
+    console.error('更新支付记录失败:',error);
+    return { success: false,message: '更新失败: ' + error.message };
   }
 }
 
@@ -4877,9 +5894,10 @@ async function testSingleSubscriptionNotification(id,env) {
     // 获取日历类型和自动续期状态
     const calendarType = subscription.useLunar ? '农历' : '公历';
     const autoRenewText = subscription.autoRenew ? '是' : '否';
+    const amountText = subscription.amount ? `\n金额: ¥${subscription.amount.toFixed(2)}/周期` : '';
 
     const commonContent = `**订阅详情**
-类型: ${subscription.customType || '其他'}
+类型: ${subscription.customType || '其他'}${amountText}
 日历类型: ${calendarType}
 到期日期: ${formattedExpiryDate}${lunarExpiryText}
 自动续期: ${autoRenewText}
@@ -5191,11 +6209,12 @@ function formatNotificationContent(subscriptions,config) {
     // 获取日历类型和自动续期状态
     const calendarType = sub.useLunar ? '农历' : '公历';
     const autoRenewText = sub.autoRenew ? '是' : '否';
+    const amountText = sub.amount ? `\n金额: ¥${sub.amount.toFixed(2)}/周期` : '';
 
     // 构建格式化的通知内容
     const subscriptionContent = `${statusEmoji} **${sub.name}**
 类型: ${typeText} ${periodText}
-分类: ${categoryText}
+分类: ${categoryText}${amountText}
 日历类型: ${calendarType}
 到期日期: ${formattedExpiryDate}${lunarExpiryText}
 自动续期: ${autoRenewText}
@@ -5220,58 +6239,45 @@ ${reminderText}
 async function sendNotificationToAllChannels(title,commonContent,config,logPrefix = '[定时任务]',options = {}) {
   const metadata = options.metadata || {};
   if (!config.ENABLED_NOTIFIERS || config.ENABLED_NOTIFIERS.length === 0) {
-    console.log(`${logPrefix} ⚠️  未启用任何通知渠道，请在系统配置中启用至少一个通知方式`);
+    console.log(`${logPrefix} 未启用任何通知渠道。`);
     return;
   }
-
-  console.log(`${logPrefix} 📢 已启用的通知渠道: ${config.ENABLED_NOTIFIERS.join(', ')}`);
-  let successCount = 0;
-  let failCount = 0;
 
   if (config.ENABLED_NOTIFIERS.includes('notifyx')) {
     const notifyxContent = `## ${title}\n\n${commonContent}`;
     const success = await sendNotifyXNotification(title,notifyxContent,`订阅提醒`,config);
-    console.log(`${logPrefix} ${success ? '✅' : '❌'} NotifyX通知 ${success ? '成功' : '失败'}`);
-    success ? successCount++ : failCount++;
+    console.log(`${logPrefix} 发送NotifyX通知 ${success ? '成功' : '失败'}`);
   }
   if (config.ENABLED_NOTIFIERS.includes('telegram')) {
     const telegramContent = `*${title}*\n\n${commonContent}`;
     const success = await sendTelegramNotification(telegramContent,config);
-    console.log(`${logPrefix} ${success ? '✅' : '❌'} Telegram通知 ${success ? '成功' : '失败'}`);
-    success ? successCount++ : failCount++;
+    console.log(`${logPrefix} 发送Telegram通知 ${success ? '成功' : '失败'}`);
   }
   if (config.ENABLED_NOTIFIERS.includes('webhook')) {
     const webhookContent = commonContent.replace(/(\**|\*|##|#|`)/g,'');
     const success = await sendWebhookNotification(title,webhookContent,config,metadata);
-    console.log(`${logPrefix} ${success ? '✅' : '❌'} Webhook通知 ${success ? '成功' : '失败'}`);
-    success ? successCount++ : failCount++;
+    console.log(`${logPrefix} 发送Webhook通知 ${success ? '成功' : '失败'}`);
   }
   if (config.ENABLED_NOTIFIERS.includes('wechatbot')) {
     const wechatbotContent = commonContent.replace(/(\**|\*|##|#|`)/g,'');
     const success = await sendWechatBotNotification(title,wechatbotContent,config);
-    console.log(`${logPrefix} ${success ? '✅' : '❌'} 企业微信机器人通知 ${success ? '成功' : '失败'}`);
-    success ? successCount++ : failCount++;
+    console.log(`${logPrefix} 发送企业微信机器人通知 ${success ? '成功' : '失败'}`);
   }
   if (config.ENABLED_NOTIFIERS.includes('weixin')) {
     const weixinContent = `【${title}】\n\n${commonContent.replace(/(\**|\*|##|#|`)/g,'')}`;
     const result = await sendWeComNotification(weixinContent,config);
-    console.log(`${logPrefix} ${result.success ? '✅' : '❌'} 企业微信通知 ${result.success ? '成功' : '失败'}. ${result.message}`);
-    result.success ? successCount++ : failCount++;
+    console.log(`${logPrefix} 发送企业微信通知 ${result.success ? '成功' : '失败'}. ${result.message}`);
   }
   if (config.ENABLED_NOTIFIERS.includes('email')) {
     const emailContent = commonContent.replace(/(\**|\*|##|#|`)/g,'');
     const success = await sendEmailNotification(title,emailContent,config);
-    console.log(`${logPrefix} ${success ? '✅' : '❌'} 邮件通知 ${success ? '成功' : '失败'}`);
-    success ? successCount++ : failCount++;
+    console.log(`${logPrefix} 发送邮件通知 ${success ? '成功' : '失败'}`);
   }
   if (config.ENABLED_NOTIFIERS.includes('bark')) {
     const barkContent = commonContent.replace(/(\**|\*|##|#|`)/g,'');
     const success = await sendBarkNotification(title,barkContent,config);
-    console.log(`${logPrefix} ${success ? '✅' : '❌'} Bark通知 ${success ? '成功' : '失败'}`);
-    success ? successCount++ : failCount++;
+    console.log(`${logPrefix} 发送Bark通知 ${success ? '成功' : '失败'}`);
   }
-
-  console.log(`${logPrefix} 📊 通知发送统计: 成功 ${successCount} 个, 失败 ${failCount} 个`);
 }
 
 async function sendTelegramNotification(message,config) {
@@ -5470,41 +6476,19 @@ async function checkExpiringSubscriptions(env) {
     const config = await getConfig(env);
     const timezone = config?.TIMEZONE || 'UTC';
     const currentTime = getCurrentTimeInTimezone(timezone);
-
-    console.log('='.repeat(80));
-    console.log('[定时任务] 🚀 开始执行订阅检查任务');
-    console.log('[定时任务] ⏰ UTC时间: ' + new Date().toISOString());
-    console.log('[定时任务] 🌍 时区: ' + timezone + ' (' + formatTimezoneDisplay(timezone) + ')');
-    console.log('[定时任务] 📅 本地时间: ' + currentTime.toLocaleString('zh-CN',{ timeZone: timezone }));
-    console.log('[定时任务] 📢 通知渠道: ' + (config.ENABLED_NOTIFIERS && config.ENABLED_NOTIFIERS.length > 0 ? config.ENABLED_NOTIFIERS.join(', ') : '未配置'));
-    console.log('='.repeat(80));
+    console.log('[定时任务] 开始检查即将到期的订阅 UTC: ' + new Date().toISOString() + ', ' + timezone + ': ' + currentTime.toLocaleString('zh-CN',{ timeZone: timezone }));
 
     const currentMidnight = getTimezoneMidnightTimestamp(currentTime,timezone); // 统一计算当天的零点时间，避免多次格式化
 
-    // 通知时段控制逻辑优化：默认允许发送，除非明确配置了时段限制
-    let shouldNotifyThisHour = true; // 默认允许发送
-
-    if (config.NOTIFICATION_HOURS && Array.isArray(config.NOTIFICATION_HOURS) && config.NOTIFICATION_HOURS.length > 0) {
-      const rawNotificationHours = config.NOTIFICATION_HOURS;
-      const normalizedNotificationHours = rawNotificationHours
-        .map(value => String(value).trim())
-        .filter(value => value.length > 0)
-        .map(value => value === '*' ? '*' : value.toUpperCase() === 'ALL' ? 'ALL' : value.padStart(2,'0'));
-
-      const allowAllHours = normalizedNotificationHours.includes('*') || normalizedNotificationHours.includes('ALL');
-
-      if (!allowAllHours && normalizedNotificationHours.length > 0) {
-        // 只有明确配置了具体时段，才进行时段检查
-        const hourFormatter = new Intl.DateTimeFormat('en-US',{ timeZone: timezone,hour12: false,hour: '2-digit' });
-        const currentHour = hourFormatter.format(currentTime);
-        shouldNotifyThisHour = normalizedNotificationHours.includes(currentHour);
-        console.log('[定时任务] 通知时段检查 - 当前小时: ' + currentHour + ', 配置时段: ' + normalizedNotificationHours.join(',') + ', 是否发送: ' + shouldNotifyThisHour);
-      } else {
-        console.log('[定时任务] 通知时段配置为全天发送 (*)');
-      }
-    } else {
-      console.log('[定时任务] 未配置通知时段限制，默认全天发送');
-    }
+    const rawNotificationHours = Array.isArray(config.NOTIFICATION_HOURS) ? config.NOTIFICATION_HOURS : [];
+    const normalizedNotificationHours = rawNotificationHours
+      .map(value => String(value).trim())
+      .filter(value => value.length > 0)
+      .map(value => value === '*' ? '*' : value.toUpperCase() === 'ALL' ? 'ALL' : value.padStart(2,'0'));
+    const allowAllHours = normalizedNotificationHours.includes('*') || normalizedNotificationHours.includes('ALL');
+    const hourFormatter = new Intl.DateTimeFormat('en-US',{ timeZone: timezone,hour12: false,hour: '2-digit' });
+    const currentHour = hourFormatter.format(currentTime);
+    const shouldNotifyThisHour = allowAllHours || normalizedNotificationHours.length === 0 || normalizedNotificationHours.includes(currentHour);
 
     const subscriptions = await getAllSubscriptions(env);
     console.log('[定时任务] 共找到 ' + subscriptions.length + ' 个订阅');
@@ -5554,7 +6538,25 @@ async function checkExpiringSubscriptions(env) {
           diffMs = newExpiryDate.getTime() - currentTime.getTime();
           diffHours = diffMs / MS_PER_HOUR;
 
-          const updatedSubscription = { ...subscription,expiryDate: newExpiryDate.toISOString() };
+          const paymentRecord = {
+            id: Date.now().toString() + '_' + Math.random().toString(36).substr(2,9),
+            date: currentTime.toISOString(),
+            amount: subscription.amount || 0,
+            type: 'auto',
+            note: '自动续订',
+            periodStart: expiryDate.toISOString(),
+            periodEnd: newExpiryDate.toISOString()
+          };
+
+          const paymentHistory = subscription.paymentHistory || [];
+          paymentHistory.push(paymentRecord);
+
+          const updatedSubscription = {
+            ...subscription,
+            expiryDate: newExpiryDate.toISOString(),
+            lastPaymentDate: currentTime.toISOString(),
+            paymentHistory
+          };
           updatedSubscriptions.push(updatedSubscription);
           hasUpdates = true;
 
@@ -5609,7 +6611,25 @@ async function checkExpiringSubscriptions(env) {
           diffMs = newExpiryDate.getTime() - currentTime.getTime();
           diffHours = diffMs / MS_PER_HOUR;
 
-          const updatedSubscription = { ...subscription,expiryDate: newExpiryDate.toISOString() };
+          const paymentRecord = {
+            id: Date.now().toString() + '_' + Math.random().toString(36).substr(2,9),
+            date: currentTime.toISOString(),
+            amount: subscription.amount || 0,
+            type: 'auto',
+            note: '自动续订',
+            periodStart: expiryDate.toISOString(),
+            periodEnd: newExpiryDate.toISOString()
+          };
+
+          const paymentHistory = subscription.paymentHistory || [];
+          paymentHistory.push(paymentRecord);
+
+          const updatedSubscription = {
+            ...subscription,
+            expiryDate: newExpiryDate.toISOString(),
+            lastPaymentDate: currentTime.toISOString(),
+            paymentHistory
+          };
           updatedSubscriptions.push(updatedSubscription);
           hasUpdates = true;
 
@@ -5657,14 +6677,10 @@ async function checkExpiringSubscriptions(env) {
     }
 
     if (expiringSubscriptions.length > 0) {
-      console.log('[定时任务] ✅ 找到 ' + expiringSubscriptions.length + ' 个需要提醒的订阅');
-
       if (!shouldNotifyThisHour) {
-        console.log('[定时任务] ⏰ 当前时段不在通知时段内，跳过发送通知（订阅仍会自动续订）');
+        console.log('[定时任务] 当前小时 ' + currentHour + ' 未配置为推送时间，跳过发送通知');
         expiringSubscriptions.length = 0;
       } else {
-        console.log('[定时任务] 📤 开始发送通知...');
-
         // 按到期时间排序
         expiringSubscriptions.sort((a,b) => a.daysRemaining - b.daysRemaining);
 
@@ -5676,21 +6692,10 @@ async function checkExpiringSubscriptions(env) {
         await sendNotificationToAllChannels(title,commonContent,config,'[定时任务]',{
           metadata: { tags: metadataTags }
         });
-
-        console.log('[定时任务] ✅ 通知发送完成');
       }
-    } else {
-      console.log('[定时任务] ℹ️  当前没有需要提醒的订阅');
     }
-
-    console.log('='.repeat(80));
-    console.log('[定时任务] ✅ 订阅检查任务执行完成');
-    console.log('='.repeat(80));
   } catch (error) {
-    console.error('='.repeat(80));
-    console.error('[定时任务] ❌ 检查即将到期的订阅失败:',error);
-    console.error('[定时任务] 错误堆栈:',error.stack);
-    console.error('='.repeat(80));
+    console.error('[定时任务] 检查即将到期的订阅失败:',error);
   }
 }
 
@@ -5752,6 +6757,66 @@ export default {
   async fetch(request,env,ctx) {
     const url = new URL(request.url);
 
+    // 添加调试页面
+    if (url.pathname === '/debug') {
+      try {
+        const config = await getConfig(env);
+        const debugInfo = {
+          timestamp: new Date().toISOString(), // 使用UTC时间戳
+          pathname: url.pathname,
+          kvBinding: !!env.SUBSCRIPTIONS_KV,
+          configExists: !!config,
+          adminUsername: config.ADMIN_USERNAME,
+          hasJwtSecret: !!config.JWT_SECRET,
+          jwtSecretLength: config.JWT_SECRET ? config.JWT_SECRET.length : 0
+        };
+
+        return new Response(`
+<!DOCTYPE html>
+<html>
+<head>
+  <title>调试信息</title>
+  <style>
+    body { font-family: monospace; padding: 20px; background: #f5f5f5; }
+    .info { background: white; padding: 15px; margin: 10px 0; border-radius: 5px; }
+    .success { color: green; }
+    .error { color: red; }
+  </style>
+</head>
+<body>
+  <h1>系统调试信息</h1>
+  <div class="info">
+    <h3>基本信息</h3>
+    <p>时间: ${debugInfo.timestamp}</p>
+    <p>路径: ${debugInfo.pathname}</p>
+    <p class="${debugInfo.kvBinding ? 'success' : 'error'}">KV绑定: ${debugInfo.kvBinding ? '✓' : '✗'}</p>
+  </div>
+
+  <div class="info">
+    <h3>配置信息</h3>
+    <p class="${debugInfo.configExists ? 'success' : 'error'}">配置存在: ${debugInfo.configExists ? '✓' : '✗'}</p>
+    <p>管理员用户名: ${debugInfo.adminUsername}</p>
+    <p class="${debugInfo.hasJwtSecret ? 'success' : 'error'}">JWT密钥: ${debugInfo.hasJwtSecret ? '✓' : '✗'} (长度: ${debugInfo.jwtSecretLength})</p>
+  </div>
+
+  <div class="info">
+    <h3>解决方案</h3>
+    <p>1. 确保KV命名空间已正确绑定为 SUBSCRIPTIONS_KV</p>
+    <p>2. 尝试访问 <a href="/">/</a> 进行登录</p>
+    <p>3. 如果仍有问题，请检查Cloudflare Workers日志</p>
+  </div>
+</body>
+</html>`,{
+          headers: { 'Content-Type': 'text/html; charset=utf-8' }
+        });
+      } catch (error) {
+        return new Response(`调试页面错误: ${error.message}`,{
+          status: 500,
+          headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+        });
+      }
+    }
+
     if (url.pathname.startsWith('/api')) {
       return api.handleRequest(request,env,ctx);
     } else if (url.pathname.startsWith('/admin')) {
@@ -5769,3 +6834,216 @@ export default {
     await checkExpiringSubscriptions(env);
   }
 };
+
+// ==================== 仪表盘统计函数 ====================
+function getPaymentCountInMonth(subscriptions,year,month,timezone) {
+  let count = 0;
+  subscriptions.forEach(sub => {
+    const paymentHistory = sub.paymentHistory || [];
+    paymentHistory.forEach(payment => {
+      if (!payment.amount || payment.amount <= 0) return;
+      const paymentDate = new Date(payment.date);
+      const parts = getTimezoneDateParts(paymentDate,timezone);
+      if (parts.year === year && parts.month === month) {
+        count++;
+      }
+    });
+  });
+  return count;
+}
+
+function calculateMonthlyExpense(subscriptions,timezone) {
+  const now = getCurrentTimeInTimezone(timezone);
+  const parts = getTimezoneDateParts(now,timezone);
+  const currentYear = parts.year;
+  const currentMonth = parts.month;
+
+  let amount = 0;
+  let currentMonthCount = 0;
+
+  // 遍历所有订阅的支付历史
+  subscriptions.forEach(sub => {
+    const paymentHistory = sub.paymentHistory || [];
+    paymentHistory.forEach(payment => {
+      if (!payment.amount || payment.amount <= 0) return;
+      const paymentDate = new Date(payment.date);
+      const paymentParts = getTimezoneDateParts(paymentDate,timezone);
+      if (paymentParts.year === currentYear && paymentParts.month === currentMonth) {
+        amount += payment.amount;
+        currentMonthCount++;
+      }
+    });
+  });
+
+  // 计算上月数据用于趋势对比
+  const lastMonth = currentMonth === 1 ? 12 : currentMonth - 1;
+  const lastMonthYear = currentMonth === 1 ? currentYear - 1 : currentYear;
+  let lastMonthAmount = 0;
+  subscriptions.forEach(sub => {
+    const paymentHistory = sub.paymentHistory || [];
+    paymentHistory.forEach(payment => {
+      if (!payment.amount || payment.amount <= 0) return;
+      const paymentDate = new Date(payment.date);
+      const paymentParts = getTimezoneDateParts(paymentDate,timezone);
+      if (paymentParts.year === lastMonthYear && paymentParts.month === lastMonth) {
+        lastMonthAmount += payment.amount;
+      }
+    });
+  });
+
+  let trend = 0;
+  let trendDirection = 'flat';
+  if (lastMonthAmount > 0) {
+    trend = Math.round(((amount - lastMonthAmount) / lastMonthAmount) * 100);
+    if (trend > 0) trendDirection = 'up';
+    else if (trend < 0) trendDirection = 'down';
+  } else if (amount > 0) {
+    // 上月无支出，本月有支出，视为增长
+    trend = 100;
+    trendDirection = 'up';
+  }
+
+  return { amount,trend: Math.abs(trend),trendDirection };
+}
+
+function calculateYearlyExpense(subscriptions,timezone) {
+  const now = getCurrentTimeInTimezone(timezone);
+  const parts = getTimezoneDateParts(now,timezone);
+  const currentYear = parts.year;
+
+  let amount = 0;
+
+  // 遍历所有订阅的支付历史
+  subscriptions.forEach(sub => {
+    const paymentHistory = sub.paymentHistory || [];
+    paymentHistory.forEach(payment => {
+      if (!payment.amount || payment.amount <= 0) return;
+      const paymentDate = new Date(payment.date);
+      const paymentParts = getTimezoneDateParts(paymentDate,timezone);
+      if (paymentParts.year === currentYear) {
+        amount += payment.amount;
+      }
+    });
+  });
+
+  const monthlyAverage = amount / parts.month;
+  return { amount,monthlyAverage };
+}
+
+function getRecentPayments(subscriptions,timezone) {
+  const now = getCurrentTimeInTimezone(timezone);
+  const sevenDaysAgo = new Date(now.getTime() - 7 * MS_PER_DAY);
+
+  const recentPayments = [];
+
+  // 遍历所有订阅的支付历史
+  subscriptions.forEach(sub => {
+    const paymentHistory = sub.paymentHistory || [];
+    paymentHistory.forEach(payment => {
+      if (!payment.amount || payment.amount <= 0) return;
+      const paymentDate = new Date(payment.date);
+      if (paymentDate >= sevenDaysAgo && paymentDate <= now) {
+        recentPayments.push({
+          name: sub.name,
+          amount: payment.amount,
+          customType: sub.customType,
+          paymentDate: payment.date,
+          note: payment.note
+        });
+      }
+    });
+  });
+
+  return recentPayments.sort((a,b) => new Date(b.paymentDate) - new Date(a.paymentDate));
+}
+
+function getUpcomingRenewals(subscriptions,timezone) {
+  const now = getCurrentTimeInTimezone(timezone);
+  const sevenDaysLater = new Date(now.getTime() + 7 * MS_PER_DAY);
+
+  return subscriptions
+    .filter(sub => {
+      if (!sub.isActive) return false;
+      const renewalDate = new Date(sub.expiryDate);
+      return renewalDate >= now && renewalDate <= sevenDaysLater;
+    })
+    .map(sub => {
+      const renewalDate = new Date(sub.expiryDate);
+      const daysUntilRenewal = Math.ceil((renewalDate - now) / MS_PER_DAY);
+      return {
+        name: sub.name,
+        amount: sub.amount || 0,
+        customType: sub.customType,
+        renewalDate: sub.expiryDate,
+        daysUntilRenewal
+      };
+    })
+    .sort((a,b) => a.daysUntilRenewal - b.daysUntilRenewal);
+}
+
+function getExpenseByType(subscriptions,timezone) {
+  const now = getCurrentTimeInTimezone(timezone);
+  const parts = getTimezoneDateParts(now,timezone);
+  const currentYear = parts.year;
+
+  const typeMap = {};
+  let total = 0;
+
+  // 遍历所有订阅的支付历史
+  subscriptions.forEach(sub => {
+    const paymentHistory = sub.paymentHistory || [];
+    paymentHistory.forEach(payment => {
+      if (!payment.amount || payment.amount <= 0) return;
+      const paymentDate = new Date(payment.date);
+      const paymentParts = getTimezoneDateParts(paymentDate,timezone);
+      if (paymentParts.year === currentYear) {
+        const type = sub.customType || '未分类';
+        typeMap[type] = (typeMap[type] || 0) + payment.amount;
+        total += payment.amount;
+      }
+    });
+  });
+
+  return Object.entries(typeMap)
+    .map(([type,amount]) => ({
+      type,
+      amount,
+      percentage: total > 0 ? Math.round((amount / total) * 100) : 0
+    }))
+    .sort((a,b) => b.amount - a.amount);
+}
+
+function getExpenseByCategory(subscriptions,timezone) {
+  const now = getCurrentTimeInTimezone(timezone);
+  const parts = getTimezoneDateParts(now,timezone);
+  const currentYear = parts.year;
+
+  const categoryMap = {};
+  let total = 0;
+
+  // 遍历所有订阅的支付历史
+  subscriptions.forEach(sub => {
+    const paymentHistory = sub.paymentHistory || [];
+    paymentHistory.forEach(payment => {
+      if (!payment.amount || payment.amount <= 0) return;
+      const paymentDate = new Date(payment.date);
+      const paymentParts = getTimezoneDateParts(paymentDate,timezone);
+      if (paymentParts.year === currentYear) {
+        const categories = sub.category ? sub.category.split(CATEGORY_SEPARATOR_REGEX).filter(c => c.trim()) : ['未分类'];
+        categories.forEach(category => {
+          const cat = category.trim() || '未分类';
+          categoryMap[cat] = (categoryMap[cat] || 0) + payment.amount / categories.length;
+        });
+        total += payment.amount;
+      }
+    });
+  });
+
+  return Object.entries(categoryMap)
+    .map(([category,amount]) => ({
+      category,
+      amount,
+      percentage: total > 0 ? Math.round((amount / total) * 100) : 0
+    }))
+    .sort((a,b) => b.amount - a.amount);
+}
