@@ -24,12 +24,12 @@ id = "71bb18d0ff4941d3b18aa85d86042c46"
 
 # 定时任务配置 - 每天早上8点检查
 [triggers]
-crons = ["0 0 * * *"]
+crons = ["0 1 * * *"]
 
 # 环境变量（可选，也可以在 Cloudflare Dashboard 中设置）
 [vars]
 ENVIRONMENT = "production"
 
 [observability]
-enabled = true
+enabled = false
 head_sampling_rate = 1
