@@ -2988,6 +2988,7 @@ const lunarBiz = {
           this.selectedDate = null;
           return;
         }
+        console.log('实际测试:', /^(\d{4})-(\d{1,2})-(\d{1,2})$/.test(value), JSON.stringify(value));
 
         const match = value.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
         if (!match) {
