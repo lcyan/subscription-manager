@@ -3460,6 +3460,22 @@ const lunarBiz = {
     async function editSubscription(e) {
       const id = e.target.dataset.id || e.target.parentElement.dataset.id;
       
+      // 辅助函数：规范化日期为 YYYY-MM-DD 格式
+      const normalizeDate = (dateStr) => {
+        if (!dateStr) return '';
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+        if (dateStr.indexOf('T') !== -1) return dateStr.split('T')[0];
+        try {
+          const d = new Date(dateStr);
+          const y = d.getFullYear();
+          const m = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+          return y + '-' + m + '-' + day;
+        } catch (e) {
+          return '';
+        }
+      };
+      
       try {
         const response = await fetch('/api/subscriptions/' + id);
         const subscription = await response.json();
@@ -3474,8 +3490,8 @@ const lunarBiz = {
           document.getElementById('amount').value = subscription.amount || '';
           document.getElementById('isActive').checked = subscription.isActive !== false;
           document.getElementById('autoRenew').checked = subscription.autoRenew !== false;
-          document.getElementById('startDate').value = subscription.startDate ? subscription.startDate.split('T')[0] : '';
-          document.getElementById('expiryDate').value = subscription.expiryDate ? subscription.expiryDate.split('T')[0] : '';
+          document.getElementById('startDate').value = normalizeDate(subscription.startDate);
+          document.getElementById('expiryDate').value = normalizeDate(subscription.expiryDate);
           document.getElementById('periodValue').value = subscription.periodValue || 1;
           document.getElementById('periodUnit').value = subscription.periodUnit || 'month';
           const reminderUnit = subscription.reminderUnit || (subscription.reminderHours !== undefined ? 'hour' : 'day');
