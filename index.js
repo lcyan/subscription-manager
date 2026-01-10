@@ -20,7 +20,7 @@ function getTimestampInTimezone(timezone = 'UTC') {
   return getCurrentTimeInTimezone(timezone).getTime();
 }
 
-function convertUTCToTimezone(utcTime, timezone = 'UTC') {
+function convertUTCToTimezone(utcTime,timezone = 'UTC') {
   try {
     // 同 getCurrentTimeInTimezone，一律返回 Date 供后续统一处理
     return new Date(utcTime);
@@ -31,13 +31,13 @@ function convertUTCToTimezone(utcTime, timezone = 'UTC') {
 }
 
 // 获取指定时区的年/月/日/时/分/秒，便于避免重复的 Intl 解析逻辑
-function getTimezoneDateParts(date, timezone = 'UTC') {
+function getTimezoneDateParts(date,timezone = 'UTC') {
   try {
-    const formatter = new Intl.DateTimeFormat('en-US', {
+    const formatter = new Intl.DateTimeFormat('en-US',{
       timeZone: timezone,
       hour12: false,
-      year: 'numeric', month: '2-digit', day: '2-digit',
-      hour: '2-digit', minute: '2-digit', second: '2-digit'
+      year: 'numeric',month: '2-digit',day: '2-digit',
+      hour: '2-digit',minute: '2-digit',second: '2-digit'
     });
     const parts = formatter.formatToParts(date);
     const pick = (type) => {
@@ -66,36 +66,36 @@ function getTimezoneDateParts(date, timezone = 'UTC') {
 }
 
 // 计算指定日期在目标时区的午夜时间戳（毫秒），用于统一的“剩余天数”计算
-function getTimezoneMidnightTimestamp(date, timezone = 'UTC') {
-  const { year, month, day } = getTimezoneDateParts(date, timezone);
-  return Date.UTC(year, month - 1, day, 0, 0, 0);
+function getTimezoneMidnightTimestamp(date,timezone = 'UTC') {
+  const { year,month,day } = getTimezoneDateParts(date,timezone);
+  return Date.UTC(year,month - 1,day,0,0,0);
 }
 
-function calculateExpirationTime(expirationMinutes, timezone = 'UTC') {
+function calculateExpirationTime(expirationMinutes,timezone = 'UTC') {
   const currentTime = getCurrentTimeInTimezone(timezone);
   const expirationTime = new Date(currentTime.getTime() + (expirationMinutes * 60 * 1000));
   return expirationTime;
 }
 
-function isExpired(targetTime, timezone = 'UTC') {
+function isExpired(targetTime,timezone = 'UTC') {
   const currentTime = getCurrentTimeInTimezone(timezone);
   const target = new Date(targetTime);
   return currentTime > target;
 }
 
-function formatTimeInTimezone(time, timezone = 'UTC', format = 'full') {
+function formatTimeInTimezone(time,timezone = 'UTC',format = 'full') {
   try {
     const date = new Date(time);
 
     if (format === 'date') {
-      return date.toLocaleDateString('zh-CN', {
+      return date.toLocaleDateString('zh-CN',{
         timeZone: timezone,
         year: 'numeric',
         month: '2-digit',
         day: '2-digit'
       });
     } else if (format === 'datetime') {
-      return date.toLocaleString('zh-CN', {
+      return date.toLocaleString('zh-CN',{
         timeZone: timezone,
         year: 'numeric',
         month: '2-digit',
@@ -106,7 +106,7 @@ function formatTimeInTimezone(time, timezone = 'UTC', format = 'full') {
       });
     } else {
       // full format
-      return date.toLocaleString('zh-CN', {
+      return date.toLocaleString('zh-CN',{
         timeZone: timezone
       });
     }
@@ -119,8 +119,8 @@ function formatTimeInTimezone(time, timezone = 'UTC', format = 'full') {
 function getTimezoneOffset(timezone = 'UTC') {
   try {
     const now = new Date();
-    const { year, month, day, hour, minute, second } = getTimezoneDateParts(now, timezone);
-    const zonedTimestamp = Date.UTC(year, month - 1, day, hour, minute, second);
+    const { year,month,day,hour,minute,second } = getTimezoneDateParts(now,timezone);
+    const zonedTimestamp = Date.UTC(year,month - 1,day,hour,minute,second);
     return Math.round((zonedTimestamp - now.getTime()) / MS_PER_HOUR);
   } catch (error) {
     console.error(`获取时区偏移量错误: ${error.message}`);
@@ -159,14 +159,14 @@ function formatTimezoneDisplay(timezone = 'UTC') {
     const timezoneName = timezoneNames[timezone] || timezone;
     return `${timezoneName} (UTC${offsetStr})`;
   } catch (error) {
-    console.error('格式化时区显示失败:', error);
+    console.error('格式化时区显示失败:',error);
     return timezone;
   }
 }
 
 // 兼容性函数 - 保持原有接口
-function formatBeijingTime(date = new Date(), format = 'full') {
-  return formatTimeInTimezone(date, 'Asia/Shanghai', format);
+function formatBeijingTime(date = new Date(),format = 'full') {
+  return formatTimeInTimezone(date,'Asia/Shanghai',format);
 }
 
 // 时区处理中间件函数
@@ -205,7 +205,7 @@ function extractTimezone(request) {
 function isValidTimezone(timezone) {
   try {
     // 尝试使用该时区格式化时间
-    new Date().toLocaleString('en-US', { timeZone: timezone });
+    new Date().toLocaleString('en-US',{ timeZone: timezone });
     return true;
   } catch (error) {
     return false;
@@ -216,34 +216,34 @@ function isValidTimezone(timezone) {
 const lunarCalendar = {
   // 农历数据 (1900-2100年)
   lunarInfo: [
-    0x04bd8, 0x04ae0, 0x0a570, 0x054d5, 0x0d260, 0x0d950, 0x16554, 0x056a0, 0x09ad0, 0x055d2,
-    0x04ae0, 0x0a5b6, 0x0a4d0, 0x0d250, 0x1d255, 0x0b540, 0x0d6a0, 0x0ada2, 0x095b0, 0x14977,
-    0x04970, 0x0a4b0, 0x0b4b5, 0x06a50, 0x06d40, 0x1ab54, 0x02b60, 0x09570, 0x052f2, 0x04970,
-    0x06566, 0x0d4a0, 0x0ea50, 0x06e95, 0x05ad0, 0x02b60, 0x186e3, 0x092e0, 0x1c8d7, 0x0c950,
-    0x0d4a0, 0x1d8a6, 0x0b550, 0x056a0, 0x1a5b4, 0x025d0, 0x092d0, 0x0d2b2, 0x0a950, 0x0b557,
-    0x06ca0, 0x0b550, 0x15355, 0x04da0, 0x0a5b0, 0x14573, 0x052b0, 0x0a9a8, 0x0e950, 0x06aa0,
-    0x0aea6, 0x0ab50, 0x04b60, 0x0aae4, 0x0a570, 0x05260, 0x0f263, 0x0d950, 0x05b57, 0x056a0,
-    0x096d0, 0x04dd5, 0x04ad0, 0x0a4d0, 0x0d4d4, 0x0d250, 0x0d558, 0x0b540, 0x0b6a0, 0x195a6,
-    0x095b0, 0x049b0, 0x0a974, 0x0a4b0, 0x0b27a, 0x06a50, 0x06d40, 0x0af46, 0x0ab60, 0x09570,
-    0x04af5, 0x04970, 0x064b0, 0x074a3, 0x0ea50, 0x06b58, 0x055c0, 0x0ab60, 0x096d5, 0x092e0,
-    0x0c960, 0x0d954, 0x0d4a0, 0x0da50, 0x07552, 0x056a0, 0x0abb7, 0x025d0, 0x092d0, 0x0cab5,
-    0x0a950, 0x0b4a0, 0x0baa4, 0x0ad50, 0x055d9, 0x04ba0, 0x0a5b0, 0x15176, 0x052b0, 0x0a930,
-    0x07954, 0x06aa0, 0x0ad50, 0x05b52, 0x04b60, 0x0a6e6, 0x0a4e0, 0x0d260, 0x0ea65, 0x0d530,
-    0x05aa0, 0x076a3, 0x096d0, 0x04bd7, 0x04ad0, 0x0a4d0, 0x1d0b6, 0x0d250, 0x0d520, 0x0dd45,
-    0x0b5a0, 0x056d0, 0x055b2, 0x049b0, 0x0a577, 0x0a4b0, 0x0aa50, 0x1b255, 0x06d20, 0x0ada0
+    0x04bd8,0x04ae0,0x0a570,0x054d5,0x0d260,0x0d950,0x16554,0x056a0,0x09ad0,0x055d2,
+    0x04ae0,0x0a5b6,0x0a4d0,0x0d250,0x1d255,0x0b540,0x0d6a0,0x0ada2,0x095b0,0x14977,
+    0x04970,0x0a4b0,0x0b4b5,0x06a50,0x06d40,0x1ab54,0x02b60,0x09570,0x052f2,0x04970,
+    0x06566,0x0d4a0,0x0ea50,0x06e95,0x05ad0,0x02b60,0x186e3,0x092e0,0x1c8d7,0x0c950,
+    0x0d4a0,0x1d8a6,0x0b550,0x056a0,0x1a5b4,0x025d0,0x092d0,0x0d2b2,0x0a950,0x0b557,
+    0x06ca0,0x0b550,0x15355,0x04da0,0x0a5b0,0x14573,0x052b0,0x0a9a8,0x0e950,0x06aa0,
+    0x0aea6,0x0ab50,0x04b60,0x0aae4,0x0a570,0x05260,0x0f263,0x0d950,0x05b57,0x056a0,
+    0x096d0,0x04dd5,0x04ad0,0x0a4d0,0x0d4d4,0x0d250,0x0d558,0x0b540,0x0b6a0,0x195a6,
+    0x095b0,0x049b0,0x0a974,0x0a4b0,0x0b27a,0x06a50,0x06d40,0x0af46,0x0ab60,0x09570,
+    0x04af5,0x04970,0x064b0,0x074a3,0x0ea50,0x06b58,0x055c0,0x0ab60,0x096d5,0x092e0,
+    0x0c960,0x0d954,0x0d4a0,0x0da50,0x07552,0x056a0,0x0abb7,0x025d0,0x092d0,0x0cab5,
+    0x0a950,0x0b4a0,0x0baa4,0x0ad50,0x055d9,0x04ba0,0x0a5b0,0x15176,0x052b0,0x0a930,
+    0x07954,0x06aa0,0x0ad50,0x05b52,0x04b60,0x0a6e6,0x0a4e0,0x0d260,0x0ea65,0x0d530,
+    0x05aa0,0x076a3,0x096d0,0x04bd7,0x04ad0,0x0a4d0,0x1d0b6,0x0d250,0x0d520,0x0dd45,
+    0x0b5a0,0x056d0,0x055b2,0x049b0,0x0a577,0x0a4b0,0x0aa50,0x1b255,0x06d20,0x0ada0
   ],
 
   // 天干地支
-  gan: ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'],
-  zhi: ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'],
+  gan: ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'],
+  zhi: ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'],
 
   // 农历月份
-  months: ['正', '二', '三', '四', '五', '六', '七', '八', '九', '十', '冬', '腊'],
+  months: ['正','二','三','四','五','六','七','八','九','十','冬','腊'],
 
   // 农历日期
-  days: ['初一', '初二', '初三', '初四', '初五', '初六', '初七', '初八', '初九', '初十',
-    '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十',
-    '廿一', '廿二', '廿三', '廿四', '廿五', '廿六', '廿七', '廿八', '廿九', '三十'],
+  days: ['初一','初二','初三','初四','初五','初六','初七','初八','初九','初十',
+    '十一','十二','十三','十四','十五','十六','十七','十八','十九','二十',
+    '廿一','廿二','廿三','廿四','廿五','廿六','廿七','廿八','廿九','三十'],
 
   // 获取农历年天数
   lunarYearDays: function (year) {
@@ -268,16 +268,16 @@ const lunarCalendar = {
   },
 
   // 获取农历月天数
-  monthDays: function (year, month) {
+  monthDays: function (year,month) {
     return (this.lunarInfo[year - 1900] & (0x10000 >> month)) ? 30 : 29;
   },
 
   // 公历转农历
-  solar2lunar: function (year, month, day) {
+  solar2lunar: function (year,month,day) {
     if (year < 1900 || year > 2100) return null;
 
-    const baseDate = new Date(1900, 0, 31);
-    const objDate = new Date(year, month - 1, day);
+    const baseDate = new Date(1900,0,31);
+    const objDate = new Date(year,month - 1,day);
     //let offset = Math.floor((objDate - baseDate) / 86400000);
     let offset = Math.round((objDate - baseDate) / 86400000);
 
@@ -305,7 +305,7 @@ const lunarCalendar = {
         isLeap = true;
         temp = this.leapDays(lunarYear);
       } else {
-        temp = this.monthDays(lunarYear, lunarMonth);
+        temp = this.monthDays(lunarYear,lunarMonth);
       }
 
       if (isLeap && lunarMonth === (leap + 1)) isLeap = false;
@@ -351,8 +351,8 @@ const lunarCalendar = {
 // 1. 新增 lunarBiz 工具模块，支持农历加周期、农历转公历、农历距离天数
 const lunarBiz = {
   // 农历加周期，返回新的农历日期对象
-  addLunarPeriod(lunar, periodValue, periodUnit) {
-    let { year, month, day, isLeap } = lunar;
+  addLunarPeriod(lunar,periodValue,periodUnit) {
+    let { year,month,day,isLeap } = lunar;
     if (periodUnit === 'year') {
       year += periodValue;
       const leap = lunarCalendar.leapMonth(year);
@@ -373,30 +373,30 @@ const lunarBiz = {
       }
     } else if (periodUnit === 'day') {
       const solar = lunarBiz.lunar2solar(lunar);
-      const date = new Date(solar.year, solar.month - 1, solar.day + periodValue);
-      return lunarCalendar.solar2lunar(date.getFullYear(), date.getMonth() + 1, date.getDate());
+      const date = new Date(solar.year,solar.month - 1,solar.day + periodValue);
+      return lunarCalendar.solar2lunar(date.getFullYear(),date.getMonth() + 1,date.getDate());
     }
     let maxDay = isLeap
       ? lunarCalendar.leapDays(year)
-      : lunarCalendar.monthDays(year, month);
-    let targetDay = Math.min(day, maxDay);
+      : lunarCalendar.monthDays(year,month);
+    let targetDay = Math.min(day,maxDay);
     while (targetDay > 0) {
-      let solar = lunarBiz.lunar2solar({ year, month, day: targetDay, isLeap });
+      let solar = lunarBiz.lunar2solar({ year,month,day: targetDay,isLeap });
       if (solar) {
-        return { year, month, day: targetDay, isLeap };
+        return { year,month,day: targetDay,isLeap };
       }
       targetDay--;
     }
-    return { year, month, day, isLeap };
+    return { year,month,day,isLeap };
   },
   // 农历转公历（遍历法，适用1900-2100年）
   lunar2solar(lunar) {
     for (let y = lunar.year - 1; y <= lunar.year + 1; y++) {
       for (let m = 1; m <= 12; m++) {
         for (let d = 1; d <= 31; d++) {
-          const date = new Date(y, m - 1, d);
+          const date = new Date(y,m - 1,d);
           if (date.getFullYear() !== y || date.getMonth() + 1 !== m || date.getDate() !== d) continue;
-          const l = lunarCalendar.solar2lunar(y, m, d);
+          const l = lunarCalendar.solar2lunar(y,m,d);
           if (
             l &&
             l.year === lunar.year &&
@@ -404,7 +404,7 @@ const lunarBiz = {
             l.day === lunar.day &&
             l.isLeap === lunar.isLeap
           ) {
-            return { year: y, month: m, day: d };
+            return { year: y,month: m,day: d };
           }
         }
       }
@@ -414,7 +414,7 @@ const lunarBiz = {
   // 距离农历日期还有多少天
   daysToLunar(lunar) {
     const solar = lunarBiz.lunar2solar(lunar);
-    const date = new Date(solar.year, solar.month - 1, solar.day);
+    const date = new Date(solar.year,solar.month - 1,solar.day);
     const now = new Date();
     return Math.ceil((date - now) / (1000 * 60 * 60 * 24));
   }
@@ -464,7 +464,7 @@ const loginPage = `
       <h1 class="text-2xl font-bold text-gray-800"><i class="fas fa-calendar-check mr-2"></i>订阅管理系统</h1>
       <p class="text-gray-600 mt-2">登录管理您的订阅提醒</p>
     </div>
-    
+
     <form id="loginForm" class="space-y-6">
       <div>
         <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
@@ -473,7 +473,7 @@ const loginPage = `
         <input type="text" id="username" name="username" required
           class="input-field w-full px-4 py-3 rounded-lg text-gray-700 focus:outline-none">
       </div>
-      
+
       <div>
         <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
           <i class="fas fa-lock mr-2"></i>密码
@@ -481,36 +481,36 @@ const loginPage = `
         <input type="password" id="password" name="password" required
           class="input-field w-full px-4 py-3 rounded-lg text-gray-700 focus:outline-none">
       </div>
-      
-      <button type="submit" 
+
+      <button type="submit"
         class="btn-primary w-full py-3 rounded-lg text-white font-medium focus:outline-none">
         <i class="fas fa-sign-in-alt mr-2"></i>登录
       </button>
-      
+
       <div id="errorMsg" class="text-red-500 text-center"></div>
     </form>
   </div>
-  
+
   <script>
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const username = document.getElementById('username').value;
       const password = document.getElementById('password').value;
-      
+
       const button = e.target.querySelector('button');
       const originalContent = button.innerHTML;
       button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>登录中...';
       button.disabled = true;
-      
+
       try {
         const response = await fetch('/api/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password })
         });
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
           window.location.href = '/admin';
         } else {
@@ -681,14 +681,14 @@ const adminPage = `
     .hidden {
       display: none !important;
     }
-    
+
     .custom-date-picker {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
       border-radius: 12px;
       min-width: 380px;
     }
-    
+
     .custom-date-picker .calendar-day {
       display: flex;
       flex-direction: column;
@@ -703,30 +703,30 @@ const adminPage = `
       padding: 4px;
       font-size: 14px;
     }
-    
+
     .custom-date-picker .calendar-day:hover {
       background-color: #e0e7ff;
       transform: scale(1.05);
     }
-    
+
     .custom-date-picker .calendar-day.selected {
       background-color: #6366f1;
       color: white;
       transform: scale(1.1);
       box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
     }
-    
+
     .custom-date-picker .calendar-day.today {
       background-color: #e0e7ff;
       color: #6366f1;
       font-weight: 600;
       border: 2px solid #6366f1;
     }
-    
+
     .custom-date-picker .calendar-day.other-month {
       color: #d1d5db;
     }
-    
+
     .custom-date-picker .calendar-day .lunar-text {
       font-size: 11px;
       line-height: 1.2;
@@ -735,33 +735,33 @@ const adminPage = `
       text-align: center;
       font-weight: 500;
     }
-    
+
     .custom-date-picker .calendar-day.selected .lunar-text {
       color: rgba(255, 255, 255, 0.9);
     }
-    
+
     .custom-date-picker .calendar-day.today .lunar-text {
       color: #6366f1;
     }
-    
+
     /* 月份和年份选择器样式 */
     .month-option, .year-option {
       transition: all 0.2s ease;
       border: 1px solid transparent;
     }
-    
+
     .month-option:hover, .year-option:hover {
       background-color: #e0e7ff !important;
       border-color: #6366f1;
       color: #6366f1;
     }
-    
+
     .month-option.selected, .year-option.selected {
       background-color: #6366f1 !important;
       color: white;
       border-color: #6366f1;
     }
-    
+
     .lunar-toggle {
       display: inline-flex;
       align-items: center;
@@ -809,7 +809,7 @@ const adminPage = `
       .responsive-table td:last-of-type { border-bottom: none; }
       .responsive-table td:before { content: attr(data-label); font-weight: 600; text-align: left; padding-right: 1rem; color: #374151; white-space: nowrap; }
       .action-buttons-wrapper { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: flex-end; }
-      
+
       .notes-container, .hover-container {
         max-width: 180px; /* Adjust for new layout */
         text-align: right;
@@ -871,7 +871,7 @@ const adminPage = `
       </div>
     </div>
   </nav>
-  
+
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
       <div>
@@ -903,7 +903,7 @@ const adminPage = `
       </div>
       </div>
     </div>
-    
+
     <div class="table-container bg-white rounded-lg overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full divide-y divide-gray-200 responsive-table">
@@ -950,10 +950,10 @@ const adminPage = `
           </button>
         </div>
       </div>
-      
+
       <form id="subscriptionForm" class="p-6 space-y-6">
         <input type="hidden" id="subscriptionId">
-        
+
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <label for="name" class="block text-sm font-medium text-gray-700 mb-1">订阅名称 *</label>
@@ -961,7 +961,7 @@ const adminPage = `
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
             <div class="error-message text-red-500" data-for="reminderValue"></div>
           </div>
-          
+
           <div>
             <label for="customType" class="block text-sm font-medium text-gray-700 mb-1">订阅类型</label>
             <input type="text" id="customType" list="customTypeList" placeholder="选择或输入自定义类型"
@@ -1010,22 +1010,33 @@ const adminPage = `
 
         <!-- 金额 -->
         <div class="mb-4">
-          <label for="amount" class="block text-sm font-medium text-gray-700 mb-1">
-            金额（元）
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            费用设置
             <span class="text-gray-400 text-xs ml-1">可选</span>
           </label>
-          <div class="relative">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
-              ¥
-            </span>
-            <input
-              type="number"
-              id="amount"
-              step="0.01"
-              min="0"
-              placeholder="例如: 15.00"
-              class="pl-8 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            />
+          <div class="flex space-x-2">
+            <div class="w-1/3">
+              <select id="currency" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                <option value="CNY" selected>CNY (¥)</option>
+                <option value="USD">USD ($)</option>
+                <option value="HKD">HKD (HK$)</option>
+                <option value="TWD">TWD (NT$)</option>
+                <option value="JPY">JPY (¥)</option>
+                <option value="EUR">EUR (€)</option>
+                <option value="GBP">GBP (£)</option>
+                <option value="KRW">KRW (₩)</option>
+              </select>
+            </div>
+            <div class="relative w-2/3">
+              <input
+                type="number"
+                id="amount"
+                step="0.01"
+                min="0"
+                placeholder="例如: 15.00"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              />
+            </div>
           </div>
           <p class="mt-1 text-xs text-gray-500">用于统计支出和生成仪表盘</p>
         </div>
@@ -1065,7 +1076,7 @@ const adminPage = `
                       <i class="fas fa-chevron-right"></i>
                     </button>
                   </div>
-                  
+
                   <!-- 月份选择器 -->
                   <div id="startDateMonthPicker" class="hidden mb-4">
                     <div class="flex justify-between items-center mb-3">
@@ -1089,7 +1100,7 @@ const adminPage = `
                       <button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="11">12月</button>
                     </div>
                   </div>
-                  
+
                   <!-- 年份选择器 -->
                   <div id="startDateYearPicker" class="hidden mb-4">
                     <div class="flex justify-between items-center mb-3">
@@ -1111,7 +1122,7 @@ const adminPage = `
                       <!-- 年份按钮将通过JavaScript动态生成 -->
                     </div>
                   </div>
-                  
+
                   <div class="grid grid-cols-7 gap-2 mb-3">
                     <div class="text-center text-sm font-semibold text-gray-600 py-2">日</div>
                     <div class="text-center text-sm font-semibold text-gray-600 py-2">一</div>
@@ -1122,7 +1133,7 @@ const adminPage = `
                     <div class="text-center text-sm font-semibold text-gray-600 py-2">六</div>
                   </div>
                   <div id="startDateCalendar" class="grid grid-cols-7 gap-2"></div>
-                  
+
                   <!-- 回到今天按钮 -->
                   <div class="mt-4 pt-3 border-t border-gray-200">
                     <button type="button" id="startDateGoToToday" class="w-full px-3 py-2 text-sm text-indigo-600 hover:bg-indigo-50 rounded-md">
@@ -1134,14 +1145,14 @@ const adminPage = `
             <div id="startDateLunar" class="lunar-display"></div>
             <div class="error-message text-red-500"></div>
           </div>
-          
+
           <div>
             <label for="periodValue" class="block text-sm font-medium text-gray-700 mb-1">周期数值 *</label>
             <input type="number" id="periodValue" min="1" value="1" required
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
             <div class="error-message text-red-500"></div>
           </div>
-          
+
           <div>
             <label for="periodUnit" class="block text-sm font-medium text-gray-700 mb-1">周期单位 *</label>
             <select id="periodUnit" required
@@ -1153,7 +1164,7 @@ const adminPage = `
             <div class="error-message text-red-500"></div>
           </div>
         </div>
-        
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label for="expiryDate" class="block text-sm font-medium text-gray-700 mb-1">到期日期 *</label>
@@ -1178,7 +1189,7 @@ const adminPage = `
                     <i class="fas fa-chevron-right"></i>
                   </button>
                 </div>
-                
+
                 <!-- 月份选择器 -->
                 <div id="expiryDateMonthPicker" class="hidden mb-4">
                   <div class="flex justify-between items-center mb-3">
@@ -1202,7 +1213,7 @@ const adminPage = `
                     <button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="11">12月</button>
                   </div>
                 </div>
-                
+
                 <!-- 年份选择器 -->
                 <div id="expiryDateYearPicker" class="hidden mb-4">
                   <div class="flex justify-between items-center mb-3">
@@ -1224,7 +1235,7 @@ const adminPage = `
                     <!-- 年份按钮将通过JavaScript动态生成 -->
                   </div>
                 </div>
-                
+
                 <div class="grid grid-cols-7 gap-2 mb-3">
                   <div class="text-center text-sm font-semibold text-gray-600 py-2">日</div>
                   <div class="text-center text-sm font-semibold text-gray-600 py-2">一</div>
@@ -1235,7 +1246,7 @@ const adminPage = `
                   <div class="text-center text-sm font-semibold text-gray-600 py-2">六</div>
                 </div>
                 <div id="expiryDateCalendar" class="grid grid-cols-7 gap-2"></div>
-                
+
                 <!-- 回到今天按钮 -->
                 <div class="mt-4 pt-3 border-t border-gray-200">
                   <button type="button" id="expiryDateGoToToday" class="w-full px-3 py-2 text-sm text-indigo-600 hover:bg-indigo-50 rounded-md">
@@ -1247,14 +1258,14 @@ const adminPage = `
             <div id="expiryDateLunar" class="lunar-display"></div>
             <div class="error-message text-red-500"></div>
             <div class="flex justify-end mt-2">
-              <button type="button" id="calculateExpiryBtn" 
+              <button type="button" id="calculateExpiryBtn"
                 class="btn-primary text-white px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap">
                 <i class="fas fa-calculator mr-2"></i>自动计算到期日期
               </button>
             </div>
           </div>
         </div>
-        
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label for="reminderValue" class="block text-sm font-medium text-gray-700 mb-1">提醒提前量</label>
@@ -1270,37 +1281,37 @@ const adminPage = `
             <p class="text-xs text-gray-500 mt-1">0 = 仅在到期时提醒；选择“小时”需要将 Worker 定时任务调整为小时级执行</p>
             <div class="error-message text-red-500"></div>
           </div>
-          
+
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-3">选项设置</label>
             <div class="space-y-2">
               <label class="inline-flex items-center">
-                <input type="checkbox" id="isActive" checked 
+                <input type="checkbox" id="isActive" checked
                   class="form-checkbox h-4 w-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500">
                 <span class="ml-2 text-sm text-gray-700">启用订阅</span>
               </label>
               <label class="inline-flex items-center">
-                <input type="checkbox" id="autoRenew" checked 
+                <input type="checkbox" id="autoRenew" checked
                   class="form-checkbox h-4 w-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500">
                 <span class="ml-2 text-sm text-gray-700">自动续订</span>
               </label>
             </div>
           </div>
         </div>
-        
+
         <div>
           <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">备注</label>
           <textarea id="notes" rows="3" placeholder="可添加相关备注信息..."
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"></textarea>
           <div class="error-message text-red-500"></div>
         </div>
-        
+
         <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-          <button type="button" id="cancelBtn" 
+          <button type="button" id="cancelBtn"
             class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
             取消
           </button>
-          <button type="submit" 
+          <button type="submit"
             class="btn-primary text-white px-4 py-2 rounded-md text-sm font-medium">
             <i class="fas fa-save mr-2"></i>保存
           </button>
@@ -1315,7 +1326,7 @@ const adminPage = `
       try {
         const timezone = 'Asia/Shanghai';
         const dateObj = new Date(date);
-        
+
         if (format === 'date') {
           return dateObj.toLocaleDateString('zh-CN', {
             timeZone: timezone,
@@ -1480,7 +1491,7 @@ const adminPage = `
         };
       }
     };
-	
+
 
 // 新增修改，农历转公历（简化，适用1900-2100年）
 function lunar2solar(lunar) {
@@ -1597,7 +1608,7 @@ const lunarBiz = {
       if (!showLunar) {
         return;
       }
-      
+
       updateLunarDisplay('startDate', 'startDateLunar');
       updateLunarDisplay('expiryDate', 'expiryDateLunar');
 
@@ -1610,7 +1621,7 @@ const lunarBiz = {
       if (!showLunar) {
         return;
       }
-      
+
       const saved = localStorage.getItem('showLunar');
       if (saved !== null) {
         showLunar.checked = saved === 'true';
@@ -1632,13 +1643,13 @@ const lunarBiz = {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
       toast.className = 'toast ' + type;
-      
+
       const icon = type === 'success' ? 'check-circle' :
                    type === 'error' ? 'exclamation-circle' :
                    type === 'warning' ? 'exclamation-triangle' : 'info-circle';
-      
+
       toast.innerHTML = '<div class="flex items-center"><i class="fas fa-' + icon + ' mr-2"></i><span>' + message + '</span></div>';
-      
+
       container.appendChild(toast);
       setTimeout(() => toast.classList.add('show'), 100);
       setTimeout(() => {
@@ -2047,10 +2058,16 @@ const lunarBiz = {
           : (reminder.unit === 'hour' ? '<div class="text-xs text-gray-500 mt-1">小时级提醒</div>' : '');
         const reminderHtml = '<div><i class="fas fa-bell mr-1"></i>' + reminder.displayText + '</div>' + reminderExtra;
 
+        const currencySymbols = {
+          'CNY': '¥', 'USD': '$', 'HKD': 'HK$', 'TWD': 'NT$',
+          'JPY': '¥', 'EUR': '€', 'GBP': '£', 'KRW': '₩'
+        };
+        const currencySymbol = currencySymbols[subscription.currency] || '¥';
+
         const amountHtml = subscription.amount
           ? '<div class="flex items-center gap-1">' +
-              '<i class="fas fa-yen-sign text-green-500"></i>' +
-              '<span class="text-sm font-medium text-gray-900">¥' + subscription.amount.toFixed(2) + '</span>' +
+              '<span class="text-xs text-gray-500 font-bold">' + currencySymbol + '</span>' +
+              '<span class="text-sm font-medium text-gray-900">' + subscription.amount.toFixed(2) + '</span>' +
             '</div>'
           : '<span class="text-xs text-gray-400">未设置</span>';
 
@@ -2170,7 +2187,7 @@ const lunarBiz = {
         showToast('加载订阅列表失败', 'error');
       }
     }
-    
+
     async function testSubscriptionNotification(e) {
         const button = e.target.tagName === 'BUTTON' ? e.target : e.target.parentElement;
         const id = button.dataset.id;
@@ -2694,19 +2711,19 @@ const lunarBiz = {
       const id = e.target.dataset.id || e.target.parentElement.dataset.id;
       const action = e.target.dataset.action || e.target.parentElement.dataset.action;
       const isActivate = action === 'activate';
-      
+
       const button = e.target.tagName === 'BUTTON' ? e.target : e.target.parentElement;
       const originalContent = button.innerHTML;
       button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>' + (isActivate ? '启用中...' : '停用中...');
       button.disabled = true;
-      
+
       try {
         const response = await fetch('/api/subscriptions/' + id + '/toggle-status', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ isActive: isActivate })
         });
-        
+
         if (response.ok) {
           showToast((isActivate ? '启用' : '停用') + '成功', 'success');
           loadSubscriptions();
@@ -2723,12 +2740,13 @@ const lunarBiz = {
         button.disabled = false;
       }
     }
-    
+
     document.getElementById('addSubscriptionBtn').addEventListener('click', () => {
       document.getElementById('modalTitle').textContent = '添加新订阅';
       document.getElementById('subscriptionModal').classList.remove('hidden');
 
       document.getElementById('subscriptionForm').reset();
+      document.getElementById('currency').value = 'CNY'; // 默认设置为CNY
       document.getElementById('subscriptionId').value = '';
       clearFieldErrors();
 
@@ -2749,7 +2767,7 @@ const lunarBiz = {
     class CustomDatePicker {
       constructor(inputId, pickerId, calendarId, monthId, yearId, prevBtnId, nextBtnId) {
         console.log('CustomDatePicker 构造函数:', { inputId, pickerId, calendarId, monthId, yearId, prevBtnId, nextBtnId });
-        
+
         this.input = document.getElementById(inputId);
         this.picker = document.getElementById(pickerId);
         this.calendar = document.getElementById(calendarId);
@@ -2757,7 +2775,7 @@ const lunarBiz = {
         this.yearElement = document.getElementById(yearId);
         this.prevBtn = document.getElementById(prevBtnId);
         this.nextBtn = document.getElementById(nextBtnId);
-        
+
         // 新增元素
         this.monthPicker = document.getElementById(pickerId.replace('Picker', 'MonthPicker'));
         this.yearPicker = document.getElementById(pickerId.replace('Picker', 'YearPicker'));
@@ -2768,7 +2786,7 @@ const lunarBiz = {
         this.nextYearDecadeBtn = document.getElementById(pickerId.replace('Picker', 'NextYearDecade'));
         this.yearRangeElement = document.getElementById(pickerId.replace('Picker', 'YearRange'));
         this.yearGrid = document.getElementById(pickerId.replace('Picker', 'YearGrid'));
-        
+
         console.log('找到的元素:', {
           input: !!this.input,
           picker: !!this.picker,
@@ -2778,18 +2796,18 @@ const lunarBiz = {
           prevBtn: !!this.prevBtn,
           nextBtn: !!this.nextBtn
         });
-        
+
         this.currentDate = new Date();
         this.selectedDate = null;
         this.currentView = 'calendar'; // 'calendar', 'month', 'year'
         this.yearDecade = Math.floor(this.currentDate.getFullYear() / 10) * 10;
-        
+
         this.init();
       }
-      
+
       init() {
         console.log('初始化日期选择器，输入框:', !!this.input, '选择器:', !!this.picker);
-        
+
         // 绑定基本事件
         if (this.input) {
           // 移除之前的事件监听器（如果存在）
@@ -2813,32 +2831,32 @@ const lunarBiz = {
           };
           this.input.addEventListener('keydown', this._manualKeydownHandler);
         }
-        
+
         if (this.prevBtn) {
           this.prevBtn.removeEventListener('click', this._prevHandler);
           this._prevHandler = () => this.previousMonth();
           this.prevBtn.addEventListener('click', this._prevHandler);
         }
-        
+
         if (this.nextBtn) {
           this.nextBtn.removeEventListener('click', this._nextHandler);
           this._nextHandler = () => this.nextMonth();
           this.nextBtn.addEventListener('click', this._nextHandler);
         }
-        
+
         // 绑定月份和年份点击事件
         if (this.monthElement) {
           this.monthElement.removeEventListener('click', this._showMonthHandler);
           this._showMonthHandler = () => this.showMonthPicker();
           this.monthElement.addEventListener('click', this._showMonthHandler);
         }
-        
+
         if (this.yearElement) {
           this.yearElement.removeEventListener('click', this._showYearHandler);
           this._showYearHandler = () => this.showYearPicker();
           this.yearElement.addEventListener('click', this._showYearHandler);
         }
-        
+
         // 绑定月份选择器事件
         if (this.monthPicker) {
           this.monthPicker.removeEventListener('click', this._monthSelectHandler);
@@ -2850,19 +2868,19 @@ const lunarBiz = {
           };
           this.monthPicker.addEventListener('click', this._monthSelectHandler);
         }
-        
+
         if (this.backToCalendarBtn) {
           this.backToCalendarBtn.removeEventListener('click', this._backToCalendarHandler);
           this._backToCalendarHandler = () => this.showCalendar();
           this.backToCalendarBtn.addEventListener('click', this._backToCalendarHandler);
         }
-        
+
         if (this.backToCalendarFromYearBtn) {
           this.backToCalendarFromYearBtn.removeEventListener('click', this._backToCalendarFromYearHandler);
           this._backToCalendarFromYearHandler = () => this.showCalendar();
           this.backToCalendarFromYearBtn.addEventListener('click', this._backToCalendarFromYearHandler);
         }
-        
+
         // 绑定年份选择器事件
         if (this.prevYearDecadeBtn) {
         this.prevYearDecadeBtn.removeEventListener('click', this._prevYearDecadeHandler);
@@ -2881,14 +2899,14 @@ const lunarBiz = {
         };
         this.nextYearDecadeBtn.addEventListener('click', this._nextYearDecadeHandler);
 }
-        
+
         // 绑定回到今天事件
         if (this.goToTodayBtn) {
           this.goToTodayBtn.removeEventListener('click', this._goToTodayHandler);
           this._goToTodayHandler = () => this.goToToday();
           this.goToTodayBtn.addEventListener('click', this._goToTodayHandler);
         }
-        
+
         // 点击外部关闭
         if (this._outsideClickHandler) {
           document.removeEventListener('click', this._outsideClickHandler);
@@ -2900,19 +2918,19 @@ const lunarBiz = {
           }
         };
         document.addEventListener('click', this._outsideClickHandler);
-        
+
         // 初始化显示
         this.syncFromInputValue();
         this.render();
         this.renderYearGrid();
       }
-      
+
       toggle() {
         console.log('toggle 被调用');
         console.log('picker 元素:', this.picker);
         console.log('picker 类名:', this.picker ? this.picker.className : 'null');
         console.log('是否包含 hidden:', this.picker ? this.picker.classList.contains('hidden') : 'null');
-        
+
         if (this.picker && this.picker.classList.contains('hidden')) {
           console.log('显示日期选择器');
           this.show();
@@ -2921,7 +2939,7 @@ const lunarBiz = {
           this.hide();
         }
       }
-      
+
       // 强制显示日期选择器
       forceShow() {
         console.log('forceShow 被调用');
@@ -2937,30 +2955,30 @@ const lunarBiz = {
           console.error('日期选择器元素不存在');
         }
       }
-      
+
       show() {
         if (this.picker) {
           this.picker.classList.remove('hidden');
           this.render();
         }
       }
-      
+
       hide() {
         if (this.picker) {
           this.picker.classList.add('hidden');
         }
       }
-      
+
       previousMonth() {
         this.currentDate.setMonth(this.currentDate.getMonth() - 1);
         this.render();
       }
-      
+
       nextMonth() {
         this.currentDate.setMonth(this.currentDate.getMonth() + 1);
         this.render();
       }
-      
+
       selectDate(date) {
         this.selectedDate = date;
         if (this.input) {
@@ -2971,7 +2989,7 @@ const lunarBiz = {
           this.input.value = year + '-' + month + '-' + day;
         }
         this.hide();
-        
+
         // 触发change事件，但不冒泡到表单
         if (this.input) {
           const event = new Event('change', { bubbles: false });
@@ -3015,50 +3033,50 @@ const lunarBiz = {
         const event = new Event('change', { bubbles: false });
         this.input.dispatchEvent(event);
       }
-      
+
       render() {
         if (!this.monthElement || !this.yearElement || !this.calendar) return;
-        
+
         const year = this.currentDate.getFullYear();
         const month = this.currentDate.getMonth();
-        
+
         // 更新月份年份显示
         this.monthElement.textContent = (month + 1) + '月';
         this.yearElement.textContent = year;
-        
+
         // 清空日历
         this.calendar.innerHTML = '';
-        
+
         // 获取当月第一天和最后一天
         const firstDay = new Date(year, month, 1);
         const lastDay = new Date(year, month + 1, 0);
         const startDate = new Date(firstDay);
         startDate.setDate(startDate.getDate() - firstDay.getDay());
-        
+
         // 生成日历网格
         for (let i = 0; i < 42; i++) {
           const date = new Date(startDate);
           date.setDate(startDate.getDate() + i);
-          
+
           const dayElement = document.createElement('div');
           dayElement.className = 'calendar-day';
-          
+
           // 判断是否是当前月份
           if (date.getMonth() !== month) {
             dayElement.classList.add('other-month');
           }
-          
+
           // 判断是否是今天
           const today = new Date();
           if (date.toDateString() === today.toDateString()) {
             dayElement.classList.add('today');
           }
-          
+
           // 判断是否是选中日期
           if (this.selectedDate && date.toDateString() === this.selectedDate.toDateString()) {
             dayElement.classList.add('selected');
           }
-          
+
           // 获取农历信息
           let lunarText = '';
           try {
@@ -3075,17 +3093,17 @@ const lunarBiz = {
           } catch (error) {
             console.error('农历转换错误:', error);
           }
-          
+
           dayElement.innerHTML =
             '<div>' + date.getDate() + '</div>' +
             '<div class="lunar-text">' + lunarText + '</div>';
-          
+
           dayElement.addEventListener('click', () => this.selectDate(date));
-          
+
           this.calendar.appendChild(dayElement);
         }
       }
-      
+
       // 显示月份选择器
       showMonthPicker() {
         this.currentView = 'month';
@@ -3102,7 +3120,7 @@ const lunarBiz = {
           });
         }
       }
-      
+
       // 显示年份选择器
       showYearPicker() {
         this.currentView = 'year';
@@ -3112,58 +3130,58 @@ const lunarBiz = {
         }
         this.renderYearGrid();
       }
-      
+
       // 显示日历视图
       showCalendar() {
         this.currentView = 'calendar';
         this.hideAllViews();
         this.render();
       }
-      
+
       // 隐藏所有视图
       hideAllViews() {
         if (this.monthPicker) this.monthPicker.classList.add('hidden');
         if (this.yearPicker) this.yearPicker.classList.add('hidden');
         // 注意：不隐藏日历视图，因为它是主视图
       }
-      
+
       // 选择月份
       selectMonth(month) {
         this.currentDate.setMonth(month);
         this.showCalendar();
       }
-      
+
       // 选择年份
       selectYear(year) {
         this.currentDate.setFullYear(year);
         this.showCalendar();
       }
-      
+
       // 上一十年
       previousYearDecade() {
         this.yearDecade -= 10;
         this.renderYearGrid();
       }
-      
+
       // 下一十年
       nextYearDecade() {
         this.yearDecade += 10;
         this.renderYearGrid();
       }
-      
+
       // 渲染年份网格
       renderYearGrid() {
         if (!this.yearGrid || !this.yearRangeElement) return;
-        
+
         const startYear = this.yearDecade;
         const endYear = this.yearDecade + 9;
-        
+
         // 更新年份范围显示
         this.yearRangeElement.textContent = startYear + '-' + endYear;
-        
+
         // 清空年份网格
         this.yearGrid.innerHTML = '';
-        
+
         // 生成年份按钮
         for (let year = startYear; year <= endYear; year++) {
           const yearBtn = document.createElement('button');
@@ -3171,12 +3189,12 @@ const lunarBiz = {
           yearBtn.className = 'year-option px-3 py-2 text-sm rounded hover:bg-gray-100';
           yearBtn.textContent = year;
           yearBtn.dataset.year = year;
-          
+
           // 高亮当前年份
           if (year === this.currentDate.getFullYear()) {
             yearBtn.classList.add('bg-indigo-100', 'text-indigo-600');
           }
-          
+
           // 限制年份范围 1900-2100
           if (year < 1900 || year > 2100) {
             yearBtn.disabled = true;
@@ -3184,21 +3202,21 @@ const lunarBiz = {
           } else {
             yearBtn.addEventListener('click', () => this.selectYear(year));
           }
-          
+
           this.yearGrid.appendChild(yearBtn);
         }
       }
-      
+
       // 回到今天
       goToToday() {
         this.currentDate = new Date();
         this.yearDecade = Math.floor(this.currentDate.getFullYear() / 10) * 10;
         this.showCalendar();
       }
-      
+
       destroy() {
         this.hide();
-        
+
         // 清理事件监听器
         if (this.input && this._forceShowHandler) {
           this.input.removeEventListener('click', this._forceShowHandler);
@@ -3244,7 +3262,7 @@ const lunarBiz = {
         }
       }
     }
-    
+
     function setupModalEventListeners() {
       // 获取DOM元素
       const calculateExpiryBtn = document.getElementById('calculateExpiryBtn');
@@ -3253,7 +3271,7 @@ const lunarBiz = {
       const startDate = document.getElementById('startDate');
       const expiryDate = document.getElementById('expiryDate');
       const cancelBtn = document.getElementById('cancelBtn');
-      
+
       // 直接绑定事件监听器（简化处理，避免重复移除的问题）
       if (calculateExpiryBtn) {
         calculateExpiryBtn.addEventListener('click', calculateExpiryDate);
@@ -3292,25 +3310,25 @@ const lunarBiz = {
         if (window.expiryDatePicker && typeof window.expiryDatePicker.destroy === 'function') {
           window.expiryDatePicker.destroy();
         }
-        
+
         // 清理全局变量
         window.startDatePicker = null;
         window.expiryDatePicker = null;
-        
+
         // 确保DOM元素存在后再创建选择器
         setTimeout(() => {
           console.log('创建开始日期选择器...');
           window.startDatePicker = new CustomDatePicker(
-            'startDate', 'startDatePicker', 'startDateCalendar', 
+            'startDate', 'startDatePicker', 'startDateCalendar',
             'startDateMonth', 'startDateYear', 'startDatePrevMonth', 'startDateNextMonth'
           );
-          
+
           console.log('创建到期日期选择器...');
           window.expiryDatePicker = new CustomDatePicker(
-            'expiryDate', 'expiryDatePicker', 'expiryDateCalendar', 
+            'expiryDate', 'expiryDatePicker', 'expiryDateCalendar',
             'expiryDateMonth', 'expiryDateYear', 'expiryDatePrevMonth', 'expiryDateNextMonth'
           );
-          
+
           console.log('日期选择器初始化完成');
         }, 50);
       } catch (error) {
@@ -3321,7 +3339,7 @@ const lunarBiz = {
       }
     }
 
-	// 3. 新增修改， calculateExpiryDate 函数，支持农历周期推算     
+	// 3. 新增修改， calculateExpiryDate 函数，支持农历周期推算
 	function calculateExpiryDate() {
 	  const startDate = document.getElementById('startDate').value;
 	  const periodValue = parseInt(document.getElementById('periodValue').value);
@@ -3338,24 +3356,24 @@ const lunarBiz = {
 		const lunar = lunarCalendar.solar2lunar(start.getFullYear(), start.getMonth() + 1, start.getDate());
 		let nextLunar = addLunarPeriod(lunar, periodValue, periodUnit);
 		const solar = lunar2solar(nextLunar);
-		
-		// 使用与公历相同的方式创建日期  
-		const expiry = new Date(startDate); // 从原始日期开始  
-		expiry.setFullYear(solar.year);  
-		expiry.setMonth(solar.month - 1);  
-		expiry.setDate(solar.day);  
+
+		// 使用与公历相同的方式创建日期
+		const expiry = new Date(startDate); // 从原始日期开始
+		expiry.setFullYear(solar.year);
+		expiry.setMonth(solar.month - 1);
+		expiry.setDate(solar.day);
 		document.getElementById('expiryDate').value = expiry.toISOString().split('T')[0];
 		console.log('start:', start);
 		console.log('nextLunar:', nextLunar);
 		console.log('expiry:', expiry);
 		console.log('expiryDate:', document.getElementById('expiryDate').value);
-		
-		console.log('solar from lunar2solar:', solar);  
+
+		console.log('solar from lunar2solar:', solar);
 		console.log('solar.year:', solar.year, 'solar.month:', solar.month, 'solar.day:', solar.day);
-		console.log('expiry.getTime():', expiry.getTime());  
+		console.log('expiry.getTime():', expiry.getTime());
 		console.log('expiry.toString():', expiry.toString());
-		
-		
+
+
 	  } else {
 		// 公历推算
 		const start = new Date(startDate);
@@ -3377,29 +3395,29 @@ const lunarBiz = {
 	  updateLunarDisplay('startDate', 'startDateLunar');
 	  updateLunarDisplay('expiryDate', 'expiryDateLunar');
 	}
-    
+
     document.getElementById('closeModal').addEventListener('click', () => {
       document.getElementById('subscriptionModal').classList.add('hidden');
     });
-    
+
     // 禁止点击弹窗外区域关闭弹窗，防止误操作丢失内容
     // document.getElementById('subscriptionModal').addEventListener('click', (event) => {
     //   if (event.target === document.getElementById('subscriptionModal')) {
     //     document.getElementById('subscriptionModal').classList.add('hidden');
     //   }
     // });
-    
-	
+
+
 	// 4. 新增修改，监听 useLunar 复选框变化时也自动重新计算
-	// 注意：这个事件监听器已经在 setupModalEventListeners 中处理了   
+	// 注意：这个事件监听器已经在 setupModalEventListeners 中处理了
    // 新增修改，表单提交时带上 useLunar 字段
     document.getElementById('subscriptionForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      
+
       if (!validateForm()) {
         return;
       }
-      
+
       const id = document.getElementById('subscriptionId').value;
       const reminderUnit = document.getElementById('reminderUnit').value;
       const reminderValue = Number(document.getElementById('reminderValue').value) || 0;
@@ -3409,6 +3427,7 @@ const lunarBiz = {
         customType: document.getElementById('customType').value.trim(),
         category: document.getElementById('category').value.trim(),
         notes: document.getElementById('notes').value.trim() || '',
+        currency: document.getElementById('currency').value, // 新增修改，表单提交时带上 currency 字段
         amount: document.getElementById('amount').value ? parseFloat(document.getElementById('amount').value) : null,
         isActive: document.getElementById('isActive').checked,
         autoRenew: document.getElementById('autoRenew').checked,
@@ -3422,24 +3441,24 @@ const lunarBiz = {
         reminderHours: reminderUnit === 'hour' ? reminderValue : undefined,
         useLunar: document.getElementById('useLunar').checked
       };
-      
+
       const submitButton = e.target.querySelector('button[type="submit"]');
       const originalContent = submitButton.innerHTML;
       submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>' + (id ? '更新中...' : '保存中...');
       submitButton.disabled = true;
-      
+
       try {
         const url = id ? '/api/subscriptions/' + id : '/api/subscriptions';
         const method = id ? 'PUT' : 'POST';
-        
+
         const response = await fetch(url, {
           method: method,
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(subscription)
         });
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
           showToast((id ? '更新' : '添加') + '订阅成功', 'success');
           document.getElementById('subscriptionModal').classList.add('hidden');
@@ -3455,15 +3474,15 @@ const lunarBiz = {
         submitButton.disabled = false;
       }
     });
-    
+
 	    // 新增修改，编辑订阅时回显 useLunar 字段
     async function editSubscription(e) {
       const id = e.target.dataset.id || e.target.parentElement.dataset.id;
-      
+
       try {
         const response = await fetch('/api/subscriptions/' + id);
         const subscription = await response.json();
-        
+
         if (subscription) {
           document.getElementById('modalTitle').textContent = '编辑订阅';
           document.getElementById('subscriptionId').value = subscription.id;
@@ -3472,6 +3491,7 @@ const lunarBiz = {
           document.getElementById('category').value = subscription.category || '';
           document.getElementById('notes').value = subscription.notes || '';
           document.getElementById('amount').value = subscription.amount || '';
+          document.getElementById('currency').value = subscription.currency || 'CNY'; // 默认设置为 CNY
           document.getElementById('isActive').checked = subscription.isActive !== false;
           document.getElementById('autoRenew').checked = subscription.autoRenew !== false;
           document.getElementById('startDate').value = subscription.startDate ? subscription.startDate.split('T')[0] : '';
@@ -3500,11 +3520,11 @@ const lunarBiz = {
           document.getElementById('reminderUnit').value = reminderUnit;
           document.getElementById('reminderValue').value = reminderValue;
           document.getElementById('useLunar').checked = !!subscription.useLunar;
-          
+
           clearFieldErrors();
           loadLunarPreference();
           document.getElementById('subscriptionModal').classList.remove('hidden');
-          
+
           // 重要：编辑订阅时也需要重新设置事件监听器
           setupModalEventListeners();
 
@@ -3519,24 +3539,24 @@ const lunarBiz = {
         showToast('获取订阅信息失败', 'error');
       }
     }
-    
+
     async function deleteSubscription(e) {
       const id = e.target.dataset.id || e.target.parentElement.dataset.id;
-      
+
       if (!confirm('确定要删除这个订阅吗？此操作不可恢复。')) {
         return;
       }
-      
+
       const button = e.target.tagName === 'BUTTON' ? e.target : e.target.parentElement;
       const originalContent = button.innerHTML;
       button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>删除中...';
       button.disabled = true;
-      
+
       try {
         const response = await fetch('/api/subscriptions/' + id, {
           method: 'DELETE'
         });
-        
+
         if (response.ok) {
           showToast('删除成功', 'success');
           loadSubscriptions();
@@ -3553,10 +3573,10 @@ const lunarBiz = {
         button.disabled = false;
       }
     }
-    
+
     // 全局时区配置
     let globalTimezone = 'UTC';
-    
+
     // 检测时区更新
     function checkTimezoneUpdate() {
       const lastUpdate = localStorage.getItem('timezoneUpdated');
@@ -3570,13 +3590,13 @@ const lunarBiz = {
         }
       }
     }
-    
+
     // 页面加载时检查时区更新
     window.addEventListener('load', () => {
       checkTimezoneUpdate();
       loadSubscriptions();
     });
-    
+
     // 定期检查时区更新（每2秒检查一次）
     setInterval(checkTimezoneUpdate, 2000);
 
@@ -3587,7 +3607,7 @@ const lunarBiz = {
         const response = await fetch('/api/config');
         const config = await response.json();
         globalTimezone = config.TIMEZONE || 'UTC';
-        
+
         // 格式化当前时间
         function formatTime(dt, tz) {
           return dt.toLocaleString('zh-CN', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -3607,7 +3627,7 @@ const lunarBiz = {
             const target = Date.UTC(get('year'), get('month') - 1, get('day'), get('hour'), get('minute'), get('second'));
             const utc = now.getTime();
             const offset = Math.round((target - utc) / (1000 * 60 * 60));
-            
+
             // 时区中文名称映射
             const timezoneNames = {
               'UTC': '世界标准时间',
@@ -3629,7 +3649,7 @@ const lunarBiz = {
               'Australia/Melbourne': '墨尔本时间',
               'Pacific/Auckland': '奥克兰时间'
             };
-            
+
             const offsetStr = offset >= 0 ? '+' + offset : offset;
             const timezoneName = timezoneNames[tz] || tz;
             return timezoneName + ' (UTC' + offsetStr + ')';
@@ -3650,14 +3670,14 @@ const lunarBiz = {
         update();
         // 每秒刷新
         setInterval(update, 1000);
-        
+
         // 定期检查时区变化并重新加载订阅列表（每30秒检查一次）
         setInterval(async () => {
           try {
             const response = await fetch('/api/config');
             const config = await response.json();
             const newTimezone = config.TIMEZONE || 'UTC';
-            
+
             if (globalTimezone !== newTimezone) {
               globalTimezone = newTimezone;
               console.log('时区已更新为:', globalTimezone);
@@ -3668,7 +3688,7 @@ const lunarBiz = {
             console.error('检查时区更新失败:', error);
           }
         }, 30000);
-        
+
         // 初始加载订阅列表
         loadSubscriptions();
       } catch (e) {
@@ -3699,7 +3719,7 @@ const configPage = `
     .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); }
     .btn-secondary { background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); transition: all 0.3s; }
     .btn-secondary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); }
-    
+
     .toast {
       position: fixed; top: 20px; right: 20px; padding: 12px 20px; border-radius: 8px;
       color: white; font-weight: 500; z-index: 1000; transform: translateX(400px);
@@ -3710,20 +3730,20 @@ const configPage = `
     .toast.error { background-color: #ef4444; }
     .toast.info { background-color: #3b82f6; }
     .toast.warning { background-color: #f59e0b; }
-    
-    .config-section { 
-      border: 1px solid #e5e7eb; 
-      border-radius: 8px; 
-      padding: 16px; 
-      margin-bottom: 24px; 
+
+    .config-section {
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
     }
-    .config-section.active { 
-      background-color: #f8fafc; 
-      border-color: #6366f1; 
+    .config-section.active {
+      background-color: #f8fafc;
+      border-color: #6366f1;
     }
-    .config-section.inactive { 
-      background-color: #f9fafb; 
-      opacity: 0.7; 
+    .config-section.inactive {
+      background-color: #f9fafb;
+      opacity: 0.7;
     }
   </style>
 </head>
@@ -3755,11 +3775,11 @@ const configPage = `
       </div>
     </div>
   </nav>
-  
+
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="bg-white rounded-lg shadow-md p-6">
       <h2 class="text-2xl font-bold text-gray-800 mb-6">系统配置</h2>
-      
+
       <form id="configForm" class="space-y-8">
         <div class="border-b border-gray-200 pb-6">
           <h3 class="text-lg font-medium text-gray-900 mb-4">管理员账户</h3>
@@ -3775,11 +3795,11 @@ const configPage = `
             </div>
           </div>
         </div>
-        
+
         <div class="border-b border-gray-200 pb-6">
           <h3 class="text-lg font-medium text-gray-900 mb-4">显示设置</h3>
-          
-          
+
+
           <div class="mb-6">
             <label class="inline-flex items-center">
               <input type="checkbox" id="showLunarGlobal" class="form-checkbox h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" checked>
@@ -3818,7 +3838,7 @@ const configPage = `
           </div>
         </div>
 
-        
+
         <div class="border-b border-gray-200 pb-6">
           <h3 class="text-lg font-medium text-gray-900 mb-4">通知设置</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -3892,7 +3912,7 @@ const configPage = `
             </div>
             <p class="mt-1 text-sm text-gray-500">调用 /api/notify/{token} 接口时需携带此令牌；留空表示禁用第三方 API 推送。</p>
           </div>
-          
+
           <div id="telegramConfig" class="config-section">
             <h4 class="text-md font-medium text-gray-900 mb-3">Telegram 配置</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -3911,7 +3931,7 @@ const configPage = `
               </button>
             </div>
           </div>
-          
+
           <div id="notifyxConfig" class="config-section">
             <h4 class="text-md font-medium text-gray-900 mb-3">NotifyX 配置</h4>
             <div class="mb-4">
@@ -4071,13 +4091,13 @@ const configPage = `
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
       toast.className = 'toast ' + type;
-      
+
       const icon = type === 'success' ? 'check-circle' :
                    type === 'error' ? 'exclamation-circle' :
                    type === 'warning' ? 'exclamation-triangle' : 'info-circle';
-      
+
       toast.innerHTML = '<div class="flex items-center"><i class="fas fa-' + icon + ' mr-2"></i><span>' + message + '</span></div>';
-      
+
       container.appendChild(toast);
       setTimeout(() => toast.classList.add('show'), 100);
       setTimeout(() => {
@@ -4121,7 +4141,7 @@ const configPage = `
           const hours = Array.isArray(config.NOTIFICATION_HOURS) ? config.NOTIFICATION_HOURS : [];
           notificationHoursInput.value = hours.join(', ');
         }
-        
+
         // 加载农历显示设置
         document.getElementById('showLunarGlobal').checked = config.SHOW_LUNAR === true;
 
@@ -4140,11 +4160,11 @@ const configPage = `
         showToast('加载配置失败，请刷新页面重试', 'error');
       }
     }
-    
+
     // 动态生成时区选项
     function generateTimezoneOptions(selectedTimezone = 'UTC') {
       const timezoneSelect = document.getElementById('timezone');
-      
+
       const timezones = [
         { value: 'UTC', name: '世界标准时间', offset: '+0' },
         { value: 'Asia/Shanghai', name: '中国标准时间', offset: '+8' },
@@ -4165,10 +4185,10 @@ const configPage = `
         { value: 'Australia/Melbourne', name: '墨尔本时间', offset: '+10' },
         { value: 'Pacific/Auckland', name: '奥克兰时间', offset: '+12' }
       ];
-      
+
       // 清空现有选项
       timezoneSelect.innerHTML = '';
-      
+
       // 添加新选项
       timezones.forEach(tz => {
         const option = document.createElement('option');
@@ -4176,11 +4196,11 @@ const configPage = `
         option.textContent = tz.name + '（UTC' + tz.offset + '）';
         timezoneSelect.appendChild(option);
       });
-      
+
       // 设置选中的时区
       timezoneSelect.value = selectedTimezone;
     }
-    
+
     function toggleNotificationConfigs(enabledNotifiers) {
       const telegramConfig = document.getElementById('telegramConfig');
       const notifyxConfig = document.getElementById('notifyxConfig');
@@ -4226,7 +4246,7 @@ const configPage = `
         toggleNotificationConfigs(enabledNotifiers);
       });
     });
-    
+
     document.getElementById('configForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -4297,14 +4317,14 @@ const configPage = `
         if (result.success) {
           showToast('配置保存成功', 'success');
           passwordField.value = '';
-          
+
           // 更新全局时区并重新显示时间
           globalTimezone = config.TIMEZONE;
           showSystemTime();
-          
+
           // 标记时区已更新，供其他页面检测
           localStorage.setItem('timezoneUpdated', Date.now().toString());
-          
+
           // 如果当前在订阅列表页面，则自动刷新页面以更新时区显示
           if (window.location.pathname === '/admin') {
             window.location.reload();
@@ -4320,7 +4340,7 @@ const configPage = `
         submitButton.disabled = false;
       }
     });
-    
+
     async function testNotification(type) {
       const buttonId = type === 'telegram' ? 'testTelegramBtn' :
                       type === 'notifyx' ? 'testNotifyXBtn' :
@@ -4429,11 +4449,11 @@ const configPage = `
         button.disabled = false;
       }
     }
-    
+
     document.getElementById('testTelegramBtn').addEventListener('click', () => {
       testNotification('telegram');
     });
-    
+
     document.getElementById('testNotifyXBtn').addEventListener('click', () => {
       testNotification('notifyx');
     });
@@ -4472,10 +4492,10 @@ const configPage = `
     });
 
     window.addEventListener('load', loadConfig);
-    
+
     // 全局时区配置
     let globalTimezone = 'UTC';
-    
+
     // 实时显示系统时间和时区
     async function showSystemTime() {
       try {
@@ -4483,7 +4503,7 @@ const configPage = `
         const response = await fetch('/api/config');
         const config = await response.json();
         globalTimezone = config.TIMEZONE || 'UTC';
-        
+
         // 格式化当前时间
         function formatTime(dt, tz) {
           return dt.toLocaleString('zh-CN', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -4503,7 +4523,7 @@ const configPage = `
             const target = Date.UTC(get('year'), get('month') - 1, get('day'), get('hour'), get('minute'), get('second'));
             const utc = now.getTime();
             const offset = Math.round((target - utc) / (1000 * 60 * 60));
-            
+
             // 时区中文名称映射
             const timezoneNames = {
               'UTC': '世界标准时间',
@@ -4525,7 +4545,7 @@ const configPage = `
               'Australia/Melbourne': '墨尔本时间',
               'Pacific/Auckland': '奥克兰时间'
             };
-            
+
             const offsetStr = offset >= 0 ? '+' + offset : offset;
             const timezoneName = timezoneNames[tz] || tz;
             return timezoneName + ' (UTC' + offsetStr + ')';
@@ -4546,14 +4566,14 @@ const configPage = `
         update();
         // 每秒刷新
         setInterval(update, 1000);
-        
+
         // 定期检查时区变化并重新加载订阅列表（每30秒检查一次）
         setInterval(async () => {
           try {
             const response = await fetch('/api/config');
             const config = await response.json();
             const newTimezone = config.TIMEZONE || 'UTC';
-            
+
             if (globalTimezone !== newTimezone) {
               globalTimezone = newTimezone;
               console.log('时区已更新为:', globalTimezone);
@@ -4661,7 +4681,7 @@ function dashboardPage() {
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="mb-6">
       <h2 class="text-2xl font-bold text-gray-800">📊 仪表板</h2>
-      <p class="text-sm text-gray-500 mt-1">订阅费用和活动概览</p>
+      <p class="text-sm text-gray-500 mt-1">订阅费用和活动概览（统计金额已折合为 CNY）</p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6" id="statsGrid">
@@ -4703,7 +4723,7 @@ function dashboardPage() {
             <i class="fas fa-chart-bar text-purple-500"></i>
             <h3 class="text-lg font-medium text-gray-900">按类型支出排行</h3>
           </div>
-          <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-xs font-medium rounded-full">年度统计</span>
+          <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-xs font-medium rounded-full">年度统计 (折合CNY)</span>
         </div>
         <div class="p-6" id="expenseByType">
           <div class="loading-skeleton"></div>
@@ -4716,7 +4736,7 @@ function dashboardPage() {
             <i class="fas fa-folder text-green-500"></i>
             <h3 class="text-lg font-medium text-gray-900">按分类支出统计</h3>
           </div>
-          <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-xs font-medium rounded-full">年度统计</span>
+          <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-xs font-medium rounded-full">年度统计 (折合CNY)</span>
         </div>
         <div class="p-6" id="expenseByCategory">
           <div class="loading-skeleton"></div>
@@ -4726,7 +4746,115 @@ function dashboardPage() {
   </div>
 
   <script>
-    async function loadDashboardData(){try{const r=await fetch('/api/dashboard/stats');const d=await r.json();if(!d.success)throw new Error(d.message||'加载失败');const data=d.data;document.getElementById('statsGrid').innerHTML=\`<div class="stat-card"><div class="stat-card-header">月度支出</div><div class="stat-card-value">¥\${data.monthlyExpense.amount.toFixed(2)}</div><div class="stat-card-subtitle">本月支出</div><div class="stat-card-trend \${data.monthlyExpense.trendDirection}"><i class="fas fa-arrow-\${data.monthlyExpense.trendDirection==='up'?'up':data.monthlyExpense.trendDirection==='down'?'down':'right'}"></i>\${data.monthlyExpense.trend}%</div></div><div class="stat-card"><div class="stat-card-header">年度支出</div><div class="stat-card-value">¥\${data.yearlyExpense.amount.toFixed(2)}</div><div class="stat-card-subtitle">月均支出</div><div class="stat-card-subtitle" style="margin-top:0.5rem">¥\${data.yearlyExpense.monthlyAverage.toFixed(2)}</div></div><div class="stat-card"><div class="stat-card-header">活跃订阅</div><div class="stat-card-value">\${data.activeSubscriptions.active}</div><div class="stat-card-subtitle">总订阅数: \${data.activeSubscriptions.total}</div>\${data.activeSubscriptions.expiringSoon>0?\`<div class="stat-card-trend down"><i class="fas fa-exclamation-circle"></i>\${data.activeSubscriptions.expiringSoon} 即将到期</div>\`:''}</div>\`;const rp=document.getElementById('recentPayments');rp.innerHTML=data.recentPayments.length===0?'<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">过去7天内没有支付记录</div></div>':data.recentPayments.map(s=>\`<div class="list-item"><div class="list-item-content"><div class="list-item-name">\${s.name}</div><div class="list-item-meta"><span><i class="fas fa-calendar"></i> 支付于:\${new Date(s.paymentDate).toLocaleDateString('zh-CN')}</span>\${s.customType?\`<span class="list-item-badge">\${s.customType}</span>\`:''}</div></div><div class="list-item-amount">¥\${(s.amount||0).toFixed(2)}</div></div>\`).join('');const ur=document.getElementById('upcomingRenewals');ur.innerHTML=data.upcomingRenewals.length===0?'<div class="empty-state"><div class="empty-state-icon">✅</div><div class="empty-state-text">未来7天内没有即将续费的订阅</div></div>':data.upcomingRenewals.map(s=>\`<div class="list-item"><div class="list-item-content"><div class="list-item-name">\${s.name}</div><div class="list-item-meta"><span><i class="fas fa-clock"></i> 将于:\${new Date(s.renewalDate).toLocaleDateString('zh-CN')}</span><span style="color:#f59e0b;font-weight:600">\${s.daysUntilRenewal} 天后</span>\${s.customType?\`<span class="list-item-badge">\${s.customType}</span>\`:''}</div></div><div class="list-item-amount">¥\${(s.amount||0).toFixed(2)}</div></div>\`).join('');const et=document.getElementById('expenseByType');et.innerHTML=data.expenseByType.length===0?'<div class="empty-state"><div class="empty-state-icon">📊</div><div class="empty-state-text">暂无支出数据</div></div>':data.expenseByType.map((item,i)=>\`<div class="ranking-item"><div class="ranking-item-header"><div class="ranking-item-name">\${item.type}</div><div class="ranking-item-value"><span class="ranking-item-amount">¥\${item.amount.toFixed(2)}</span><span class="ranking-item-percentage">\${item.percentage}%</span></div></div><div class="ranking-progress"><div class="ranking-progress-bar color-\${(i%5)+1}" style="width:\${item.percentage}%"></div></div></div>\`).join('');const ec=document.getElementById('expenseByCategory');ec.innerHTML=data.expenseByCategory.length===0?'<div class="empty-state"><div class="empty-state-icon">📂</div><div class="empty-state-text">暂无支出数据</div></div>':data.expenseByCategory.map((item,i)=>\`<div class="ranking-item"><div class="ranking-item-header"><div class="ranking-item-name">\${item.category}</div><div class="ranking-item-value"><span class="ranking-item-amount">¥\${item.amount.toFixed(2)}</span><span class="ranking-item-percentage">\${item.percentage}%</span></div></div><div class="ranking-progress"><div class="ranking-progress-bar color-\${(i%5)+1}" style="width:\${item.percentage}%"></div></div></div>\`).join('')}catch(e){console.error('加载仪表盘数据失败:',e);document.getElementById('statsGrid').innerHTML='<div class="empty-state"><div class="empty-state-icon">❌</div><div class="empty-state-text">加载失败:'+e.message+'</div></div>'}}
+    // 定义货币符号映射
+    const currencySymbols = {
+      'CNY': '¥', 'USD': '$', 'HKD': 'HK$', 'TWD': 'NT$',
+      'JPY': '¥', 'EUR': '€', 'GBP': '£', 'KRW': '₩'
+    };
+    function getSymbol(currency) {
+      return currencySymbols[currency] || '¥';
+    }
+
+    async function loadDashboardData(){
+      try {
+        const r=await fetch('/api/dashboard/stats');
+        const d=await r.json();
+        if(!d.success) throw new Error(d.message||'加载失败');
+
+        const data=d.data;
+        document.getElementById('statsGrid').innerHTML=\`
+          <div class="stat-card">
+            <div class="stat-card-header">月度支出 (CNY)</div>
+            <div class="stat-card-value">¥\${data.monthlyExpense.amount.toFixed(2)}</div>
+            <div class="stat-card-subtitle">本月折合支出</div>
+            <div class="stat-card-trend \${data.monthlyExpense.trendDirection}">
+              <i class="fas fa-arrow-\${data.monthlyExpense.trendDirection==='up'?'up':data.monthlyExpense.trendDirection==='down'?'down':'right'}"></i>
+              \${data.monthlyExpense.trend}%
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-header">年度支出 (CNY)</div>
+            <div class="stat-card-value">¥\${data.yearlyExpense.amount.toFixed(2)}</div>
+            <div class="stat-card-subtitle">月均支出: ¥\${data.yearlyExpense.monthlyAverage.toFixed(2)}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-header">活跃订阅</div>
+            <div class="stat-card-value">\${data.activeSubscriptions.active}</div>
+            <div class="stat-card-subtitle">总订阅数: \${data.activeSubscriptions.total}</div>
+            \${data.activeSubscriptions.expiringSoon>0?\`<div class="stat-card-trend down"><i class="fas fa-exclamation-circle"></i>\${data.activeSubscriptions.expiringSoon} 即将到期</div>\`:''}
+          </div>
+        \`;
+
+        const rp=document.getElementById('recentPayments');
+        rp.innerHTML=data.recentPayments.length===0?'<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">过去7天内没有支付记录</div></div>':
+        data.recentPayments.map(s=>\`
+          <div class="list-item">
+            <div class="list-item-content">
+              <div class="list-item-name">\${s.name}</div>
+              <div class="list-item-meta">
+                <span><i class="fas fa-calendar"></i> \${new Date(s.paymentDate).toLocaleDateString('zh-CN')}</span>
+                \${s.customType?\`<span class="list-item-badge">\${s.customType}</span>\`:''}
+              </div>
+            </div>
+            <div class="list-item-amount">\${getSymbol(s.currency)}\${(s.amount||0).toFixed(2)}</div>
+          </div>
+        \`).join('');
+
+        const ur=document.getElementById('upcomingRenewals');
+        ur.innerHTML=data.upcomingRenewals.length===0?'<div class="empty-state"><div class="empty-state-icon">✅</div><div class="empty-state-text">未来7天内没有即将续费的订阅</div></div>':
+        data.upcomingRenewals.map(s=>\`
+          <div class="list-item">
+            <div class="list-item-content">
+              <div class="list-item-name">\${s.name}</div>
+              <div class="list-item-meta">
+                <span><i class="fas fa-clock"></i> \${new Date(s.renewalDate).toLocaleDateString('zh-CN')}</span>
+                <span style="color:#f59e0b;font-weight:600">\${s.daysUntilRenewal} 天后</span>
+                \${s.customType?\`<span class="list-item-badge">\${s.customType}</span>\`:''}
+              </div>
+            </div>
+            <div class="list-item-amount">\${getSymbol(s.currency)}\${(s.amount||0).toFixed(2)}</div>
+          </div>
+        \`).join('');
+
+        // 支出排行仍然显示 CNY
+        const et=document.getElementById('expenseByType');
+        et.innerHTML=data.expenseByType.length===0?'<div class="empty-state"><div class="empty-state-icon">📊</div><div class="empty-state-text">暂无支出数据</div></div>':
+        data.expenseByType.map((item,i)=>\`
+          <div class="ranking-item">
+            <div class="ranking-item-header">
+              <div class="ranking-item-name">\${item.type}</div>
+              <div class="ranking-item-value">
+                <span class="ranking-item-amount">¥\${item.amount.toFixed(2)}</span>
+                <span class="ranking-item-percentage">\${item.percentage}%</span>
+              </div>
+            </div>
+            <div class="ranking-progress">
+              <div class="ranking-progress-bar color-\${(i%5)+1}" style="width:\${item.percentage}%"></div>
+            </div>
+          </div>
+        \`).join('');
+
+        const ec=document.getElementById('expenseByCategory');
+        ec.innerHTML=data.expenseByCategory.length===0?'<div class="empty-state"><div class="empty-state-icon">📂</div><div class="empty-state-text">暂无支出数据</div></div>':
+        data.expenseByCategory.map((item,i)=>\`
+          <div class="ranking-item">
+            <div class="ranking-item-header">
+              <div class="ranking-item-name">\${item.category}</div>
+              <div class="ranking-item-value">
+                <span class="ranking-item-amount">¥\${item.amount.toFixed(2)}</span>
+                <span class="ranking-item-percentage">\${item.percentage}%</span>
+              </div>
+            </div>
+            <div class="ranking-progress">
+              <div class="ranking-progress-bar color-\${(i%5)+1}" style="width:\${item.percentage}%"></div>
+            </div>
+          </div>
+        \`).join('');
+      } catch(e){
+        console.error('加载仪表盘数据失败:',e);
+        document.getElementById('statsGrid').innerHTML='<div class="empty-state"><div class="empty-state-icon">❌</div><div class="empty-state-text">加载失败:'+e.message+'</div></div>';
+      }
+    }
     loadDashboardData();
     setInterval(loadDashboardData, 60000);
   </script>
@@ -4760,47 +4888,47 @@ function extractTagsFromSubscriptions(subscriptions = []) {
 }
 
 const admin = {
-  async handleRequest(request, env, ctx) {
+  async handleRequest(request,env,ctx) {
     try {
       const url = new URL(request.url);
       const pathname = url.pathname;
 
-      console.log('[管理页面] 访问路径:', pathname);
+      console.log('[管理页面] 访问路径:',pathname);
 
-      const token = getCookieValue(request.headers.get('Cookie'), 'token');
-      console.log('[管理页面] Token存在:', !!token);
+      const token = getCookieValue(request.headers.get('Cookie'),'token');
+      console.log('[管理页面] Token存在:',!!token);
 
       const config = await getConfig(env);
-      const user = token ? await verifyJWT(token, config.JWT_SECRET) : null;
+      const user = token ? await verifyJWT(token,config.JWT_SECRET) : null;
 
-      console.log('[管理页面] 用户验证结果:', !!user);
+      console.log('[管理页面] 用户验证结果:',!!user);
 
       if (!user) {
         console.log('[管理页面] 用户未登录，重定向到登录页面');
-        return new Response('', {
+        return new Response('',{
           status: 302,
           headers: { 'Location': '/' }
         });
       }
 
       if (pathname === '/admin/config') {
-        return new Response(configPage, {
+        return new Response(configPage,{
           headers: { 'Content-Type': 'text/html; charset=utf-8' }
         });
       }
 
       if (pathname === '/admin/dashboard') {
-        return new Response(dashboardPage(), {
+        return new Response(dashboardPage(),{
           headers: { 'Content-Type': 'text/html; charset=utf-8' }
         });
       }
 
-      return new Response(adminPage, {
+      return new Response(adminPage,{
         headers: { 'Content-Type': 'text/html; charset=utf-8' }
       });
     } catch (error) {
-      console.error('[管理页面] 处理请求时出错:', error);
-      return new Response('服务器内部错误', {
+      console.error('[管理页面] 处理请求时出错:',error);
+      return new Response('服务器内部错误',{
         status: 500,
         headers: { 'Content-Type': 'text/plain; charset=utf-8' }
       });
@@ -4810,7 +4938,7 @@ const admin = {
 
 // 处理API请求
 const api = {
-  async handleRequest(request, env, ctx) {
+  async handleRequest(request,env,ctx) {
     const url = new URL(request.url);
     const path = url.pathname.slice(4);
     const method = request.method;
@@ -4821,7 +4949,7 @@ const api = {
       const body = await request.json();
 
       if (body.username === config.ADMIN_USERNAME && body.password === config.ADMIN_PASSWORD) {
-        const token = await generateJWT(body.username, config.JWT_SECRET);
+        const token = await generateJWT(body.username,config.JWT_SECRET);
 
         return new Response(
           JSON.stringify({ success: true }),
@@ -4834,14 +4962,14 @@ const api = {
         );
       } else {
         return new Response(
-          JSON.stringify({ success: false, message: '用户名或密码错误' }),
+          JSON.stringify({ success: false,message: '用户名或密码错误' }),
           { headers: { 'Content-Type': 'application/json' } }
         );
       }
     }
 
     if (path === '/logout' && (method === 'GET' || method === 'POST')) {
-      return new Response('', {
+      return new Response('',{
         status: 302,
         headers: {
           'Location': '/',
@@ -4850,19 +4978,19 @@ const api = {
       });
     }
 
-    const token = getCookieValue(request.headers.get('Cookie'), 'token');
-    const user = token ? await verifyJWT(token, config.JWT_SECRET) : null;
+    const token = getCookieValue(request.headers.get('Cookie'),'token');
+    const user = token ? await verifyJWT(token,config.JWT_SECRET) : null;
 
     if (!user && path !== '/login') {
       return new Response(
-        JSON.stringify({ success: false, message: '未授权访问' }),
-        { status: 401, headers: { 'Content-Type': 'application/json' } }
+        JSON.stringify({ success: false,message: '未授权访问' }),
+        { status: 401,headers: { 'Content-Type': 'application/json' } }
       );
     }
 
     if (path === '/config') {
       if (method === 'GET') {
-        const { JWT_SECRET, ADMIN_PASSWORD, ...safeConfig } = config;
+        const { JWT_SECRET,ADMIN_PASSWORD,...safeConfig } = config;
         return new Response(
           JSON.stringify(safeConfig),
           { headers: { 'Content-Type': 'application/json' } }
@@ -4916,7 +5044,7 @@ const api = {
               }
               const numeric = Number(upperValue);
               if (!isNaN(numeric)) {
-                return String(Math.max(0, Math.min(23, Math.floor(numeric)))).padStart(2, '0');
+                return String(Math.max(0,Math.min(23,Math.floor(numeric)))).padStart(2,'0');
               }
               return upperValue;
             });
@@ -4933,17 +5061,17 @@ const api = {
             console.log('[安全] 生成新的JWT密钥');
           }
 
-          await env.SUBSCRIPTIONS_KV.put('config', JSON.stringify(updatedConfig));
+          await env.SUBSCRIPTIONS_KV.put('config',JSON.stringify(updatedConfig));
 
           return new Response(
             JSON.stringify({ success: true }),
             { headers: { 'Content-Type': 'application/json' } }
           );
         } catch (error) {
-          console.error('配置保存错误:', error);
+          console.error('配置保存错误:',error);
           return new Response(
-            JSON.stringify({ success: false, message: '更新配置失败: ' + error.message }),
-            { status: 400, headers: { 'Content-Type': 'application/json' } }
+            JSON.stringify({ success: false,message: '更新配置失败: ' + error.message }),
+            { status: 400,headers: { 'Content-Type': 'application/json' } }
           );
         }
       }
@@ -4954,12 +5082,12 @@ const api = {
         const subscriptions = await getAllSubscriptions(env);
         const timezone = config?.TIMEZONE || 'UTC';
 
-        const monthlyExpense = calculateMonthlyExpense(subscriptions, timezone);
-        const yearlyExpense = calculateYearlyExpense(subscriptions, timezone);
-        const recentPayments = getRecentPayments(subscriptions, timezone);
-        const upcomingRenewals = getUpcomingRenewals(subscriptions, timezone);
-        const expenseByType = getExpenseByType(subscriptions, timezone);
-        const expenseByCategory = getExpenseByCategory(subscriptions, timezone);
+        const monthlyExpense = calculateMonthlyExpense(subscriptions,timezone);
+        const yearlyExpense = calculateYearlyExpense(subscriptions,timezone);
+        const recentPayments = getRecentPayments(subscriptions,timezone);
+        const upcomingRenewals = getUpcomingRenewals(subscriptions,timezone);
+        const expenseByType = getExpenseByType(subscriptions,timezone);
+        const expenseByCategory = getExpenseByCategory(subscriptions,timezone);
 
         const activeSubscriptions = subscriptions.filter(s => s.isActive);
         const now = getCurrentTimeInTimezone(timezone);
@@ -4989,10 +5117,10 @@ const api = {
           { headers: { 'Content-Type': 'application/json' } }
         );
       } catch (error) {
-        console.error('获取仪表盘统计失败:', error);
+        console.error('获取仪表盘统计失败:',error);
         return new Response(
-          JSON.stringify({ success: false, message: '获取统计数据失败: ' + error.message }),
-          { status: 500, headers: { 'Content-Type': 'application/json' } }
+          JSON.stringify({ success: false,message: '获取统计数据失败: ' + error.message }),
+          { status: 500,headers: { 'Content-Type': 'application/json' } }
         );
       }
     }
@@ -5011,7 +5139,7 @@ const api = {
           };
 
           const content = '*测试通知*\n\n这是一条测试通知，用于验证Telegram通知功能是否正常工作。\n\n发送时间: ' + formatBeijingTime();
-          success = await sendTelegramNotification(content, testConfig);
+          success = await sendTelegramNotification(content,testConfig);
           message = success ? 'Telegram通知发送成功' : 'Telegram通知发送失败，请检查配置';
         } else if (body.type === 'notifyx') {
           const testConfig = {
@@ -5023,7 +5151,7 @@ const api = {
           const content = '## 这是一条测试通知\n\n用于验证NotifyX通知功能是否正常工作。\n\n发送时间: ' + formatBeijingTime();
           const description = '测试NotifyX通知功能';
 
-          success = await sendNotifyXNotification(title, content, description, testConfig);
+          success = await sendNotifyXNotification(title,content,description,testConfig);
           message = success ? 'NotifyX通知发送成功' : 'NotifyX通知发送失败，请检查配置';
         } else if (body.type === 'webhook') {
           const testConfig = {
@@ -5037,7 +5165,7 @@ const api = {
           const title = '测试通知';
           const content = '这是一条测试通知，用于验证Webhook 通知功能是否正常工作。\n\n发送时间: ' + formatBeijingTime();
 
-          success = await sendWebhookNotification(title, content, testConfig);
+          success = await sendWebhookNotification(title,content,testConfig);
           message = success ? 'Webhook 通知发送成功' : 'Webhook 通知发送失败，请检查配置';
         } else if (body.type === 'wechatbot') {
           const testConfig = {
@@ -5051,7 +5179,7 @@ const api = {
           const title = '测试通知';
           const content = '这是一条测试通知，用于验证企业微信机器人功能是否正常工作。\n\n发送时间: ' + formatBeijingTime();
 
-          success = await sendWechatBotNotification(title, content, testConfig);
+          success = await sendWechatBotNotification(title,content,testConfig);
           message = success ? '企业微信机器人通知发送成功' : '企业微信机器人通知发送失败，请检查配置';
         } else if (body.type === 'email') {
           const testConfig = {
@@ -5065,7 +5193,7 @@ const api = {
           const title = '测试通知';
           const content = '这是一条测试通知，用于验证邮件通知功能是否正常工作。\n\n发送时间: ' + formatBeijingTime();
 
-          success = await sendEmailNotification(title, content, testConfig);
+          success = await sendEmailNotification(title,content,testConfig);
           message = success ? '邮件通知发送成功' : '邮件通知发送失败，请检查配置';
         } else if (body.type === 'bark') {
           const testConfig = {
@@ -5078,19 +5206,19 @@ const api = {
           const title = '测试通知';
           const content = '这是一条测试通知，用于验证Bark通知功能是否正常工作。\n\n发送时间: ' + formatBeijingTime();
 
-          success = await sendBarkNotification(title, content, testConfig);
+          success = await sendBarkNotification(title,content,testConfig);
           message = success ? 'Bark通知发送成功' : 'Bark通知发送失败，请检查配置';
         }
 
         return new Response(
-          JSON.stringify({ success, message }),
+          JSON.stringify({ success,message }),
           { headers: { 'Content-Type': 'application/json' } }
         );
       } catch (error) {
-        console.error('测试通知失败:', error);
+        console.error('测试通知失败:',error);
         return new Response(
-          JSON.stringify({ success: false, message: '测试通知失败: ' + error.message }),
-          { status: 500, headers: { 'Content-Type': 'application/json' } }
+          JSON.stringify({ success: false,message: '测试通知失败: ' + error.message }),
+          { status: 500,headers: { 'Content-Type': 'application/json' } }
         );
       }
     }
@@ -5106,7 +5234,7 @@ const api = {
 
       if (method === 'POST') {
         const subscription = await request.json();
-        const result = await createSubscription(subscription, env);
+        const result = await createSubscription(subscription,env);
 
         return new Response(
           JSON.stringify(result),
@@ -5124,7 +5252,7 @@ const api = {
 
       if (parts[3] === 'toggle-status' && method === 'POST') {
         const body = await request.json();
-        const result = await toggleSubscriptionStatus(id, body.isActive, env);
+        const result = await toggleSubscriptionStatus(id,body.isActive,env);
 
         return new Response(
           JSON.stringify(result),
@@ -5136,8 +5264,8 @@ const api = {
       }
 
       if (parts[3] === 'test-notify' && method === 'POST') {
-        const result = await testSingleSubscriptionNotification(id, env);
-        return new Response(JSON.stringify(result), { status: result.success ? 200 : 500, headers: { 'Content-Type': 'application/json' } });
+        const result = await testSingleSubscriptionNotification(id,env);
+        return new Response(JSON.stringify(result),{ status: result.success ? 200 : 500,headers: { 'Content-Type': 'application/json' } });
       }
 
       if (parts[3] === 'renew' && method === 'POST') {
@@ -5148,33 +5276,33 @@ const api = {
         } catch (e) {
           // 如果没有请求体，使用默认空对象
         }
-        const result = await manualRenewSubscription(id, env, options);
-        return new Response(JSON.stringify(result), { status: result.success ? 200 : 400, headers: { 'Content-Type': 'application/json' } });
+        const result = await manualRenewSubscription(id,env,options);
+        return new Response(JSON.stringify(result),{ status: result.success ? 200 : 400,headers: { 'Content-Type': 'application/json' } });
       }
 
       if (parts[3] === 'payments' && method === 'GET') {
-        const subscription = await getSubscription(id, env);
+        const subscription = await getSubscription(id,env);
         if (!subscription) {
-          return new Response(JSON.stringify({ success: false, message: '订阅不存在' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
+          return new Response(JSON.stringify({ success: false,message: '订阅不存在' }),{ status: 404,headers: { 'Content-Type': 'application/json' } });
         }
-        return new Response(JSON.stringify({ success: true, payments: subscription.paymentHistory || [] }), { headers: { 'Content-Type': 'application/json' } });
+        return new Response(JSON.stringify({ success: true,payments: subscription.paymentHistory || [] }),{ headers: { 'Content-Type': 'application/json' } });
       }
 
       if (parts[3] === 'payments' && parts[4] && method === 'DELETE') {
         const paymentId = parts[4];
-        const result = await deletePaymentRecord(id, paymentId, env);
-        return new Response(JSON.stringify(result), { status: result.success ? 200 : 400, headers: { 'Content-Type': 'application/json' } });
+        const result = await deletePaymentRecord(id,paymentId,env);
+        return new Response(JSON.stringify(result),{ status: result.success ? 200 : 400,headers: { 'Content-Type': 'application/json' } });
       }
 
       if (parts[3] === 'payments' && parts[4] && method === 'PUT') {
         const paymentId = parts[4];
         const paymentData = await request.json();
-        const result = await updatePaymentRecord(id, paymentId, paymentData, env);
-        return new Response(JSON.stringify(result), { status: result.success ? 200 : 400, headers: { 'Content-Type': 'application/json' } });
+        const result = await updatePaymentRecord(id,paymentId,paymentData,env);
+        return new Response(JSON.stringify(result),{ status: result.success ? 200 : 400,headers: { 'Content-Type': 'application/json' } });
       }
 
       if (method === 'GET') {
-        const subscription = await getSubscription(id, env);
+        const subscription = await getSubscription(id,env);
 
         return new Response(
           JSON.stringify(subscription),
@@ -5184,7 +5312,7 @@ const api = {
 
       if (method === 'PUT') {
         const subscription = await request.json();
-        const result = await updateSubscription(id, subscription, env);
+        const result = await updateSubscription(id,subscription,env);
 
         return new Response(
           JSON.stringify(result),
@@ -5196,7 +5324,7 @@ const api = {
       }
 
       if (method === 'DELETE') {
-        const result = await deleteSubscription(id, env);
+        const result = await deleteSubscription(id,env);
 
         return new Response(
           JSON.stringify(result),
@@ -5213,7 +5341,7 @@ const api = {
       const pathSegments = path.split('/');
       // 允许通过路径、Authorization 头或查询参数三种方式传入访问令牌
       const tokenFromPath = pathSegments[2] || '';
-      const tokenFromHeader = (request.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '').trim();
+      const tokenFromHeader = (request.headers.get('Authorization') || '').replace(/^Bearer\s+/i,'').trim();
       const tokenFromQuery = url.searchParams.get('token') || '';
       const providedToken = tokenFromPath || tokenFromHeader || tokenFromQuery;
       const expectedToken = config.THIRD_PARTY_API_TOKEN || '';
@@ -5221,14 +5349,14 @@ const api = {
       if (!expectedToken) {
         return new Response(
           JSON.stringify({ message: '第三方 API 已禁用，请在后台配置访问令牌后使用' }),
-          { status: 403, headers: { 'Content-Type': 'application/json' } }
+          { status: 403,headers: { 'Content-Type': 'application/json' } }
         );
       }
 
       if (!providedToken || providedToken !== expectedToken) {
         return new Response(
           JSON.stringify({ message: '访问未授权，令牌无效或缺失' }),
-          { status: 401, headers: { 'Content-Type': 'application/json' } }
+          { status: 401,headers: { 'Content-Type': 'application/json' } }
         );
       }
 
@@ -5241,7 +5369,7 @@ const api = {
           if (!content) {
             return new Response(
               JSON.stringify({ message: '缺少必填参数 content' }),
-              { status: 400, headers: { 'Content-Type': 'application/json' } }
+              { status: 400,headers: { 'Content-Type': 'application/json' } }
             );
           }
 
@@ -5254,7 +5382,7 @@ const api = {
             : [];
 
           // 使用多渠道发送通知
-          await sendNotificationToAllChannels(title, content, config, '[第三方API]', {
+          await sendNotificationToAllChannels(title,content,config,'[第三方API]',{
             metadata: { tags: bodyTags }
           });
 
@@ -5270,7 +5398,7 @@ const api = {
             { headers: { 'Content-Type': 'application/json' } }
           );
         } catch (error) {
-          console.error('[第三方API] 发送通知失败:', error);
+          console.error('[第三方API] 发送通知失败:',error);
           return new Response(
             JSON.stringify({
               message: '发送失败',
@@ -5279,15 +5407,15 @@ const api = {
                 errmsg: error.message
               }
             }),
-            { status: 500, headers: { 'Content-Type': 'application/json' } }
+            { status: 500,headers: { 'Content-Type': 'application/json' } }
           );
         }
       }
     }
 
     return new Response(
-      JSON.stringify({ success: false, message: '未找到请求的资源' }),
-      { status: 404, headers: { 'Content-Type': 'application/json' } }
+      JSON.stringify({ success: false,message: '未找到请求的资源' }),
+      { status: 404,headers: { 'Content-Type': 'application/json' } }
     );
   }
 };
@@ -5311,7 +5439,7 @@ async function getConfig(env) {
     }
 
     const data = await env.SUBSCRIPTIONS_KV.get('config');
-    console.log('[配置] 从KV读取配置:', data ? '成功' : '空配置');
+    console.log('[配置] 从KV读取配置:',data ? '成功' : '空配置');
 
     const config = data ? JSON.parse(data) : {};
 
@@ -5322,8 +5450,8 @@ async function getConfig(env) {
       console.log('[配置] 生成新的JWT密钥');
 
       // 保存新的JWT密钥
-      const updatedConfig = { ...config, JWT_SECRET: jwtSecret };
-      await env.SUBSCRIPTIONS_KV.put('config', JSON.stringify(updatedConfig));
+      const updatedConfig = { ...config,JWT_SECRET: jwtSecret };
+      await env.SUBSCRIPTIONS_KV.put('config',JSON.stringify(updatedConfig));
     }
 
     const finalConfig = {
@@ -5355,10 +5483,10 @@ async function getConfig(env) {
       THIRD_PARTY_API_TOKEN: config.THIRD_PARTY_API_TOKEN || ''
     };
 
-    console.log('[配置] 最终配置用户名:', finalConfig.ADMIN_USERNAME);
+    console.log('[配置] 最终配置用户名:',finalConfig.ADMIN_USERNAME);
     return finalConfig;
   } catch (error) {
-    console.error('[配置] 获取配置失败:', error);
+    console.error('[配置] 获取配置失败:',error);
     const defaultJwtSecret = generateRandomSecret();
 
     return {
@@ -5389,20 +5517,20 @@ async function getConfig(env) {
   }
 }
 
-async function generateJWT(username, secret) {
-  const header = { alg: 'HS256', typ: 'JWT' };
-  const payload = { username, iat: Math.floor(Date.now() / 1000) };
+async function generateJWT(username,secret) {
+  const header = { alg: 'HS256',typ: 'JWT' };
+  const payload = { username,iat: Math.floor(Date.now() / 1000) };
 
   const headerBase64 = btoa(JSON.stringify(header));
   const payloadBase64 = btoa(JSON.stringify(payload));
 
   const signatureInput = headerBase64 + '.' + payloadBase64;
-  const signature = await CryptoJS.HmacSHA256(signatureInput, secret);
+  const signature = await CryptoJS.HmacSHA256(signatureInput,secret);
 
   return headerBase64 + '.' + payloadBase64 + '.' + signature;
 }
 
-async function verifyJWT(token, secret) {
+async function verifyJWT(token,secret) {
   try {
     if (!token || !secret) {
       console.log('[JWT] Token或Secret为空');
@@ -5411,13 +5539,13 @@ async function verifyJWT(token, secret) {
 
     const parts = token.split('.');
     if (parts.length !== 3) {
-      console.log('[JWT] Token格式错误，部分数量:', parts.length);
+      console.log('[JWT] Token格式错误，部分数量:',parts.length);
       return null;
     }
 
-    const [headerBase64, payloadBase64, signature] = parts;
+    const [headerBase64,payloadBase64,signature] = parts;
     const signatureInput = headerBase64 + '.' + payloadBase64;
-    const expectedSignature = await CryptoJS.HmacSHA256(signatureInput, secret);
+    const expectedSignature = await CryptoJS.HmacSHA256(signatureInput,secret);
 
     if (signature !== expectedSignature) {
       console.log('[JWT] 签名验证失败');
@@ -5425,10 +5553,10 @@ async function verifyJWT(token, secret) {
     }
 
     const payload = JSON.parse(atob(payloadBase64));
-    console.log('[JWT] 验证成功，用户:', payload.username);
+    console.log('[JWT] 验证成功，用户:',payload.username);
     return payload;
   } catch (error) {
-    console.error('[JWT] 验证过程出错:', error);
+    console.error('[JWT] 验证过程出错:',error);
     return null;
   }
 }
@@ -5442,18 +5570,18 @@ async function getAllSubscriptions(env) {
   }
 }
 
-async function getSubscription(id, env) {
+async function getSubscription(id,env) {
   const subscriptions = await getAllSubscriptions(env);
   return subscriptions.find(s => s.id === id);
 }
 
 // 2. 修改 createSubscription，支持 useLunar 字段
-async function createSubscription(subscription, env) {
+async function createSubscription(subscription,env) {
   try {
     const subscriptions = await getAllSubscriptions(env);
 
     if (!subscription.name || !subscription.expiryDate) {
-      return { success: false, message: '缺少必填字段' };
+      return { success: false,message: '缺少必填字段' };
     }
 
     let expiryDate = new Date(subscription.expiryDate);
@@ -5473,9 +5601,9 @@ async function createSubscription(subscription, env) {
       if (lunar && subscription.periodValue && subscription.periodUnit) {
         // 如果到期日<=今天，自动推算到下一个周期
         while (expiryDate <= currentTime) {
-          lunar = lunarBiz.addLunarPeriod(lunar, subscription.periodValue, subscription.periodUnit);
+          lunar = lunarBiz.addLunarPeriod(lunar,subscription.periodValue,subscription.periodUnit);
           const solar = lunarBiz.lunar2solar(lunar);
-          expiryDate = new Date(solar.year, solar.month - 1, solar.day);
+          expiryDate = new Date(solar.year,solar.month - 1,solar.day);
         }
         subscription.expiryDate = expiryDate.toISOString();
       }
@@ -5512,7 +5640,7 @@ async function createSubscription(subscription, env) {
       reminderHours: reminderSetting.unit === 'hour' ? reminderSetting.value : undefined,
       notes: subscription.notes || '',
       amount: subscription.amount || null,
-      currency: 'CNY',
+      currency: subscription.currency || 'CNY', // 使用传入的币种，默认为CNY
       lastPaymentDate: initialPaymentDate,
       paymentHistory: subscription.amount ? [{
         id: Date.now().toString(),
@@ -5531,27 +5659,27 @@ async function createSubscription(subscription, env) {
 
     subscriptions.push(newSubscription);
 
-    await env.SUBSCRIPTIONS_KV.put('subscriptions', JSON.stringify(subscriptions));
+    await env.SUBSCRIPTIONS_KV.put('subscriptions',JSON.stringify(subscriptions));
 
-    return { success: true, subscription: newSubscription };
+    return { success: true,subscription: newSubscription };
   } catch (error) {
-    console.error("创建订阅异常：", error && error.stack ? error.stack : error);
-    return { success: false, message: error && error.message ? error.message : '创建订阅失败' };
+    console.error("创建订阅异常：",error && error.stack ? error.stack : error);
+    return { success: false,message: error && error.message ? error.message : '创建订阅失败' };
   }
 }
 
 // 3. 修改 updateSubscription，支持 useLunar 字段
-async function updateSubscription(id, subscription, env) {
+async function updateSubscription(id,subscription,env) {
   try {
     const subscriptions = await getAllSubscriptions(env);
     const index = subscriptions.findIndex(s => s.id === id);
 
     if (index === -1) {
-      return { success: false, message: '订阅不存在' };
+      return { success: false,message: '订阅不存在' };
     }
 
     if (!subscription.name || !subscription.expiryDate) {
-      return { success: false, message: '缺少必填字段' };
+      return { success: false,message: '缺少必填字段' };
     }
 
     let expiryDate = new Date(subscription.expiryDate);
@@ -5567,14 +5695,14 @@ async function updateSubscription(id, subscription, env) {
         expiryDate.getDate()
       );
       if (!lunar) {
-        return { success: false, message: '农历日期超出支持范围（1900-2100年）' };
+        return { success: false,message: '农历日期超出支持范围（1900-2100年）' };
       }
       if (lunar && expiryDate < currentTime && subscription.periodValue && subscription.periodUnit) {
         // 新增：循环加周期，直到 expiryDate > currentTime
         do {
-          lunar = lunarBiz.addLunarPeriod(lunar, subscription.periodValue, subscription.periodUnit);
+          lunar = lunarBiz.addLunarPeriod(lunar,subscription.periodValue,subscription.periodUnit);
           const solar = lunarBiz.lunar2solar(lunar);
-          expiryDate = new Date(solar.year, solar.month - 1, solar.day);
+          expiryDate = new Date(solar.year,solar.month - 1,solar.day);
         } while (expiryDate < currentTime);
         subscription.expiryDate = expiryDate.toISOString();
       }
@@ -5601,6 +5729,26 @@ async function updateSubscription(id, subscription, env) {
     };
     const reminderSetting = resolveReminderSetting(reminderSource);
 
+    // --- 新增/修改逻辑开始 ---
+    // 获取旧的订阅信息以便比较
+    const oldSubscription = subscriptions[index];
+    const newAmount = subscription.amount !== undefined ? subscription.amount : oldSubscription.amount;
+
+    let paymentHistory = oldSubscription.paymentHistory || [];
+
+    // 核心修复：如果金额发生了变化，且存在初始支付记录，则同步更新初始支付记录的金额
+    // 这解决了"修改订阅金额后，仪表盘统计不更新"的问题
+    if (newAmount !== oldSubscription.amount) {
+      const initialPaymentIndex = paymentHistory.findIndex(p => p.type === 'initial');
+      if (initialPaymentIndex !== -1) {
+        paymentHistory[initialPaymentIndex] = {
+          ...paymentHistory[initialPaymentIndex],
+          amount: newAmount
+        };
+      }
+    }
+    // --- 新增/修改逻辑结束 ---
+
     subscriptions[index] = {
       ...subscriptions[index],
       name: subscription.name,
@@ -5615,53 +5763,54 @@ async function updateSubscription(id, subscription, env) {
       reminderDays: reminderSetting.unit === 'day' ? reminderSetting.value : undefined,
       reminderHours: reminderSetting.unit === 'hour' ? reminderSetting.value : undefined,
       notes: subscription.notes || '',
-      amount: subscription.amount !== undefined ? subscription.amount : subscriptions[index].amount,
-      currency: subscriptions[index].currency || 'CNY',
+      amount: newAmount, // 使用新的变量
+      currency: subscription.currency || subscriptions[index].currency || 'CNY', // 更新币种
       lastPaymentDate: subscriptions[index].lastPaymentDate || subscriptions[index].startDate || subscriptions[index].createdAt || currentTime.toISOString(),
+      paymentHistory: paymentHistory, // 保存更新后的支付历史
       isActive: subscription.isActive !== undefined ? subscription.isActive : subscriptions[index].isActive,
       autoRenew: subscription.autoRenew !== undefined ? subscription.autoRenew : (subscriptions[index].autoRenew !== undefined ? subscriptions[index].autoRenew : true),
       useLunar: useLunar,
       updatedAt: new Date().toISOString()
     };
 
-    await env.SUBSCRIPTIONS_KV.put('subscriptions', JSON.stringify(subscriptions));
+    await env.SUBSCRIPTIONS_KV.put('subscriptions',JSON.stringify(subscriptions));
 
-    return { success: true, subscription: subscriptions[index] };
+    return { success: true,subscription: subscriptions[index] };
   } catch (error) {
-    return { success: false, message: '更新订阅失败' };
+    return { success: false,message: '更新订阅失败' };
   }
 }
 
-async function deleteSubscription(id, env) {
+async function deleteSubscription(id,env) {
   try {
     const subscriptions = await getAllSubscriptions(env);
     const filteredSubscriptions = subscriptions.filter(s => s.id !== id);
 
     if (filteredSubscriptions.length === subscriptions.length) {
-      return { success: false, message: '订阅不存在' };
+      return { success: false,message: '订阅不存在' };
     }
 
-    await env.SUBSCRIPTIONS_KV.put('subscriptions', JSON.stringify(filteredSubscriptions));
+    await env.SUBSCRIPTIONS_KV.put('subscriptions',JSON.stringify(filteredSubscriptions));
 
     return { success: true };
   } catch (error) {
-    return { success: false, message: '删除订阅失败' };
+    return { success: false,message: '删除订阅失败' };
   }
 }
 
-async function manualRenewSubscription(id, env, options = {}) {
+async function manualRenewSubscription(id,env,options = {}) {
   try {
     const subscriptions = await getAllSubscriptions(env);
     const index = subscriptions.findIndex(s => s.id === id);
 
     if (index === -1) {
-      return { success: false, message: '订阅不存在' };
+      return { success: false,message: '订阅不存在' };
     }
 
     const subscription = subscriptions[index];
 
     if (!subscription.periodValue || !subscription.periodUnit) {
-      return { success: false, message: '订阅未设置续订周期' };
+      return { success: false,message: '订阅未设置续订周期' };
     }
 
     const config = await getConfig(env);
@@ -5686,10 +5835,10 @@ async function manualRenewSubscription(id, env, options = {}) {
       // 支持多周期续订
       let nextLunar = lunar;
       for (let i = 0; i < periodMultiplier; i++) {
-        nextLunar = lunarBiz.addLunarPeriod(nextLunar, subscription.periodValue, subscription.periodUnit);
+        nextLunar = lunarBiz.addLunarPeriod(nextLunar,subscription.periodValue,subscription.periodUnit);
       }
       const solar = lunarBiz.lunar2solar(nextLunar);
-      newExpiryDate = new Date(solar.year, solar.month - 1, solar.day);
+      newExpiryDate = new Date(solar.year,solar.month - 1,solar.day);
     } else {
       newExpiryDate = new Date(expiryDate);
       const totalPeriodValue = subscription.periodValue * periodMultiplier;
@@ -5722,22 +5871,22 @@ async function manualRenewSubscription(id, env, options = {}) {
       paymentHistory
     };
 
-    await env.SUBSCRIPTIONS_KV.put('subscriptions', JSON.stringify(subscriptions));
+    await env.SUBSCRIPTIONS_KV.put('subscriptions',JSON.stringify(subscriptions));
 
-    return { success: true, subscription: subscriptions[index], message: '续订成功' };
+    return { success: true,subscription: subscriptions[index],message: '续订成功' };
   } catch (error) {
-    console.error('手动续订失败:', error);
-    return { success: false, message: '续订失败: ' + error.message };
+    console.error('手动续订失败:',error);
+    return { success: false,message: '续订失败: ' + error.message };
   }
 }
 
-async function deletePaymentRecord(subscriptionId, paymentId, env) {
+async function deletePaymentRecord(subscriptionId,paymentId,env) {
   try {
     const subscriptions = await getAllSubscriptions(env);
     const index = subscriptions.findIndex(s => s.id === subscriptionId);
 
     if (index === -1) {
-      return { success: false, message: '订阅不存在' };
+      return { success: false,message: '订阅不存在' };
     }
 
     const subscription = subscriptions[index];
@@ -5745,13 +5894,13 @@ async function deletePaymentRecord(subscriptionId, paymentId, env) {
     const paymentIndex = paymentHistory.findIndex(p => p.id === paymentId);
 
     if (paymentIndex === -1) {
-      return { success: false, message: '支付记录不存在' };
+      return { success: false,message: '支付记录不存在' };
     }
 
     const deletedPayment = paymentHistory[paymentIndex];
 
     // 删除支付记录
-    paymentHistory.splice(paymentIndex, 1);
+    paymentHistory.splice(paymentIndex,1);
 
     // 回退订阅周期和更新 lastPaymentDate
     let newExpiryDate = subscription.expiryDate;
@@ -5759,7 +5908,7 @@ async function deletePaymentRecord(subscriptionId, paymentId, env) {
 
     if (paymentHistory.length > 0) {
       // 找到剩余支付记录中 periodEnd 最晚的那条（最新的续订）
-      const sortedByPeriodEnd = [...paymentHistory].sort((a, b) => {
+      const sortedByPeriodEnd = [...paymentHistory].sort((a,b) => {
         const dateA = a.periodEnd ? new Date(a.periodEnd) : new Date(0);
         const dateB = b.periodEnd ? new Date(b.periodEnd) : new Date(0);
         return dateB - dateA;
@@ -5771,7 +5920,7 @@ async function deletePaymentRecord(subscriptionId, paymentId, env) {
       }
 
       // 找到最新的支付记录日期
-      const sortedByDate = [...paymentHistory].sort((a, b) => new Date(b.date) - new Date(a.date));
+      const sortedByDate = [...paymentHistory].sort((a,b) => new Date(b.date) - new Date(a.date));
       newLastPaymentDate = sortedByDate[0].date;
     } else {
       // 如果没有支付记录了，回退到初始状态
@@ -5789,22 +5938,22 @@ async function deletePaymentRecord(subscriptionId, paymentId, env) {
       lastPaymentDate: newLastPaymentDate
     };
 
-    await env.SUBSCRIPTIONS_KV.put('subscriptions', JSON.stringify(subscriptions));
+    await env.SUBSCRIPTIONS_KV.put('subscriptions',JSON.stringify(subscriptions));
 
-    return { success: true, subscription: subscriptions[index], message: '支付记录已删除' };
+    return { success: true,subscription: subscriptions[index],message: '支付记录已删除' };
   } catch (error) {
-    console.error('删除支付记录失败:', error);
-    return { success: false, message: '删除失败: ' + error.message };
+    console.error('删除支付记录失败:',error);
+    return { success: false,message: '删除失败: ' + error.message };
   }
 }
 
-async function updatePaymentRecord(subscriptionId, paymentId, paymentData, env) {
+async function updatePaymentRecord(subscriptionId,paymentId,paymentData,env) {
   try {
     const subscriptions = await getAllSubscriptions(env);
     const index = subscriptions.findIndex(s => s.id === subscriptionId);
 
     if (index === -1) {
-      return { success: false, message: '订阅不存在' };
+      return { success: false,message: '订阅不存在' };
     }
 
     const subscription = subscriptions[index];
@@ -5812,7 +5961,7 @@ async function updatePaymentRecord(subscriptionId, paymentId, paymentData, env) 
     const paymentIndex = paymentHistory.findIndex(p => p.id === paymentId);
 
     if (paymentIndex === -1) {
-      return { success: false, message: '支付记录不存在' };
+      return { success: false,message: '支付记录不存在' };
     }
 
     // 更新支付记录
@@ -5824,7 +5973,7 @@ async function updatePaymentRecord(subscriptionId, paymentId, paymentData, env) 
     };
 
     // 更新 lastPaymentDate 为最新的支付记录日期
-    const sortedPayments = [...paymentHistory].sort((a, b) => new Date(b.date) - new Date(a.date));
+    const sortedPayments = [...paymentHistory].sort((a,b) => new Date(b.date) - new Date(a.date));
     const newLastPaymentDate = sortedPayments[0].date;
 
     subscriptions[index] = {
@@ -5833,22 +5982,22 @@ async function updatePaymentRecord(subscriptionId, paymentId, paymentData, env) 
       lastPaymentDate: newLastPaymentDate
     };
 
-    await env.SUBSCRIPTIONS_KV.put('subscriptions', JSON.stringify(subscriptions));
+    await env.SUBSCRIPTIONS_KV.put('subscriptions',JSON.stringify(subscriptions));
 
-    return { success: true, subscription: subscriptions[index], message: '支付记录已更新' };
+    return { success: true,subscription: subscriptions[index],message: '支付记录已更新' };
   } catch (error) {
-    console.error('更新支付记录失败:', error);
-    return { success: false, message: '更新失败: ' + error.message };
+    console.error('更新支付记录失败:',error);
+    return { success: false,message: '更新失败: ' + error.message };
   }
 }
 
-async function toggleSubscriptionStatus(id, isActive, env) {
+async function toggleSubscriptionStatus(id,isActive,env) {
   try {
     const subscriptions = await getAllSubscriptions(env);
     const index = subscriptions.findIndex(s => s.id === id);
 
     if (index === -1) {
-      return { success: false, message: '订阅不存在' };
+      return { success: false,message: '订阅不存在' };
     }
 
     subscriptions[index] = {
@@ -5857,19 +6006,19 @@ async function toggleSubscriptionStatus(id, isActive, env) {
       updatedAt: new Date().toISOString()
     };
 
-    await env.SUBSCRIPTIONS_KV.put('subscriptions', JSON.stringify(subscriptions));
+    await env.SUBSCRIPTIONS_KV.put('subscriptions',JSON.stringify(subscriptions));
 
-    return { success: true, subscription: subscriptions[index] };
+    return { success: true,subscription: subscriptions[index] };
   } catch (error) {
-    return { success: false, message: '更新订阅状态失败' };
+    return { success: false,message: '更新订阅状态失败' };
   }
 }
 
-async function testSingleSubscriptionNotification(id, env) {
+async function testSingleSubscriptionNotification(id,env) {
   try {
-    const subscription = await getSubscription(id, env);
+    const subscription = await getSubscription(id,env);
     if (!subscription) {
-      return { success: false, message: '未找到该订阅' };
+      return { success: false,message: '未找到该订阅' };
     }
     const config = await getConfig(env);
 
@@ -5882,14 +6031,14 @@ async function testSingleSubscriptionNotification(id, env) {
     if (showLunar) {
       // 计算农历日期
       const expiryDateObj = new Date(subscription.expiryDate);
-      const lunarExpiry = lunarCalendar.solar2lunar(expiryDateObj.getFullYear(), expiryDateObj.getMonth() + 1, expiryDateObj.getDate());
+      const lunarExpiry = lunarCalendar.solar2lunar(expiryDateObj.getFullYear(),expiryDateObj.getMonth() + 1,expiryDateObj.getDate());
       lunarExpiryText = lunarExpiry ? ` (农历: ${lunarExpiry.fullStr})` : '';
     }
 
     // 格式化到期日期（使用所选时区）
     const timezone = config?.TIMEZONE || 'UTC';
-    const formattedExpiryDate = formatTimeInTimezone(new Date(subscription.expiryDate), timezone, 'date');
-    const currentTime = formatTimeInTimezone(new Date(), timezone, 'datetime');
+    const formattedExpiryDate = formatTimeInTimezone(new Date(subscription.expiryDate),timezone,'date');
+    const currentTime = formatTimeInTimezone(new Date(),timezone,'datetime');
 
     // 获取日历类型和自动续期状态
     const calendarType = subscription.useLunar ? '农历' : '公历';
@@ -5907,19 +6056,19 @@ async function testSingleSubscriptionNotification(id, env) {
 
     // 使用多渠道发送
     const tags = extractTagsFromSubscriptions([subscription]);
-    await sendNotificationToAllChannels(title, commonContent, config, '[手动测试]', {
+    await sendNotificationToAllChannels(title,commonContent,config,'[手动测试]',{
       metadata: { tags }
     });
 
-    return { success: true, message: '测试通知已发送到所有启用的渠道' };
+    return { success: true,message: '测试通知已发送到所有启用的渠道' };
 
   } catch (error) {
-    console.error('[手动测试] 发送失败:', error);
-    return { success: false, message: '发送时发生错误: ' + error.message };
+    console.error('[手动测试] 发送失败:',error);
+    return { success: false,message: '发送时发生错误: ' + error.message };
   }
 }
 
-async function sendWebhookNotification(title, content, config, metadata = {}) {
+async function sendWebhookNotification(title,content,config,metadata = {}) {
   try {
     if (!config.WEBHOOK_URL) {
       console.error('[Webhook通知] 通知未配置，缺少URL');
@@ -5935,7 +6084,7 @@ async function sendWebhookNotification(title, content, config, metadata = {}) {
     if (config.WEBHOOK_HEADERS) {
       try {
         const customHeaders = JSON.parse(config.WEBHOOK_HEADERS);
-        headers = { ...headers, ...customHeaders };
+        headers = { ...headers,...customHeaders };
       } catch (error) {
         console.warn('[Webhook通知] 自定义请求头格式错误，使用默认请求头');
       }
@@ -5946,8 +6095,8 @@ async function sendWebhookNotification(title, content, config, metadata = {}) {
       : [];
     const tagsBlock = tagsArray.length ? tagsArray.map(tag => `- ${tag}`).join('\n') : '';
     const tagsLine = tagsArray.length ? '标签：' + tagsArray.join('、') : '';
-    const timestamp = formatTimeInTimezone(new Date(), config?.TIMEZONE || 'UTC', 'datetime');
-    const formattedMessage = [title, content, tagsLine, `发送时间：${timestamp}`]
+    const timestamp = formatTimeInTimezone(new Date(),config?.TIMEZONE || 'UTC','datetime');
+    const formattedMessage = [title,content,tagsLine,`发送时间：${timestamp}`]
       .filter(section => section && section.trim().length > 0)
       .join('\n\n');
 
@@ -5966,13 +6115,13 @@ async function sendWebhookNotification(title, content, config, metadata = {}) {
       if (value === null || value === undefined) {
         return '';
       }
-      return JSON.stringify(String(value)).slice(1, -1);
+      return JSON.stringify(String(value)).slice(1,-1);
     };
 
-    const applyTemplate = (template, data) => {
+    const applyTemplate = (template,data) => {
       const templateString = JSON.stringify(template);
-      const replaced = templateString.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (_, key) => {
-        if (Object.prototype.hasOwnProperty.call(data, key)) {
+      const replaced = templateString.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g,(_,key) => {
+        if (Object.prototype.hasOwnProperty.call(data,key)) {
           return escapeForJson(data[key]);
         }
         return '';
@@ -5984,7 +6133,7 @@ async function sendWebhookNotification(title, content, config, metadata = {}) {
     if (config.WEBHOOK_TEMPLATE) {
       try {
         const template = JSON.parse(config.WEBHOOK_TEMPLATE);
-        requestBody = applyTemplate(template, templateData);
+        requestBody = applyTemplate(template,templateData);
       } catch (error) {
         console.warn('[Webhook通知] 消息模板格式错误，使用默认格式');
         requestBody = {
@@ -6007,28 +6156,28 @@ async function sendWebhookNotification(title, content, config, metadata = {}) {
       };
     }
 
-    const response = await fetch(config.WEBHOOK_URL, {
+    const response = await fetch(config.WEBHOOK_URL,{
       method: config.WEBHOOK_METHOD || 'POST',
       headers: headers,
       body: JSON.stringify(requestBody)
     });
 
     const result = await response.text();
-    console.log('[Webhook通知] 发送结果:', response.status, result);
+    console.log('[Webhook通知] 发送结果:',response.status,result);
     return response.ok;
   } catch (error) {
-    console.error('[Webhook通知] 发送通知失败:', error);
+    console.error('[Webhook通知] 发送通知失败:',error);
     return false;
   }
 }
 
-async function sendWeComNotification(message, config) {
+async function sendWeComNotification(message,config) {
   // This is a placeholder. In a real scenario, you would implement the WeCom notification logic here.
   console.log("[企业微信] 通知功能未实现");
-  return { success: false, message: "企业微信通知功能未实现" };
+  return { success: false,message: "企业微信通知功能未实现" };
 }
 
-async function sendWechatBotNotification(title, content, config) {
+async function sendWechatBotNotification(title,content,config) {
   try {
     if (!config.WECHATBOT_WEBHOOK) {
       console.error('[企业微信机器人] 通知未配置，缺少Webhook URL');
@@ -6077,9 +6226,9 @@ async function sendWechatBotNotification(title, content, config) {
       }
     }
 
-    console.log('[企业微信机器人] 发送消息数据:', JSON.stringify(messageData, null, 2));
+    console.log('[企业微信机器人] 发送消息数据:',JSON.stringify(messageData,null,2));
 
-    const response = await fetch(config.WECHATBOT_WEBHOOK, {
+    const response = await fetch(config.WECHATBOT_WEBHOOK,{
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -6088,8 +6237,8 @@ async function sendWechatBotNotification(title, content, config) {
     });
 
     const responseText = await response.text();
-    console.log('[企业微信机器人] 响应状态:', response.status);
-    console.log('[企业微信机器人] 响应内容:', responseText);
+    console.log('[企业微信机器人] 响应状态:',response.status);
+    console.log('[企业微信机器人] 响应内容:',responseText);
 
     if (response.ok) {
       try {
@@ -6098,19 +6247,19 @@ async function sendWechatBotNotification(title, content, config) {
           console.log('[企业微信机器人] 通知发送成功');
           return true;
         } else {
-          console.error('[企业微信机器人] 发送失败，错误码:', result.errcode, '错误信息:', result.errmsg);
+          console.error('[企业微信机器人] 发送失败，错误码:',result.errcode,'错误信息:',result.errmsg);
           return false;
         }
       } catch (parseError) {
-        console.error('[企业微信机器人] 解析响应失败:', parseError);
+        console.error('[企业微信机器人] 解析响应失败:',parseError);
         return false;
       }
     } else {
-      console.error('[企业微信机器人] HTTP请求失败，状态码:', response.status);
+      console.error('[企业微信机器人] HTTP请求失败，状态码:',response.status);
       return false;
     }
   } catch (error) {
-    console.error('[企业微信机器人] 发送通知失败:', error);
+    console.error('[企业微信机器人] 发送通知失败:',error);
     return false;
   }
 }
@@ -6143,10 +6292,10 @@ function resolveReminderSetting(subscription) {
     value = 0;
   }
 
-  return { unit, value };
+  return { unit,value };
 }
 
-function shouldTriggerReminder(reminder, daysDiff, hoursDiff) {
+function shouldTriggerReminder(reminder,daysDiff,hoursDiff) {
   if (!reminder) {
     return false;
   }
@@ -6162,25 +6311,25 @@ function shouldTriggerReminder(reminder, daysDiff, hoursDiff) {
   return daysDiff >= 0 && daysDiff <= reminder.value;
 }
 
-function formatNotificationContent(subscriptions, config) {
+function formatNotificationContent(subscriptions,config) {
   const showLunar = config.SHOW_LUNAR === true;
   const timezone = config?.TIMEZONE || 'UTC';
   let content = '';
 
   for (const sub of subscriptions) {
     const typeText = sub.customType || '其他';
-    const periodText = (sub.periodValue && sub.periodUnit) ? `(周期: ${sub.periodValue} ${{ day: '天', month: '月', year: '年' }[sub.periodUnit] || sub.periodUnit})` : '';
+    const periodText = (sub.periodValue && sub.periodUnit) ? `(周期: ${sub.periodValue} ${{ day: '天',month: '月',year: '年' }[sub.periodUnit] || sub.periodUnit})` : '';
     const categoryText = sub.category ? sub.category : '未分类';
     const reminderSetting = resolveReminderSetting(sub);
 
     // 格式化到期日期（使用所选时区）
     const expiryDateObj = new Date(sub.expiryDate);
-    const formattedExpiryDate = formatTimeInTimezone(expiryDateObj, timezone, 'date');
+    const formattedExpiryDate = formatTimeInTimezone(expiryDateObj,timezone,'date');
 
     // 农历日期
     let lunarExpiryText = '';
     if (showLunar) {
-      const lunarExpiry = lunarCalendar.solar2lunar(expiryDateObj.getFullYear(), expiryDateObj.getMonth() + 1, expiryDateObj.getDate());
+      const lunarExpiry = lunarCalendar.solar2lunar(expiryDateObj.getFullYear(),expiryDateObj.getMonth() + 1,expiryDateObj.getDate());
       lunarExpiryText = lunarExpiry ? `
 农历日期: ${lunarExpiry.fullStr}` : '';
     }
@@ -6230,13 +6379,13 @@ ${reminderText}
   }
 
   // 添加发送时间和时区信息
-  const currentTime = formatTimeInTimezone(new Date(), timezone, 'datetime');
+  const currentTime = formatTimeInTimezone(new Date(),timezone,'datetime');
   content += `发送时间: ${currentTime}\n当前时区: ${formatTimezoneDisplay(timezone)}`;
 
   return content;
 }
 
-async function sendNotificationToAllChannels(title, commonContent, config, logPrefix = '[定时任务]', options = {}) {
+async function sendNotificationToAllChannels(title,commonContent,config,logPrefix = '[定时任务]',options = {}) {
   const metadata = options.metadata || {};
   if (!config.ENABLED_NOTIFIERS || config.ENABLED_NOTIFIERS.length === 0) {
     console.log(`${logPrefix} 未启用任何通知渠道。`);
@@ -6245,42 +6394,42 @@ async function sendNotificationToAllChannels(title, commonContent, config, logPr
 
   if (config.ENABLED_NOTIFIERS.includes('notifyx')) {
     const notifyxContent = `## ${title}\n\n${commonContent}`;
-    const success = await sendNotifyXNotification(title, notifyxContent, `订阅提醒`, config);
+    const success = await sendNotifyXNotification(title,notifyxContent,`订阅提醒`,config);
     console.log(`${logPrefix} 发送NotifyX通知 ${success ? '成功' : '失败'}`);
   }
   if (config.ENABLED_NOTIFIERS.includes('telegram')) {
     const telegramContent = `*${title}*\n\n${commonContent}`;
-    const success = await sendTelegramNotification(telegramContent, config);
+    const success = await sendTelegramNotification(telegramContent,config);
     console.log(`${logPrefix} 发送Telegram通知 ${success ? '成功' : '失败'}`);
   }
   if (config.ENABLED_NOTIFIERS.includes('webhook')) {
-    const webhookContent = commonContent.replace(/(\**|\*|##|#|`)/g, '');
-    const success = await sendWebhookNotification(title, webhookContent, config, metadata);
+    const webhookContent = commonContent.replace(/(\**|\*|##|#|`)/g,'');
+    const success = await sendWebhookNotification(title,webhookContent,config,metadata);
     console.log(`${logPrefix} 发送Webhook通知 ${success ? '成功' : '失败'}`);
   }
   if (config.ENABLED_NOTIFIERS.includes('wechatbot')) {
-    const wechatbotContent = commonContent.replace(/(\**|\*|##|#|`)/g, '');
-    const success = await sendWechatBotNotification(title, wechatbotContent, config);
+    const wechatbotContent = commonContent.replace(/(\**|\*|##|#|`)/g,'');
+    const success = await sendWechatBotNotification(title,wechatbotContent,config);
     console.log(`${logPrefix} 发送企业微信机器人通知 ${success ? '成功' : '失败'}`);
   }
   if (config.ENABLED_NOTIFIERS.includes('weixin')) {
-    const weixinContent = `【${title}】\n\n${commonContent.replace(/(\**|\*|##|#|`)/g, '')}`;
-    const result = await sendWeComNotification(weixinContent, config);
+    const weixinContent = `【${title}】\n\n${commonContent.replace(/(\**|\*|##|#|`)/g,'')}`;
+    const result = await sendWeComNotification(weixinContent,config);
     console.log(`${logPrefix} 发送企业微信通知 ${result.success ? '成功' : '失败'}. ${result.message}`);
   }
   if (config.ENABLED_NOTIFIERS.includes('email')) {
-    const emailContent = commonContent.replace(/(\**|\*|##|#|`)/g, '');
-    const success = await sendEmailNotification(title, emailContent, config);
+    const emailContent = commonContent.replace(/(\**|\*|##|#|`)/g,'');
+    const success = await sendEmailNotification(title,emailContent,config);
     console.log(`${logPrefix} 发送邮件通知 ${success ? '成功' : '失败'}`);
   }
   if (config.ENABLED_NOTIFIERS.includes('bark')) {
-    const barkContent = commonContent.replace(/(\**|\*|##|#|`)/g, '');
-    const success = await sendBarkNotification(title, barkContent, config);
+    const barkContent = commonContent.replace(/(\**|\*|##|#|`)/g,'');
+    const success = await sendBarkNotification(title,barkContent,config);
     console.log(`${logPrefix} 发送Bark通知 ${success ? '成功' : '失败'}`);
   }
 }
 
-async function sendTelegramNotification(message, config) {
+async function sendTelegramNotification(message,config) {
   try {
     if (!config.TG_BOT_TOKEN || !config.TG_CHAT_ID) {
       console.error('[Telegram] 通知未配置，缺少Bot Token或Chat ID');
@@ -6290,7 +6439,7 @@ async function sendTelegramNotification(message, config) {
     console.log('[Telegram] 开始发送通知到 Chat ID: ' + config.TG_CHAT_ID);
 
     const url = 'https://api.telegram.org/bot' + config.TG_BOT_TOKEN + '/sendMessage';
-    const response = await fetch(url, {
+    const response = await fetch(url,{
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -6301,15 +6450,15 @@ async function sendTelegramNotification(message, config) {
     });
 
     const result = await response.json();
-    console.log('[Telegram] 发送结果:', result);
+    console.log('[Telegram] 发送结果:',result);
     return result.ok;
   } catch (error) {
-    console.error('[Telegram] 发送通知失败:', error);
+    console.error('[Telegram] 发送通知失败:',error);
     return false;
   }
 }
 
-async function sendNotifyXNotification(title, content, description, config) {
+async function sendNotifyXNotification(title,content,description,config) {
   try {
     if (!config.NOTIFYX_API_KEY) {
       console.error('[NotifyX] 通知未配置，缺少API Key');
@@ -6319,7 +6468,7 @@ async function sendNotifyXNotification(title, content, description, config) {
     console.log('[NotifyX] 开始发送通知: ' + title);
 
     const url = 'https://www.notifyx.cn/api/v1/send/' + config.NOTIFYX_API_KEY;
-    const response = await fetch(url, {
+    const response = await fetch(url,{
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -6330,15 +6479,15 @@ async function sendNotifyXNotification(title, content, description, config) {
     });
 
     const result = await response.json();
-    console.log('[NotifyX] 发送结果:', result);
+    console.log('[NotifyX] 发送结果:',result);
     return result.status === 'queued';
   } catch (error) {
-    console.error('[NotifyX] 发送通知失败:', error);
+    console.error('[NotifyX] 发送通知失败:',error);
     return false;
   }
 }
 
-async function sendBarkNotification(title, content, config) {
+async function sendBarkNotification(title,content,config) {
   try {
     if (!config.BARK_DEVICE_KEY) {
       console.error('[Bark] 通知未配置，缺少设备Key');
@@ -6360,7 +6509,7 @@ async function sendBarkNotification(title, content, config) {
       payload.isArchive = 1;
     }
 
-    const response = await fetch(url, {
+    const response = await fetch(url,{
       method: 'POST',
       headers: {
         'Content-Type': 'application/json; charset=utf-8'
@@ -6369,17 +6518,17 @@ async function sendBarkNotification(title, content, config) {
     });
 
     const result = await response.json();
-    console.log('[Bark] 发送结果:', result);
+    console.log('[Bark] 发送结果:',result);
 
     // Bark API返回code为200表示成功
     return result.code === 200;
   } catch (error) {
-    console.error('[Bark] 发送通知失败:', error);
+    console.error('[Bark] 发送通知失败:',error);
     return false;
   }
 }
 
-async function sendEmailNotification(title, content, config) {
+async function sendEmailNotification(title,content,config) {
   try {
     if (!config.RESEND_API_KEY || !config.EMAIL_FROM || !config.EMAIL_TO) {
       console.error('[邮件通知] 通知未配置，缺少必要参数');
@@ -6416,12 +6565,12 @@ async function sendEmailNotification(title, content, config) {
         </div>
         <div class="content">
             <div class="highlight">
-                ${content.replace(/\n/g, '<br>')}
+                ${content.replace(/\n/g,'<br>')}
             </div>
             <p>此邮件由订阅管理系统自动发送，请及时处理相关订阅事务。</p>
         </div>
         <div class="footer">
-            <p>订阅管理系统 | 发送时间: ${formatTimeInTimezone(new Date(), config?.TIMEZONE || 'UTC', 'datetime')}</p>
+            <p>订阅管理系统 | 发送时间: ${formatTimeInTimezone(new Date(),config?.TIMEZONE || 'UTC','datetime')}</p>
         </div>
     </div>
 </body>
@@ -6431,7 +6580,7 @@ async function sendEmailNotification(title, content, config) {
       `${config.EMAIL_FROM_NAME} <${config.EMAIL_FROM}>` :
       config.EMAIL_FROM;
 
-    const response = await fetch('https://api.resend.com/emails', {
+    const response = await fetch('https://api.resend.com/emails',{
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${config.RESEND_API_KEY}`,
@@ -6447,26 +6596,26 @@ async function sendEmailNotification(title, content, config) {
     });
 
     const result = await response.json();
-    console.log('[邮件通知] 发送结果:', response.status, result);
+    console.log('[邮件通知] 发送结果:',response.status,result);
 
     if (response.ok && result.id) {
-      console.log('[邮件通知] 邮件发送成功，ID:', result.id);
+      console.log('[邮件通知] 邮件发送成功，ID:',result.id);
       return true;
     } else {
-      console.error('[邮件通知] 邮件发送失败:', result);
+      console.error('[邮件通知] 邮件发送失败:',result);
       return false;
     }
   } catch (error) {
-    console.error('[邮件通知] 发送邮件失败:', error);
+    console.error('[邮件通知] 发送邮件失败:',error);
     return false;
   }
 }
 
-async function sendNotification(title, content, description, config) {
+async function sendNotification(title,content,description,config) {
   if (config.NOTIFICATION_TYPE === 'notifyx') {
-    return await sendNotifyXNotification(title, content, description, config);
+    return await sendNotifyXNotification(title,content,description,config);
   } else {
-    return await sendTelegramNotification(content, config);
+    return await sendTelegramNotification(content,config);
   }
 }
 
@@ -6476,17 +6625,17 @@ async function checkExpiringSubscriptions(env) {
     const config = await getConfig(env);
     const timezone = config?.TIMEZONE || 'UTC';
     const currentTime = getCurrentTimeInTimezone(timezone);
-    console.log('[定时任务] 开始检查即将到期的订阅 UTC: ' + new Date().toISOString() + ', ' + timezone + ': ' + currentTime.toLocaleString('zh-CN', { timeZone: timezone }));
+    console.log('[定时任务] 开始检查即将到期的订阅 UTC: ' + new Date().toISOString() + ', ' + timezone + ': ' + currentTime.toLocaleString('zh-CN',{ timeZone: timezone }));
 
-    const currentMidnight = getTimezoneMidnightTimestamp(currentTime, timezone); // 统一计算当天的零点时间，避免多次格式化
+    const currentMidnight = getTimezoneMidnightTimestamp(currentTime,timezone); // 统一计算当天的零点时间，避免多次格式化
 
     const rawNotificationHours = Array.isArray(config.NOTIFICATION_HOURS) ? config.NOTIFICATION_HOURS : [];
     const normalizedNotificationHours = rawNotificationHours
       .map(value => String(value).trim())
       .filter(value => value.length > 0)
-      .map(value => value === '*' ? '*' : value.toUpperCase() === 'ALL' ? 'ALL' : value.padStart(2, '0'));
+      .map(value => value === '*' ? '*' : value.toUpperCase() === 'ALL' ? 'ALL' : value.padStart(2,'0'));
     const allowAllHours = normalizedNotificationHours.includes('*') || normalizedNotificationHours.includes('ALL');
-    const hourFormatter = new Intl.DateTimeFormat('en-US', { timeZone: timezone, hour12: false, hour: '2-digit' });
+    const hourFormatter = new Intl.DateTimeFormat('en-US',{ timeZone: timezone,hour12: false,hour: '2-digit' });
     const currentHour = hourFormatter.format(currentTime);
     const shouldNotifyThisHour = allowAllHours || normalizedNotificationHours.length === 0 || normalizedNotificationHours.includes(currentHour);
 
@@ -6514,8 +6663,8 @@ async function checkExpiringSubscriptions(env) {
           expiryDate.getDate()
         );
         const solar = lunarBiz.lunar2solar(lunar);
-        const lunarDate = new Date(solar.year, solar.month - 1, solar.day);
-        const lunarMidnight = getTimezoneMidnightTimestamp(lunarDate, timezone);
+        const lunarDate = new Date(solar.year,solar.month - 1,solar.day);
+        const lunarMidnight = getTimezoneMidnightTimestamp(lunarDate,timezone);
 
         daysDiff = Math.round((lunarMidnight - currentMidnight) / MS_PER_DAY);
 
@@ -6527,10 +6676,10 @@ async function checkExpiringSubscriptions(env) {
         if (daysDiff < 0 && subscription.periodValue && subscription.periodUnit && subscription.autoRenew !== false) {
           let nextLunar = lunar;
           do {
-            nextLunar = lunarBiz.addLunarPeriod(nextLunar, subscription.periodValue, subscription.periodUnit);
+            nextLunar = lunarBiz.addLunarPeriod(nextLunar,subscription.periodValue,subscription.periodUnit);
             const solar = lunarBiz.lunar2solar(nextLunar);
-            var newExpiryDate = new Date(solar.year, solar.month - 1, solar.day);
-            const newLunarMidnight = getTimezoneMidnightTimestamp(newExpiryDate, timezone);
+            var newExpiryDate = new Date(solar.year,solar.month - 1,solar.day);
+            const newLunarMidnight = getTimezoneMidnightTimestamp(newExpiryDate,timezone);
             daysDiff = Math.round((newLunarMidnight - currentMidnight) / MS_PER_DAY);
             console.log('[定时任务] 订阅 "' + subscription.name + '" 更新到期日期: ' + newExpiryDate.toISOString() + ', 农历转换后午夜时间: ' + new Date(newLunarMidnight).toISOString() + ', 剩余天数: ' + daysDiff);
           } while (daysDiff < 0);
@@ -6539,7 +6688,7 @@ async function checkExpiringSubscriptions(env) {
           diffHours = diffMs / MS_PER_HOUR;
 
           const paymentRecord = {
-            id: Date.now().toString() + '_' + Math.random().toString(36).substr(2, 9),
+            id: Date.now().toString() + '_' + Math.random().toString(36).substr(2,9),
             date: currentTime.toISOString(),
             amount: subscription.amount || 0,
             type: 'auto',
@@ -6560,7 +6709,7 @@ async function checkExpiringSubscriptions(env) {
           updatedSubscriptions.push(updatedSubscription);
           hasUpdates = true;
 
-          const shouldRemindAfterRenewal = shouldTriggerReminder(reminderSetting, daysDiff, diffHours);
+          const shouldRemindAfterRenewal = shouldTriggerReminder(reminderSetting,daysDiff,diffHours);
           if (shouldRemindAfterRenewal) {
             console.log('[定时任务] 订阅 "' + subscription.name + '" 在提醒范围内，将发送通知');
             expiringSubscriptions.push({
@@ -6573,7 +6722,7 @@ async function checkExpiringSubscriptions(env) {
         }
       } else {
         const expiryDate = new Date(subscription.expiryDate);
-        const expiryMidnight = getTimezoneMidnightTimestamp(expiryDate, timezone);
+        const expiryMidnight = getTimezoneMidnightTimestamp(expiryDate,timezone);
 
         daysDiff = Math.round((expiryMidnight - currentMidnight) / MS_PER_DAY);
 
@@ -6593,7 +6742,7 @@ async function checkExpiringSubscriptions(env) {
             newExpiryDate.setFullYear(expiryDate.getFullYear() + subscription.periodValue);
           }
 
-          let newExpiryMidnight = getTimezoneMidnightTimestamp(newExpiryDate, timezone);
+          let newExpiryMidnight = getTimezoneMidnightTimestamp(newExpiryDate,timezone);
           while (newExpiryMidnight < currentMidnight) {
             console.log('[定时任务] 新计算的到期日期 ' + newExpiryDate.toISOString() + ' (时区转换后午夜: ' + new Date(newExpiryMidnight).toISOString() + ') 仍然过期，继续计算下一个周期');
             if (subscription.periodUnit === 'day') {
@@ -6603,7 +6752,7 @@ async function checkExpiringSubscriptions(env) {
             } else if (subscription.periodUnit === 'year') {
               newExpiryDate.setFullYear(newExpiryDate.getFullYear() + subscription.periodValue);
             }
-            newExpiryMidnight = getTimezoneMidnightTimestamp(newExpiryDate, timezone);
+            newExpiryMidnight = getTimezoneMidnightTimestamp(newExpiryDate,timezone);
           }
 
           console.log('[定时任务] 订阅 "' + subscription.name + '" 更新到期日期: ' + newExpiryDate.toISOString());
@@ -6612,7 +6761,7 @@ async function checkExpiringSubscriptions(env) {
           diffHours = diffMs / MS_PER_HOUR;
 
           const paymentRecord = {
-            id: Date.now().toString() + '_' + Math.random().toString(36).substr(2, 9),
+            id: Date.now().toString() + '_' + Math.random().toString(36).substr(2,9),
             date: currentTime.toISOString(),
             amount: subscription.amount || 0,
             type: 'auto',
@@ -6634,7 +6783,7 @@ async function checkExpiringSubscriptions(env) {
           hasUpdates = true;
 
           const newDaysDiff = Math.round((newExpiryMidnight - currentMidnight) / MS_PER_DAY);
-          const shouldRemindAfterRenewal = shouldTriggerReminder(reminderSetting, newDaysDiff, diffHours);
+          const shouldRemindAfterRenewal = shouldTriggerReminder(reminderSetting,newDaysDiff,diffHours);
           if (shouldRemindAfterRenewal) {
             console.log('[定时任务] 订阅 "' + subscription.name + '" 在提醒范围内，将发送通知');
             expiringSubscriptions.push({
@@ -6649,7 +6798,7 @@ async function checkExpiringSubscriptions(env) {
 
       diffMs = new Date(subscription.expiryDate).getTime() - currentTime.getTime();
       diffHours = diffMs / MS_PER_HOUR;
-      const shouldRemind = shouldTriggerReminder(reminderSetting, daysDiff, diffHours);
+      const shouldRemind = shouldTriggerReminder(reminderSetting,daysDiff,diffHours);
 
       if (daysDiff < 0 && subscription.autoRenew === false) {
         console.log('[定时任务] 订阅 "' + subscription.name + '" 已过期且未启用自动续订，将发送过期通知');
@@ -6673,7 +6822,7 @@ async function checkExpiringSubscriptions(env) {
         const updated = updatedSubscriptions.find(u => u.id === sub.id);
         return updated || sub;
       });
-      await env.SUBSCRIPTIONS_KV.put('subscriptions', JSON.stringify(mergedSubscriptions));
+      await env.SUBSCRIPTIONS_KV.put('subscriptions',JSON.stringify(mergedSubscriptions));
     }
 
     if (expiringSubscriptions.length > 0) {
@@ -6682,38 +6831,38 @@ async function checkExpiringSubscriptions(env) {
         expiringSubscriptions.length = 0;
       } else {
         // 按到期时间排序
-        expiringSubscriptions.sort((a, b) => a.daysRemaining - b.daysRemaining);
+        expiringSubscriptions.sort((a,b) => a.daysRemaining - b.daysRemaining);
 
         // 使用优化的格式化函数
-        const commonContent = formatNotificationContent(expiringSubscriptions, config);
+        const commonContent = formatNotificationContent(expiringSubscriptions,config);
         const metadataTags = extractTagsFromSubscriptions(expiringSubscriptions);
 
         const title = '订阅到期提醒';
-        await sendNotificationToAllChannels(title, commonContent, config, '[定时任务]', {
+        await sendNotificationToAllChannels(title,commonContent,config,'[定时任务]',{
           metadata: { tags: metadataTags }
         });
       }
     }
   } catch (error) {
-    console.error('[定时任务] 检查即将到期的订阅失败:', error);
+    console.error('[定时任务] 检查即将到期的订阅失败:',error);
   }
 }
 
-function getCookieValue(cookieString, key) {
+function getCookieValue(cookieString,key) {
   if (!cookieString) return null;
 
   const match = cookieString.match(new RegExp('(^| )' + key + '=([^;]+)'));
   return match ? match[2] : null;
 }
 
-async function handleRequest(request, env, ctx) {
-  return new Response(loginPage, {
+async function handleRequest(request,env,ctx) {
+  return new Response(loginPage,{
     headers: { 'Content-Type': 'text/html; charset=utf-8' }
   });
 }
 
 const CryptoJS = {
-  HmacSHA256: function (message, key) {
+  HmacSHA256: function (message,key) {
     const keyData = new TextEncoder().encode(key);
     const messageData = new TextEncoder().encode(message);
 
@@ -6721,7 +6870,7 @@ const CryptoJS = {
       return crypto.subtle.importKey(
         "raw",
         keyData,
-        { name: "HMAC", hash: { name: "SHA-256" } },
+        { name: "HMAC",hash: { name: "SHA-256" } },
         false,
         ["sign"]
       );
@@ -6733,7 +6882,7 @@ const CryptoJS = {
       );
     }).then(buffer => {
       const hashArray = Array.from(new Uint8Array(buffer));
-      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      return hashArray.map(b => b.toString(16).padStart(2,'0')).join('');
     });
   }
 };
@@ -6741,10 +6890,10 @@ const CryptoJS = {
 function getCurrentTime(config) {
   const timezone = config?.TIMEZONE || 'UTC';
   const currentTime = getCurrentTimeInTimezone(timezone);
-  const formatter = new Intl.DateTimeFormat('zh-CN', {
+  const formatter = new Intl.DateTimeFormat('zh-CN',{
     timeZone: timezone,
-    year: 'numeric', month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit', second: '2-digit'
+    year: 'numeric',month: '2-digit',day: '2-digit',
+    hour: '2-digit',minute: '2-digit',second: '2-digit'
   });
   return {
     date: currentTime,
@@ -6754,7 +6903,7 @@ function getCurrentTime(config) {
 }
 
 export default {
-  async fetch(request, env, ctx) {
+  async fetch(request,env,ctx) {
     const url = new URL(request.url);
 
     // 添加调试页面
@@ -6806,11 +6955,11 @@ export default {
     <p>3. 如果仍有问题，请检查Cloudflare Workers日志</p>
   </div>
 </body>
-</html>`, {
+</html>`,{
           headers: { 'Content-Type': 'text/html; charset=utf-8' }
         });
       } catch (error) {
-        return new Response(`调试页面错误: ${error.message}`, {
+        return new Response(`调试页面错误: ${error.message}`,{
           status: 500,
           headers: { 'Content-Type': 'text/plain; charset=utf-8' }
         });
@@ -6818,32 +6967,55 @@ export default {
     }
 
     if (url.pathname.startsWith('/api')) {
-      return api.handleRequest(request, env, ctx);
+      return api.handleRequest(request,env,ctx);
     } else if (url.pathname.startsWith('/admin')) {
-      return admin.handleRequest(request, env, ctx);
+      return admin.handleRequest(request,env,ctx);
     } else {
-      return handleRequest(request, env, ctx);
+      return handleRequest(request,env,ctx);
     }
   },
 
-  async scheduled(event, env, ctx) {
+  async scheduled(event,env,ctx) {
     const config = await getConfig(env);
     const timezone = config?.TIMEZONE || 'UTC';
     const currentTime = getCurrentTimeInTimezone(timezone);
-    console.log('[Workers] 定时任务触发 UTC:', new Date().toISOString(), timezone + ':', currentTime.toLocaleString('zh-CN', { timeZone: timezone }));
+    console.log('[Workers] 定时任务触发 UTC:',new Date().toISOString(),timezone + ':',currentTime.toLocaleString('zh-CN',{ timeZone: timezone }));
     await checkExpiringSubscriptions(env);
   }
 };
 
 // ==================== 仪表盘统计函数 ====================
-function getPaymentCountInMonth(subscriptions, year, month, timezone) {
+
+// 汇率配置 (以 CNY 为基准)
+// 您可以根据需要修改此处的汇率
+const EXCHANGE_RATES = {
+  'CNY': 1,
+  'USD': 6.98,
+  'HKD': 0.90,
+  'TWD': 0.22,
+  'JPY': 0.044,
+  'EUR': 8.16,
+  'GBP': 9.40,
+  'KRW': 0.0048
+};
+
+// 辅助函数：将金额转换为基准货币 (CNY)
+function convertToCNY(amount,currency) {
+  if (!amount || amount <= 0) return 0;
+  // 如果没有币种信息，默认视为 CNY
+  const code = currency || 'CNY';
+  const rate = EXCHANGE_RATES[code] || 1;
+  return amount * rate;
+}
+
+function getPaymentCountInMonth(subscriptions,year,month,timezone) {
   let count = 0;
   subscriptions.forEach(sub => {
     const paymentHistory = sub.paymentHistory || [];
     paymentHistory.forEach(payment => {
       if (!payment.amount || payment.amount <= 0) return;
       const paymentDate = new Date(payment.date);
-      const parts = getTimezoneDateParts(paymentDate, timezone);
+      const parts = getTimezoneDateParts(paymentDate,timezone);
       if (parts.year === year && parts.month === month) {
         count++;
       }
@@ -6852,14 +7024,13 @@ function getPaymentCountInMonth(subscriptions, year, month, timezone) {
   return count;
 }
 
-function calculateMonthlyExpense(subscriptions, timezone) {
+function calculateMonthlyExpense(subscriptions,timezone) {
   const now = getCurrentTimeInTimezone(timezone);
-  const parts = getTimezoneDateParts(now, timezone);
+  const parts = getTimezoneDateParts(now,timezone);
   const currentYear = parts.year;
   const currentMonth = parts.month;
 
   let amount = 0;
-  let currentMonthCount = 0;
 
   // 遍历所有订阅的支付历史
   subscriptions.forEach(sub => {
@@ -6867,10 +7038,10 @@ function calculateMonthlyExpense(subscriptions, timezone) {
     paymentHistory.forEach(payment => {
       if (!payment.amount || payment.amount <= 0) return;
       const paymentDate = new Date(payment.date);
-      const paymentParts = getTimezoneDateParts(paymentDate, timezone);
+      const paymentParts = getTimezoneDateParts(paymentDate,timezone);
       if (paymentParts.year === currentYear && paymentParts.month === currentMonth) {
-        amount += payment.amount;
-        currentMonthCount++;
+        // 【核心修改】使用 convertToCNY 进行汇率转换
+        amount += convertToCNY(payment.amount,sub.currency);
       }
     });
   });
@@ -6884,9 +7055,10 @@ function calculateMonthlyExpense(subscriptions, timezone) {
     paymentHistory.forEach(payment => {
       if (!payment.amount || payment.amount <= 0) return;
       const paymentDate = new Date(payment.date);
-      const paymentParts = getTimezoneDateParts(paymentDate, timezone);
+      const paymentParts = getTimezoneDateParts(paymentDate,timezone);
       if (paymentParts.year === lastMonthYear && paymentParts.month === lastMonth) {
-        lastMonthAmount += payment.amount;
+        // 【核心修改】使用 convertToCNY 进行汇率转换
+        lastMonthAmount += convertToCNY(payment.amount,sub.currency);
       }
     });
   });
@@ -6903,12 +7075,12 @@ function calculateMonthlyExpense(subscriptions, timezone) {
     trendDirection = 'up';
   }
 
-  return { amount, trend: Math.abs(trend), trendDirection };
+  return { amount,trend: Math.abs(trend),trendDirection };
 }
 
-function calculateYearlyExpense(subscriptions, timezone) {
+function calculateYearlyExpense(subscriptions,timezone) {
   const now = getCurrentTimeInTimezone(timezone);
-  const parts = getTimezoneDateParts(now, timezone);
+  const parts = getTimezoneDateParts(now,timezone);
   const currentYear = parts.year;
 
   let amount = 0;
@@ -6919,18 +7091,20 @@ function calculateYearlyExpense(subscriptions, timezone) {
     paymentHistory.forEach(payment => {
       if (!payment.amount || payment.amount <= 0) return;
       const paymentDate = new Date(payment.date);
-      const paymentParts = getTimezoneDateParts(paymentDate, timezone);
+      const paymentParts = getTimezoneDateParts(paymentDate,timezone);
       if (paymentParts.year === currentYear) {
-        amount += payment.amount;
+        // 【核心修改】使用 convertToCNY 进行汇率转换
+        amount += convertToCNY(payment.amount,sub.currency);
       }
     });
   });
 
+  // 简单的月均计算：总额 / 当前月份（或者12，取决于您的统计逻辑，此处保持原逻辑）
   const monthlyAverage = amount / parts.month;
-  return { amount, monthlyAverage };
+  return { amount,monthlyAverage };
 }
 
-function getRecentPayments(subscriptions, timezone) {
+function getRecentPayments(subscriptions,timezone) {
   const now = getCurrentTimeInTimezone(timezone);
   const sevenDaysAgo = new Date(now.getTime() - 7 * MS_PER_DAY);
 
@@ -6946,6 +7120,7 @@ function getRecentPayments(subscriptions, timezone) {
         recentPayments.push({
           name: sub.name,
           amount: payment.amount,
+          currency: sub.currency || 'CNY', // 【核心修改】传递币种给前端显示
           customType: sub.customType,
           paymentDate: payment.date,
           note: payment.note
@@ -6954,10 +7129,10 @@ function getRecentPayments(subscriptions, timezone) {
     });
   });
 
-  return recentPayments.sort((a, b) => new Date(b.paymentDate) - new Date(a.paymentDate));
+  return recentPayments.sort((a,b) => new Date(b.paymentDate) - new Date(a.paymentDate));
 }
 
-function getUpcomingRenewals(subscriptions, timezone) {
+function getUpcomingRenewals(subscriptions,timezone) {
   const now = getCurrentTimeInTimezone(timezone);
   const sevenDaysLater = new Date(now.getTime() + 7 * MS_PER_DAY);
 
@@ -6973,17 +7148,18 @@ function getUpcomingRenewals(subscriptions, timezone) {
       return {
         name: sub.name,
         amount: sub.amount || 0,
+        currency: sub.currency || 'CNY', // 【核心修改】传递币种给前端显示
         customType: sub.customType,
         renewalDate: sub.expiryDate,
         daysUntilRenewal
       };
     })
-    .sort((a, b) => a.daysUntilRenewal - b.daysUntilRenewal);
+    .sort((a,b) => a.daysUntilRenewal - b.daysUntilRenewal);
 }
 
-function getExpenseByType(subscriptions, timezone) {
+function getExpenseByType(subscriptions,timezone) {
   const now = getCurrentTimeInTimezone(timezone);
-  const parts = getTimezoneDateParts(now, timezone);
+  const parts = getTimezoneDateParts(now,timezone);
   const currentYear = parts.year;
 
   const typeMap = {};
@@ -6995,27 +7171,30 @@ function getExpenseByType(subscriptions, timezone) {
     paymentHistory.forEach(payment => {
       if (!payment.amount || payment.amount <= 0) return;
       const paymentDate = new Date(payment.date);
-      const paymentParts = getTimezoneDateParts(paymentDate, timezone);
+      const paymentParts = getTimezoneDateParts(paymentDate,timezone);
       if (paymentParts.year === currentYear) {
         const type = sub.customType || '未分类';
-        typeMap[type] = (typeMap[type] || 0) + payment.amount;
-        total += payment.amount;
+        // 【核心修改】先转换为 CNY 再统计
+        const amountCNY = convertToCNY(payment.amount,sub.currency);
+
+        typeMap[type] = (typeMap[type] || 0) + amountCNY;
+        total += amountCNY;
       }
     });
   });
 
   return Object.entries(typeMap)
-    .map(([type, amount]) => ({
+    .map(([type,amount]) => ({
       type,
       amount,
       percentage: total > 0 ? Math.round((amount / total) * 100) : 0
     }))
-    .sort((a, b) => b.amount - a.amount);
+    .sort((a,b) => b.amount - a.amount);
 }
 
-function getExpenseByCategory(subscriptions, timezone) {
+function getExpenseByCategory(subscriptions,timezone) {
   const now = getCurrentTimeInTimezone(timezone);
-  const parts = getTimezoneDateParts(now, timezone);
+  const parts = getTimezoneDateParts(now,timezone);
   const currentYear = parts.year;
 
   const categoryMap = {};
@@ -7027,23 +7206,27 @@ function getExpenseByCategory(subscriptions, timezone) {
     paymentHistory.forEach(payment => {
       if (!payment.amount || payment.amount <= 0) return;
       const paymentDate = new Date(payment.date);
-      const paymentParts = getTimezoneDateParts(paymentDate, timezone);
+      const paymentParts = getTimezoneDateParts(paymentDate,timezone);
       if (paymentParts.year === currentYear) {
         const categories = sub.category ? sub.category.split(CATEGORY_SEPARATOR_REGEX).filter(c => c.trim()) : ['未分类'];
+
+        // 【核心修改】先转换为 CNY 再分配给各个分类
+        const amountCNY = convertToCNY(payment.amount,sub.currency);
+
         categories.forEach(category => {
           const cat = category.trim() || '未分类';
-          categoryMap[cat] = (categoryMap[cat] || 0) + payment.amount / categories.length;
+          categoryMap[cat] = (categoryMap[cat] || 0) + amountCNY / categories.length;
         });
-        total += payment.amount;
+        total += amountCNY;
       }
     });
   });
 
   return Object.entries(categoryMap)
-    .map(([category, amount]) => ({
+    .map(([category,amount]) => ({
       category,
       amount,
       percentage: total > 0 ? Math.round((amount / total) * 100) : 0
     }))
-    .sort((a, b) => b.amount - a.amount);
+    .sort((a,b) => b.amount - a.amount);
 }
