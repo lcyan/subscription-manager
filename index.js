@@ -71,18 +71,6 @@ function getTimezoneMidnightTimestamp(date, timezone = 'UTC') {
   return Date.UTC(year, month - 1, day, 0, 0, 0);
 }
 
-function calculateExpirationTime(expirationMinutes, timezone = 'UTC') {
-  const currentTime = getCurrentTimeInTimezone(timezone);
-  const expirationTime = new Date(currentTime.getTime() + (expirationMinutes * 60 * 1000));
-  return expirationTime;
-}
-
-function isExpired(targetTime, timezone = 'UTC') {
-  const currentTime = getCurrentTimeInTimezone(timezone);
-  const target = new Date(targetTime);
-  return currentTime > target;
-}
-
 function formatTimeInTimezone(time, timezone = 'UTC', format = 'full') {
   try {
     const date = new Date(time);
@@ -1327,41 +1315,6 @@ const adminPage = `
   </div>
 
   <script>
-    // 兼容性函数 - 保持原有接口
-    function formatBeijingTime(date = new Date(), format = 'full') {
-      try {
-        const timezone = 'Asia/Shanghai';
-        const dateObj = new Date(date);
-        
-        if (format === 'date') {
-          return dateObj.toLocaleDateString('zh-CN', {
-            timeZone: timezone,
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit'
-          });
-        } else if (format === 'datetime') {
-          return dateObj.toLocaleString('zh-CN', {
-            timeZone: timezone,
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-          });
-        } else {
-          // full format
-          return dateObj.toLocaleString('zh-CN', {
-            timeZone: timezone
-          });
-        }
-      } catch (error) {
-        console.error('时间格式化错误: ' + error.message);
-        return new Date(date).toISOString();
-      }
-    }
-
     // 农历转换工具函数 - 前端版本
     const lunarCalendar = {
       // 农历数据 (1900-2100年)
@@ -2263,12 +2216,35 @@ const lunarBiz = {
 
     function showRenewFormModal(subscription) {
         const today = new Date().toISOString().split('T')[0];
-        const expiryDate = new Date(subscription.expiryDate);
-        const formattedExpiry = expiryDate.toLocaleDateString('zh-CN');
-        const defaultAmount = subscription.amount || 0;
-        const periodUnit = subscription.periodUnit === 'day' ? '天' :
-                          subscription.periodUnit === 'month' ? '月' : '年';
+        
+        // 获取当前到期日的显示文本
+        let currentExpiryDisplay = '无';
+        if (subscription.expiryDate) {
+            const datePart = subscription.expiryDate.split('T')[0];
+            
+            currentExpiryDisplay = datePart;
+            
+            // 只有当订阅类型明确为“使用农历”时，才计算并显示农历日期文本
+            if (subscription.useLunar) {
+                try {
+                    const parts = datePart.split('-');
+                    const y = parseInt(parts[0], 10);
+                    const m = parseInt(parts[1], 10);
+                    const d = parseInt(parts[2], 10);
+                    
+                    const lunarObj = lunarCalendar.solar2lunar(y, m, d);
+                    if (lunarObj) {
+                        // 统一格式
+                        currentExpiryDisplay += ' (农历: ' + lunarObj.fullStr + ')';
+                    }
+                } catch (e) {
+                    console.error('农历计算失败', e);
+                }
+            }
+        }
 
+        const defaultAmount = subscription.amount || 0;
+        
         // 获取动态货币符号
         const currencySymbols = {
           'CNY': '¥', 'USD': '$', 'HKD': 'HK$', 'TWD': 'NT$', 
@@ -2277,8 +2253,13 @@ const lunarBiz = {
         const currency = subscription.currency || 'CNY';
         const symbol = currencySymbols[currency] || '¥';
         const currencyLabel = "(" + currency + " " + symbol + ")";
+        
+        // 【修改点1】农历标记：移除 absolute 定位，改为普通 Flex 布局元素，优化移动端显示
+        // 移除了 absolute top-2 right-2，添加了 shrink-0 防止被压缩
+        const lunarBadge = subscription.useLunar ? 
+            '<span class="text-sm bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full border border-purple-200 shrink-0">农历周期</span>' : '';
 
-        // 【修复】使用单引号和 + 号拼接 HTML，避免反引号嵌套导致的语法错误
+        // 构建 Modal HTML
         const modalHtml = 
             '<div id="renewFormModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" onclick="closeRenewFormModal(event)">' +
             '    <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white" onclick="event.stopPropagation()">' +
@@ -2305,24 +2286,29 @@ const lunarBiz = {
             '            </div>' +
             '' +
             '            <div>' +
-            '                <label class="block text-sm font-medium text-gray-700 mb-1">续订周期数</label>' +
+            // 【修改点2】将农历徽标移动到这里，与 label 同行显示
+            '                <div class="flex justify-between items-center mb-1">' +
+            '                    <label class="block text-sm font-medium text-gray-700">续订周期数</label>' +
+            '                    ' + lunarBadge + 
+            '                </div>' +
             '                <div class="flex items-center space-x-2">' +
             '                    <input type="number" id="renewPeriodMultiplier" value="1" min="1" max="120"' +
             '                           class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"' +
             '                           oninput="updateNewExpiryPreview()">' +
-            '                    <span class="text-gray-600">' + periodUnit + '</span>' +
+            '                    <span class="text-gray-600">个</span>' + 
             '                </div>' +
             '                <p class="mt-1 text-xs text-gray-500">一次性续订多个周期（如12个月）</p>' +
             '            </div>' +
             '' +
-            '            <div class="bg-blue-50 rounded-lg p-3">' +
-            '                <div class="flex justify-between text-sm mb-1">' +
-            '                    <span class="text-gray-600">当前到期:</span>' +
-            '                    <span class="font-medium">' + formattedExpiry + '</span>' +
+            // 【修改点3】蓝色预览框中移除了原来的 lunarBadge 插入
+            '            <div class="bg-blue-50 rounded-lg p-3 relative">' +
+            '                <div class="flex justify-start items-center text-sm mb-2 gap-3">' +
+            '                    <span class="text-gray-600 whitespace-nowrap">当前到期:</span>' +
+            '                    <div class="font-medium break-all">' + currentExpiryDisplay + '</div>' + // 增加了 break-all 防止超长日期撑破布局
             '                </div>' +
-            '                <div class="flex justify-between text-sm">' +
-            '                    <span class="text-gray-600">新到期日:</span>' +
-            '                    <span class="font-medium text-blue-600" id="newExpiryPreview">计算中...</span>' +
+            '                <div class="flex justify-start items-center text-sm gap-3">' +
+            '                    <span class="text-gray-600 whitespace-nowrap">新到期日:</span>' +
+            '                    <div class="font-medium text-blue-600 break-all" id="newExpiryPreview">计算中...</div>' +
             '                </div>' +
             '            </div>' +
             '' +
@@ -2367,22 +2353,70 @@ const lunarBiz = {
         const subscription = JSON.parse(form.dataset.subscriptionData);
         const multiplier = parseInt(document.getElementById('renewPeriodMultiplier').value) || 1;
 
-        const expiryDate = new Date(subscription.expiryDate);
-        const newExpiryDate = new Date(expiryDate);
+        // 获取基准日期，避免直接 new Date() 的时区问题
+        const getDateParts = (dateStr) => {
+            if (!dateStr) return { year: 2024, month: 1, day: 1 };
+            const part = dateStr.split('T')[0];
+            const parts = part.split('-');
+            return {
+                year: parseInt(parts[0], 10),
+                month: parseInt(parts[1], 10),
+                day: parseInt(parts[2], 10)
+            };
+        };
 
+        const parts = getDateParts(subscription.expiryDate);
+        
         if (subscription.useLunar) {
-            // 农历续订的预览比较复杂，简化显示
-            document.getElementById('newExpiryPreview').textContent = '农历计算中...';
-        } else {
-            const totalPeriodValue = subscription.periodValue * multiplier;
-            if (subscription.periodUnit === 'day') {
-                newExpiryDate.setDate(expiryDate.getDate() + totalPeriodValue);
-            } else if (subscription.periodUnit === 'month') {
-                newExpiryDate.setMonth(expiryDate.getMonth() + totalPeriodValue);
-            } else if (subscription.periodUnit === 'year') {
-                newExpiryDate.setFullYear(expiryDate.getFullYear() + totalPeriodValue);
+            try {
+                // 1. 转为农历对象
+                let lunar = lunarCalendar.solar2lunar(parts.year, parts.month, parts.day);
+                
+                if (lunar) {
+                    // 2. 循环添加周期
+                    let nextLunar = lunar;
+                    for(let i = 0; i < multiplier; i++) {
+                        nextLunar = lunarBiz.addLunarPeriod(nextLunar, subscription.periodValue, subscription.periodUnit);
+                    }
+                    
+                    // 3. 转回公历
+                    const solar = lunarBiz.lunar2solar(nextLunar);
+                    
+                    // 重点：用计算出的公历日期重新获取完整的农历对象，确保有 fullStr 属性
+                    const fullNextLunar = lunarCalendar.solar2lunar(solar.year, solar.month, solar.day);
+                    
+                    // 格式化输出 YYYY-MM-DD
+                    const resultStr = solar.year + '-' + 
+                                      String(solar.month).padStart(2, '0') + '-' + 
+                                      String(solar.day).padStart(2, '0');
+                                      
+                    document.getElementById('newExpiryPreview').textContent = resultStr + ' (农历: ' + fullNextLunar.fullStr + ')';
+                } else {
+                    document.getElementById('newExpiryPreview').textContent = '日期计算错误';
+                }
+            } catch (e) {
+                console.error(e);
+                document.getElementById('newExpiryPreview').textContent = '计算出错';
             }
-            document.getElementById('newExpiryPreview').textContent = newExpiryDate.toLocaleDateString('zh-CN');
+        } else {
+            // 公历计算逻辑
+            const tempDate = new Date(parts.year, parts.month - 1, parts.day);
+            const totalPeriodValue = subscription.periodValue * multiplier;
+            
+            if (subscription.periodUnit === 'day') {
+                tempDate.setDate(tempDate.getDate() + totalPeriodValue);
+            } else if (subscription.periodUnit === 'month') {
+                tempDate.setMonth(tempDate.getMonth() + totalPeriodValue);
+            } else if (subscription.periodUnit === 'year') {
+                tempDate.setFullYear(tempDate.getFullYear() + totalPeriodValue);
+            }
+            
+            // 格式化输出 YYYY-MM-DD
+            const y = tempDate.getFullYear();
+            const m = String(tempDate.getMonth() + 1).padStart(2, '0');
+            const d = String(tempDate.getDate()).padStart(2, '0');
+            
+            document.getElementById('newExpiryPreview').textContent = y + '-' + m + '-' + d;
         }
     }
 
@@ -6215,12 +6249,6 @@ async function sendWebhookNotification(title, content, config, metadata = {}) {
   }
 }
 
-async function sendWeComNotification(message, config) {
-    // This is a placeholder. In a real scenario, you would implement the WeCom notification logic here.
-    console.log("[企业微信] 通知功能未实现");
-    return { success: false, message: "企业微信通知功能未实现" };
-}
-
 async function sendWechatBotNotification(title, content, config) {
   try {
     if (!config.WECHATBOT_WEBHOOK) {
@@ -6455,11 +6483,6 @@ async function sendNotificationToAllChannels(title, commonContent, config, logPr
         const wechatbotContent = commonContent.replace(/(\**|\*|##|#|`)/g, '');
         const success = await sendWechatBotNotification(title, wechatbotContent, config);
         console.log(`${logPrefix} 发送企业微信机器人通知 ${success ? '成功' : '失败'}`);
-    }
-    if (config.ENABLED_NOTIFIERS.includes('weixin')) {
-        const weixinContent = `【${title}】\n\n${commonContent.replace(/(\**|\*|##|#|`)/g, '')}`;
-        const result = await sendWeComNotification(weixinContent, config);
-        console.log(`${logPrefix} 发送企业微信通知 ${result.success ? '成功' : '失败'}. ${result.message}`);
     }
     if (config.ENABLED_NOTIFIERS.includes('email')) {
         const emailContent = commonContent.replace(/(\**|\*|##|#|`)/g, '');
@@ -7052,22 +7075,6 @@ function convertToCNY(amount, currency) {
   return amount * rate;
 }
 
-function getPaymentCountInMonth(subscriptions, year, month, timezone) {
-  let count = 0;
-  subscriptions.forEach(sub => {
-    const paymentHistory = sub.paymentHistory || [];
-    paymentHistory.forEach(payment => {
-      if (!payment.amount || payment.amount <= 0) return;
-      const paymentDate = new Date(payment.date);
-      const parts = getTimezoneDateParts(paymentDate, timezone);
-      if (parts.year === year && parts.month === month) {
-        count++;
-      }
-    });
-  });
-  return count;
-}
-
 function calculateMonthlyExpense(subscriptions, timezone) {
   const now = getCurrentTimeInTimezone(timezone);
   const parts = getTimezoneDateParts(now, timezone);
@@ -7230,45 +7237,6 @@ function getExpenseByType(subscriptions, timezone) {
   return Object.entries(typeMap)
     .map(([type, amount]) => ({
       type,
-      amount,
-      percentage: total > 0 ? Math.round((amount / total) * 100) : 0
-    }))
-    .sort((a, b) => b.amount - a.amount);
-}
-
-function getExpenseByCategory(subscriptions, timezone) {
-  const now = getCurrentTimeInTimezone(timezone);
-  const parts = getTimezoneDateParts(now, timezone);
-  const currentYear = parts.year;
-
-  const categoryMap = {};
-  let total = 0;
-
-  // 遍历所有订阅的支付历史
-  subscriptions.forEach(sub => {
-    const paymentHistory = sub.paymentHistory || [];
-    paymentHistory.forEach(payment => {
-      if (!payment.amount || payment.amount <= 0) return;
-      const paymentDate = new Date(payment.date);
-      const paymentParts = getTimezoneDateParts(paymentDate, timezone);
-      if (paymentParts.year === currentYear) {
-        const categories = sub.category ? sub.category.split(CATEGORY_SEPARATOR_REGEX).filter(c => c.trim()) : ['未分类'];
-        
-        // 【核心修改】先转换为 CNY 再分配给各个分类
-        const amountCNY = convertToCNY(payment.amount, sub.currency);
-        
-        categories.forEach(category => {
-          const cat = category.trim() || '未分类';
-          categoryMap[cat] = (categoryMap[cat] || 0) + amountCNY / categories.length;
-        });
-        total += amountCNY;
-      }
-    });
-  });
-
-  return Object.entries(categoryMap)
-    .map(([category, amount]) => ({
-      category,
       amount,
       percentage: total > 0 ? Math.round((amount / total) * 100) : 0
     }))
