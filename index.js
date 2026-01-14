@@ -7242,3 +7242,42 @@ function getExpenseByType(subscriptions, timezone) {
     }))
     .sort((a, b) => b.amount - a.amount);
 }
+
+function getExpenseByCategory(subscriptions, timezone) {
+  const now = getCurrentTimeInTimezone(timezone);
+  const parts = getTimezoneDateParts(now, timezone);
+  const currentYear = parts.year;
+
+  const categoryMap = {};
+  let total = 0;
+
+  // 遍历所有订阅的支付历史
+  subscriptions.forEach(sub => {
+    const paymentHistory = sub.paymentHistory || [];
+    paymentHistory.forEach(payment => {
+      if (!payment.amount || payment.amount <= 0) return;
+      const paymentDate = new Date(payment.date);
+      const paymentParts = getTimezoneDateParts(paymentDate, timezone);
+      if (paymentParts.year === currentYear) {
+        const categories = sub.category ? sub.category.split(CATEGORY_SEPARATOR_REGEX).filter(c => c.trim()) : ['未分类'];
+
+        // 先转换为 CNY 再分配给各个分类
+        const amountCNY = convertToCNY(payment.amount, sub.currency);
+
+        categories.forEach(category => {
+          const cat = category.trim() || '未分类';
+          categoryMap[cat] = (categoryMap[cat] || 0) + amountCNY / categories.length;
+        });
+        total += amountCNY;
+      }
+    });
+  });
+
+  return Object.entries(categoryMap)
+    .map(([category, amount]) => ({
+      category,
+      amount,
+      percentage: total > 0 ? Math.round((amount / total) * 100) : 0
+    }))
+    .sort((a, b) => b.amount - a.amount);
+}
