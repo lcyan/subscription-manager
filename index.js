@@ -671,16 +671,14 @@ const adminPage = `
     .lunar-display.show {
       opacity: 1;
     }
-    /* 自定义日期选择器样式 */
-    .hidden {
-      display: none !important;
-    }
     
     .custom-date-picker {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
       border-radius: 12px;
-      min-width: 380px;
+      width: 100%;
+      max-width: 380px;
+      min-width: 300px; 
     }
     
     .custom-date-picker .calendar-day {
@@ -688,16 +686,56 @@ const adminPage = `
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      width: 48px;
-      height: 60px;
+      width: 100%; 
+      height: auto;
+      aspect-ratio: 0.85; /* 保持适中的长宽比，紧凑布局 */
+      min-height: 45px;   /* 保证最小点击区域 */
       border-radius: 6px;
       cursor: pointer;
       transition: all 0.2s ease;
       position: relative;
-      padding: 4px;
-      font-size: 14px;
+      padding: 2px; /* 减小内边距 */
+      font-size: 13px; /* 稍微调小字体适应移动端 */
     }
-    
+    /* 【新增】自定义下拉菜单样式 (用于替代 datalist) */
+    .custom-dropdown-wrapper {
+      position: relative;
+      width: 100%;
+    }
+    .custom-dropdown-list {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.5rem;
+      margin-top: 4px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 60; /* 确保在其他元素之上 */
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      display: none; /* 默认隐藏 */
+    }
+    .custom-dropdown-list.show {
+      display: block;
+    }
+    .dropdown-item {
+      padding: 10px 12px;
+      font-size: 14px;
+      color: #374151;
+      cursor: pointer;
+      border-bottom: 1px solid #f3f4f6;
+      transition: background-color 0.2s;
+    }
+    .dropdown-item:last-child {
+      border-bottom: none;
+    }
+    .dropdown-item:hover, .dropdown-item:active {
+      background-color: #f3f4f6;
+      color: #4f46e5;
+    }
+
     .custom-date-picker .calendar-day:hover {
       background-color: #e0e7ff;
       transform: scale(1.05);
@@ -840,28 +878,55 @@ const adminPage = `
 <body class="bg-gray-100 min-h-screen">
   <div id="toast-container"></div>
 
-  <nav class="bg-white shadow-md">
+  <nav class="bg-white shadow-md relative z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between h-16">
-        <div class="flex items-center">
-          <i class="fas fa-calendar-check text-indigo-600 text-2xl mr-2"></i>
-          <span class="font-bold text-xl text-gray-800">订阅管理系统</span>
-          <span id="systemTimeDisplay" class="ml-4 text-base text-indigo-600 font-normal"></span>
+        <div class="flex items-center shrink-0">
+          <div class="flex items-center">
+            <i class="fas fa-calendar-check text-indigo-600 text-2xl mr-2"></i>
+            <span class="font-bold text-xl text-gray-800">订阅管理系统</span>
+          </div>
+          <span id="systemTimeDisplay" class="ml-4 text-base text-indigo-600 font-normal hidden md:block pt-1"></span>
         </div>
-        <div class="flex items-center space-x-4">
-          <a href="/admin/dashboard" class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+
+        <div class="hidden md:flex items-center space-x-4 ml-auto">
+          <a href="/admin/dashboard" class="text-gray-700 hover:text-gray-900 border-b-2 border-transparent hover:border-gray-300 px-3 py-2 rounded-md text-sm font-medium transition">
             <i class="fas fa-chart-line mr-1"></i>仪表盘
           </a>
-          <a href="/admin" class="text-indigo-600 border-b-2 border-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
+          <a href="/admin" class="text-indigo-600 border-b-2 border-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition">
             <i class="fas fa-list mr-1"></i>订阅列表
           </a>
-          <a href="/admin/config" class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+          <a href="/admin/config" class="text-gray-700 hover:text-gray-900 border-b-2 border-transparent hover:border-gray-300 px-3 py-2 rounded-md text-sm font-medium transition">
             <i class="fas fa-cog mr-1"></i>系统配置
           </a>
-          <a href="/api/logout" class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+          <a href="/api/logout" class="text-gray-700 hover:text-red-600 border-b-2 border-transparent hover:border-red-300 px-3 py-2 rounded-md text-sm font-medium transition">
             <i class="fas fa-sign-out-alt mr-1"></i>退出登录
           </a>
         </div>
+
+        <div class="flex items-center md:hidden ml-auto">
+          <button id="mobile-menu-btn" type="button" class="text-gray-600 hover:text-indigo-600 focus:outline-none p-2 rounded-md hover:bg-gray-100 active:bg-gray-200 transition-colors">
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-b border-gray-200 w-full">
+       <div class="px-4 pt-2 pb-4 space-y-2">
+        <div id="mobileTimeDisplay" class="px-3 py-2 text-xs text-indigo-600 text-right border-b border-gray-100 mb-2"></div>
+        <a href="/admin/dashboard" class="block px-3 py-3 rounded-md text-base font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 active:bg-indigo-100 transition-colors">
+          <i class="fas fa-chart-line w-6 text-center mr-2"></i>仪表盘
+        </a>
+        <a href="/admin" class="block px-3 py-3 rounded-md text-base font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 active:bg-indigo-100 transition-colors">
+          <i class="fas fa-list w-6 text-center mr-2"></i>订阅列表
+        </a>
+        <a href="/admin/config" class="block px-3 py-3 rounded-md text-base font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 active:bg-indigo-100 transition-colors">
+          <i class="fas fa-cog w-6 text-center mr-2"></i>系统配置
+        </a>
+        <a href="/api/logout" class="block px-3 py-3 rounded-md text-base font-medium text-gray-700 hover:bg-red-50 hover:text-red-600 active:bg-red-100 transition-colors">
+          <i class="fas fa-sign-out-alt w-6 text-center mr-2"></i>退出登录
+        </a>
       </div>
     </div>
   </nav>
@@ -875,16 +940,24 @@ const adminPage = `
       <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 w-full">
         <div class="flex flex-col sm:flex-row sm:items-center gap-3 w-full lg:flex-1 lg:max-w-2xl">
           <div class="relative flex-1 min-w-[200px] lg:max-w-md">
-            <input type="text" id="searchKeyword" placeholder="搜索名称、类型或备注..." class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            <input type="text" id="searchKeyword" placeholder="搜索名称、类型或备注..." class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
             <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
               <i class="fas fa-search"></i>
             </span>
           </div>
+          <div class="sm:w-36 lg:w-32">
+            <select id="modeFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white text-sm">
+              <option value="">全部模式</option>
+              <option value="cycle">循环订阅</option>
+              <option value="reset">到期重置</option>
+            </select>
+          </div>
           <div class="sm:w-44 lg:w-40">
-            <select id="categoryFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+            <select id="categoryFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white text-sm">
               <option value="">全部分类</option>
             </select>
           </div>
+
         </div>
         <div class="flex items-center space-x-3 lg:space-x-4">
         <label class="lunar-toggle">
@@ -933,7 +1006,6 @@ const adminPage = `
     </div>
   </div>
 
-  <!-- 添加/编辑订阅的模态框 -->
   <div id="subscriptionModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 modal-container hidden flex items-center justify-center z-50">
     <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-screen overflow-y-auto">
       <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 rounded-t-lg">
@@ -945,368 +1017,214 @@ const adminPage = `
         </div>
       </div>
       
-      <form id="subscriptionForm" class="p-6 space-y-6">
-        <input type="hidden" id="subscriptionId">
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <form id="subscriptionForm" class="p-6 space-y-5">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label for="name" class="block text-sm font-medium text-gray-700 mb-1">订阅名称 *</label>
             <input type="text" id="name" required
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-            <div class="error-message text-red-500" data-for="reminderValue"></div>
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+            <div class="error-message text-red-500" data-for="name"></div>
           </div>
           
-          <div>
+          <div class="custom-dropdown-wrapper">
             <label for="customType" class="block text-sm font-medium text-gray-700 mb-1">订阅类型</label>
-            <input type="text" id="customType" list="customTypeList" placeholder="选择或输入自定义类型"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-            <datalist id="customTypeList">
-              <option value="流媒体">
-              <option value="视频平台">
-              <option value="音乐平台">
-              <option value="云服务">
-              <option value="软件订阅">
-              <option value="域名">
-              <option value="服务器">
-              <option value="会员服务">
-              <option value="学习平台">
-              <option value="健身/运动">
-              <option value="游戏">
-              <option value="新闻/杂志">
-              <option value="生日">
-              <option value="纪念日">
-              <option value="其他">
-            </datalist>
-            <div class="error-message text-red-500"></div>
+            <input type="text" id="customType" placeholder="选择或输入自定义类型" autocomplete="off"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+            <div id="customTypeDropdown" class="custom-dropdown-list"></div>
+          </div>
+
+          <div class="custom-dropdown-wrapper">
+            <label for="category" class="block text-sm font-medium text-gray-700 mb-1">分类标签</label>
+            <input type="text" id="category" placeholder="选择或输入自定义标签" autocomplete="off"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+            <div id="categoryDropdown" class="custom-dropdown-list"></div>
+            <p class="mt-1 text-xs text-gray-500">可输入多个标签并使用"/"分隔</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              费用设置 <span class="text-gray-400 text-xs ml-1">可选</span>
+            </label>
+            <div class="flex space-x-2">
+              <div class="w-24 shrink-0"> 
+                <select id="currency" class="h-10 w-full px-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white text-sm">
+                  <option value="CNY" selected>CNY (¥)</option>
+                  <option value="USD">USD ($)</option>
+                  <option value="HKD">HKD (HK$)</option>
+                  <option value="TWD">TWD (NT$)</option>
+                  <option value="JPY">JPY (¥)</option>
+                  <option value="EUR">EUR (€)</option>
+                  <option value="GBP">GBP (£)</option>
+                  <option value="KRW">KRW (₩)</option>
+                </select>
+              </div>
+              <div class="relative flex-1">
+                <input type="number" id="amount" step="0.01" min="0" placeholder="例如: 15.00"
+                  class="h-10 w-full px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
+              </div>
+            </div>
+            <p class="mt-1 text-xs text-gray-500">用于统计支出和生成仪表盘</p>
           </div>
 
           <div>
-            <label for="category" class="block text-sm font-medium text-gray-700 mb-1">分类标签</label>
-            <input type="text" id="category" list="categoryList" placeholder="选择或输入自定义标签"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-            <datalist id="categoryList">
-              <option value="个人">
-              <option value="家庭">
-              <option value="工作">
-              <option value="公司">
-              <option value="娱乐">
-              <option value="学习">
-              <option value="开发">
-              <option value="生产力">
-              <option value="社交">
-              <option value="健康">
-              <option value="财务">
-            </datalist>
-            <p class="mt-1 text-xs text-gray-500">可输入多个标签并使用"/"分隔，便于筛选和统计</p>
-            <div class="error-message text-red-500"></div>
-          </div>
-        </div>
-
-        <!-- 金额 -->
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-1">
-            费用设置
-            <span class="text-gray-400 text-xs ml-1">可选</span>
-          </label>
-          <div class="flex space-x-2">
-            <div class="w-1/3">
-              <select id="currency" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white">
-                <option value="CNY" selected>CNY (¥)</option>
-                <option value="USD">USD ($)</option>
-                <option value="HKD">HKD (HK$)</option>
-                <option value="TWD">TWD (NT$)</option>
-                <option value="JPY">JPY (¥)</option>
-                <option value="EUR">EUR (€)</option>
-                <option value="GBP">GBP (£)</option>
-                <option value="KRW">KRW (₩)</option>
-              </select>
-            </div>
-            <div class="relative w-2/3">
-              <input
-                type="number"
-                id="amount"
-                step="0.01"
-                min="0"
-                placeholder="例如: 15.00"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              />
+             <div class="flex justify-between items-center mb-1">
+                <label for="subscriptionMode" class="block text-sm font-medium text-gray-700">订阅模式</label>
+             </div>
+            <select id="subscriptionMode" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white h-10">
+              <option value="cycle" selected>📅 循环订阅</option>
+              <option value="reset">⏳ 到期重置</option>
+            </select>
+            
+            <div class="mt-2 flex items-center space-x-3">
+                 <label class="inline-flex items-center cursor-pointer select-none">
+                  <input type="checkbox" id="showLunar" class="form-checkbox h-4 w-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500">
+                  <span class="ml-2 text-sm text-gray-600">显示农历日期</span>
+                </label>
+                <label class="inline-flex items-center cursor-pointer select-none">
+                  <input type="checkbox" id="useLunar" class="form-checkbox h-4 w-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500">
+                  <span class="ml-2 text-sm text-gray-600">农历周期</span>
+                </label>
             </div>
           </div>
-          <p class="mt-1 text-xs text-gray-500">用于统计支出和生成仪表盘</p>
         </div>
 
-        <div class="mb-4 flex items-center space-x-6">
-          <label class="lunar-toggle">
-            <input type="checkbox" id="showLunar" class="form-checkbox h-4 w-4 text-indigo-600">
-            <span class="text-gray-700">显示农历日期</span>
-          </label>
-          <label class="lunar-toggle">
-            <input type="checkbox" id="useLunar" class="form-checkbox h-4 w-4 text-indigo-600">
-            <span class="text-gray-700">周期按农历</span>
-          </label>
-        </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div class="md:col-span-2">
             <label for="startDate" class="block text-sm font-medium text-gray-700 mb-1">开始日期</label>
             <div class="relative">
               <input type="text" id="startDate"
-                class="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="YYYY-MM-DD 或点击右侧图标选择">
+                class="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+                placeholder="YYYY-MM-DD">
               <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                 <i class="fas fa-calendar text-gray-400"></i>
               </div>
-                              <div id="startDatePicker" class="custom-date-picker hidden absolute top-full left-0 z-50 bg-white border border-gray-300 rounded-md shadow-lg p-6 min-w-[380px]">
+               <div id="startDatePicker" class="custom-date-picker hidden absolute top-full left-0 z-50 bg-white border border-gray-300 rounded-md shadow-lg p-4 w-full">
                   <div class="flex justify-between items-center mb-4">
-                    <button type="button" id="startDatePrevMonth" class="text-gray-600 hover:text-gray-800">
-                      <i class="fas fa-chevron-left"></i>
-                    </button>
+                    <button type="button" id="startDatePrevMonth" class="text-gray-600 hover:text-gray-800"><i class="fas fa-chevron-left"></i></button>
                     <div class="flex items-center space-x-2">
                       <span id="startDateMonth" class="font-medium text-gray-900 cursor-pointer hover:text-indigo-600">1月</span>
                       <span class="text-gray-400">|</span>
                       <span id="startDateYear" class="font-medium text-gray-900 cursor-pointer hover:text-indigo-600">2024</span>
                     </div>
-                    <button type="button" id="startDateNextMonth" class="text-gray-600 hover:text-gray-800">
-                      <i class="fas fa-chevron-right"></i>
-                    </button>
+                    <button type="button" id="startDateNextMonth" class="text-gray-600 hover:text-gray-800"><i class="fas fa-chevron-right"></i></button>
                   </div>
-                  
-                  <!-- 月份选择器 -->
-                  <div id="startDateMonthPicker" class="hidden mb-4">
-                    <div class="flex justify-between items-center mb-3">
-                      <span class="font-medium text-gray-900">选择月份</span>
-                      <button type="button" id="startDateBackToCalendar" class="text-gray-600 hover:text-gray-800">
-                        <i class="fas fa-times"></i>
-                      </button>
-                    </div>
-                    <div class="grid grid-cols-3 gap-2">
-                      <button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="0">1月</button>
-                      <button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="1">2月</button>
-                      <button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="2">3月</button>
-                      <button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="3">4月</button>
-                      <button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="4">5月</button>
-                      <button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="5">6月</button>
-                      <button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="6">7月</button>
-                      <button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="7">8月</button>
-                      <button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="8">9月</button>
-                      <button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="9">10月</button>
-                      <button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="10">11月</button>
-                      <button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="11">12月</button>
-                    </div>
-                  </div>
-                  
-                  <!-- 年份选择器 -->
-                  <div id="startDateYearPicker" class="hidden mb-4">
-                    <div class="flex justify-between items-center mb-3">
-                      <span class="font-medium text-gray-900">选择年份</span>
-                      <button type="button" id="startDateBackToCalendarFromYear" class="text-gray-600 hover:text-gray-800">
-                        <i class="fas fa-times"></i>
-                      </button>
-                    </div>
-                    <div class="flex justify-between items-center mb-3">
-                      <button type="button"  id="startDatePrevYearDecade" class="text-gray-600 hover:text-gray-800">
-                        <i class="fas fa-chevron-left"></i>
-                      </button>
-                      <span id="startDateYearRange" class="font-medium text-gray-900">2020-2029</span>
-                      <button type="button"  id="startDateNextYearDecade" class="text-gray-600 hover:text-gray-800">
-                        <i class="fas fa-chevron-right"></i>
-                      </button>
-                    </div>
-                    <div id="startDateYearGrid" class="grid grid-cols-3 gap-2">
-                      <!-- 年份按钮将通过JavaScript动态生成 -->
-                    </div>
-                  </div>
-                  
-                  <div class="grid grid-cols-7 gap-2 mb-3">
-                    <div class="text-center text-sm font-semibold text-gray-600 py-2">日</div>
-                    <div class="text-center text-sm font-semibold text-gray-600 py-2">一</div>
-                    <div class="text-center text-sm font-semibold text-gray-600 py-2">二</div>
-                    <div class="text-center text-sm font-semibold text-gray-600 py-2">三</div>
-                    <div class="text-center text-sm font-semibold text-gray-600 py-2">四</div>
-                    <div class="text-center text-sm font-semibold text-gray-600 py-2">五</div>
-                    <div class="text-center text-sm font-semibold text-gray-600 py-2">六</div>
-                  </div>
-                  <div id="startDateCalendar" class="grid grid-cols-7 gap-2"></div>
-                  
-                  <!-- 回到今天按钮 -->
-                  <div class="mt-4 pt-3 border-t border-gray-200">
-                    <button type="button" id="startDateGoToToday" class="w-full px-3 py-2 text-sm text-indigo-600 hover:bg-indigo-50 rounded-md">
-                      <i class="fas fa-calendar-day mr-2"></i>回到今天
-                    </button>
-                  </div>
-                </div>
+                  <div id="startDateMonthPicker" class="hidden mb-4"><div class="flex justify-between items-center mb-3"><span class="font-medium text-gray-900">选择月份</span><button type="button" id="startDateBackToCalendar" class="text-gray-600 hover:text-gray-800"><i class="fas fa-times"></i></button></div><div class="grid grid-cols-3 gap-2"><button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="0">1月</button><button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="1">2月</button><button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="2">3月</button><button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="3">4月</button><button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="4">5月</button><button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="5">6月</button><button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="6">7月</button><button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="7">8月</button><button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="8">9月</button><button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="9">10月</button><button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="10">11月</button><button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="11">12月</button></div></div>
+                  <div id="startDateYearPicker" class="hidden mb-4"><div class="flex justify-between items-center mb-3"><span class="font-medium text-gray-900">选择年份</span><button type="button" id="startDateBackToCalendarFromYear" class="text-gray-600 hover:text-gray-800"><i class="fas fa-times"></i></button></div><div class="flex justify-between items-center mb-3"><button type="button"  id="startDatePrevYearDecade" class="text-gray-600 hover:text-gray-800"><i class="fas fa-chevron-left"></i></button><span id="startDateYearRange" class="font-medium text-gray-900">2020-2029</span><button type="button"  id="startDateNextYearDecade" class="text-gray-600 hover:text-gray-800"><i class="fas fa-chevron-right"></i></button></div><div id="startDateYearGrid" class="grid grid-cols-3 gap-2"></div></div>
+                  <div class="grid grid-cols-7 gap-2 mb-3"><div class="text-center text-sm font-semibold text-gray-600 py-2">日</div><div class="text-center text-sm font-semibold text-gray-600 py-2">一</div><div class="text-center text-sm font-semibold text-gray-600 py-2">二</div><div class="text-center text-sm font-semibold text-gray-600 py-2">三</div><div class="text-center text-sm font-semibold text-gray-600 py-2">四</div><div class="text-center text-sm font-semibold text-gray-600 py-2">五</div><div class="text-center text-sm font-semibold text-gray-600 py-2">六</div></div><div id="startDateCalendar" class="grid grid-cols-7 gap-2"></div>
+                  <div class="mt-4 pt-3 border-t border-gray-200"><button type="button" id="startDateGoToToday" class="w-full px-3 py-2 text-sm text-indigo-600 hover:bg-indigo-50 rounded-md"><i class="fas fa-calendar-day mr-2"></i>回到今天</button></div>
+               </div>
             </div>
-            <div id="startDateLunar" class="lunar-display"></div>
-            <div class="error-message text-red-500"></div>
+            <div id="startDateLunar" class="lunar-display pl-1"></div>
           </div>
           
           <div>
             <label for="periodValue" class="block text-sm font-medium text-gray-700 mb-1">周期数值 *</label>
             <input type="number" id="periodValue" min="1" value="1" required
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-            <div class="error-message text-red-500"></div>
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white">
           </div>
           
           <div>
             <label for="periodUnit" class="block text-sm font-medium text-gray-700 mb-1">周期单位 *</label>
             <select id="periodUnit" required
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white">
               <option value="day">天</option>
               <option value="month" selected>月</option>
               <option value="year">年</option>
             </select>
-            <div class="error-message text-red-500"></div>
           </div>
         </div>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label for="expiryDate" class="block text-sm font-medium text-gray-700 mb-1">到期日期 *</label>
-            <div class="relative">
-              <input type="text" id="expiryDate" required
-                class="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="YYYY-MM-DD 或点击右侧图标选择">
-              <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <i class="fas fa-calendar text-gray-400"></i>
-              </div>
-              <div id="expiryDatePicker" class="custom-date-picker hidden absolute top-full left-0 z-50 bg-white border border-gray-300 rounded-md shadow-lg p-6 min-w-[380px]">
-                <div class="flex justify-between items-center mb-4">
-                  <button type="button" id="expiryDatePrevMonth" class="text-gray-600 hover:text-gray-800">
-                    <i class="fas fa-chevron-left"></i>
-                  </button>
-                  <div class="flex items-center space-x-2">
-                    <span id="expiryDateMonth" class="font-medium text-gray-900 cursor-pointer hover:text-indigo-600">1月</span>
-                    <span class="text-gray-400">|</span>
-                    <span id="expiryDateYear" class="font-medium text-gray-900 cursor-pointer hover:text-indigo-600">2024</span>
-                  </div>
-                  <button type="button" id="expiryDateNextMonth" class="text-gray-600 hover:text-gray-800">
-                    <i class="fas fa-chevron-right"></i>
-                  </button>
+              <label for="expiryDate" class="block text-sm font-medium text-gray-700 mb-1">到期日期 *</label>
+              <div class="relative">
+                <input type="text" id="expiryDate" required
+                  class="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+                  placeholder="YYYY-MM-DD">
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                  <i class="fas fa-calendar text-gray-400"></i>
                 </div>
-                
-                <!-- 月份选择器 -->
-                <div id="expiryDateMonthPicker" class="hidden mb-4">
-                  <div class="flex justify-between items-center mb-3">
-                    <span class="font-medium text-gray-900">选择月份</span>
-                    <button type="button" id="expiryDateBackToCalendar" class="text-gray-600 hover:text-gray-800">
-                      <i class="fas fa-times"></i>
-                    </button>
-                  </div>
-                  <div class="grid grid-cols-3 gap-2">
-                    <button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="0">1月</button>
-                    <button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="1">2月</button>
-                    <button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="2">3月</button>
-                    <button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="3">4月</button>
-                    <button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="4">5月</button>
-                    <button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="5">6月</button>
-                    <button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="6">7月</button>
-                    <button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="7">8月</button>
-                    <button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="8">9月</button>
-                    <button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="9">10月</button>
-                    <button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="10">11月</button>
-                    <button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="11">12月</button>
-                  </div>
-                </div>
-                
-                <!-- 年份选择器 -->
-                <div id="expiryDateYearPicker" class="hidden mb-4">
-                  <div class="flex justify-between items-center mb-3">
-                    <span class="font-medium text-gray-900">选择年份</span>
-                    <button type="button" id="expiryDateBackToCalendarFromYear" class="text-gray-600 hover:text-gray-800">
-                      <i class="fas fa-times"></i>
-                    </button>
-                  </div>
-                  <div class="flex justify-between items-center mb-3">
-                    <button  type="button" id="expiryDatePrevYearDecade" class="text-gray-600 hover:text-gray-800">
-                      <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <span id="expiryDateYearRange" class="font-medium text-gray-900">2020-2029</span>
-                    <button  type="button"  id="expiryDateNextYearDecade" class="text-gray-600 hover:text-gray-800">
-                      <i class="fas fa-chevron-right"></i>
-                    </button>
-                  </div>
-                  <div id="expiryDateYearGrid" class="grid grid-cols-3 gap-2">
-                    <!-- 年份按钮将通过JavaScript动态生成 -->
-                  </div>
-                </div>
-                
-                <div class="grid grid-cols-7 gap-2 mb-3">
-                  <div class="text-center text-sm font-semibold text-gray-600 py-2">日</div>
-                  <div class="text-center text-sm font-semibold text-gray-600 py-2">一</div>
-                  <div class="text-center text-sm font-semibold text-gray-600 py-2">二</div>
-                  <div class="text-center text-sm font-semibold text-gray-600 py-2">三</div>
-                  <div class="text-center text-sm font-semibold text-gray-600 py-2">四</div>
-                  <div class="text-center text-sm font-semibold text-gray-600 py-2">五</div>
-                  <div class="text-center text-sm font-semibold text-gray-600 py-2">六</div>
-                </div>
-                <div id="expiryDateCalendar" class="grid grid-cols-7 gap-2"></div>
-                
-                <!-- 回到今天按钮 -->
-                <div class="mt-4 pt-3 border-t border-gray-200">
-                  <button type="button" id="expiryDateGoToToday" class="w-full px-3 py-2 text-sm text-indigo-600 hover:bg-indigo-50 rounded-md">
-                    <i class="fas fa-calendar-day mr-2"></i>回到今天
-                  </button>
+                <div id="expiryDatePicker" class="custom-date-picker hidden absolute top-full left-0 z-50 bg-white border border-gray-300 rounded-md shadow-lg p-4 w-full">
+                    <div class="flex justify-between items-center mb-4">
+                      <button type="button" id="expiryDatePrevMonth" class="text-gray-600 hover:text-gray-800"><i class="fas fa-chevron-left"></i></button>
+                      <div class="flex items-center space-x-2"><span id="expiryDateMonth" class="font-medium text-gray-900 cursor-pointer hover:text-indigo-600">1月</span><span class="text-gray-400">|</span><span id="expiryDateYear" class="font-medium text-gray-900 cursor-pointer hover:text-indigo-600">2024</span></div>
+                      <button type="button" id="expiryDateNextMonth" class="text-gray-600 hover:text-gray-800"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <div id="expiryDateMonthPicker" class="hidden mb-4"><div class="flex justify-between items-center mb-3"><span class="font-medium text-gray-900">选择月份</span><button type="button" id="expiryDateBackToCalendar" class="text-gray-600 hover:text-gray-800"><i class="fas fa-times"></i></button></div><div class="grid grid-cols-3 gap-2"><button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="0">1月</button><button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="1">2月</button><button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="2">3月</button><button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="3">4月</button><button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="4">5月</button><button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="5">6月</button><button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="6">7月</button><button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="7">8月</button><button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="8">9月</button><button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="9">10月</button><button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="10">11月</button><button type="button" class="month-option px-3 py-2 text-sm rounded hover:bg-gray-100" data-month="11">12月</button></div></div>
+                    <div id="expiryDateYearPicker" class="hidden mb-4"><div class="flex justify-between items-center mb-3"><span class="font-medium text-gray-900">选择年份</span><button type="button" id="expiryDateBackToCalendarFromYear" class="text-gray-600 hover:text-gray-800"><i class="fas fa-times"></i></button></div><div class="flex justify-between items-center mb-3"><button type="button" id="expiryDatePrevYearDecade" class="text-gray-600 hover:text-gray-800"><i class="fas fa-chevron-left"></i></button><span id="expiryDateYearRange" class="font-medium text-gray-900">2020-2029</span><button type="button" id="expiryDateNextYearDecade" class="text-gray-600 hover:text-gray-800"><i class="fas fa-chevron-right"></i></button></div><div id="expiryDateYearGrid" class="grid grid-cols-3 gap-2"></div></div>
+                    <div class="grid grid-cols-7 gap-2 mb-3"><div class="text-center text-sm font-semibold text-gray-600 py-2">日</div><div class="text-center text-sm font-semibold text-gray-600 py-2">一</div><div class="text-center text-sm font-semibold text-gray-600 py-2">二</div><div class="text-center text-sm font-semibold text-gray-600 py-2">三</div><div class="text-center text-sm font-semibold text-gray-600 py-2">四</div><div class="text-center text-sm font-semibold text-gray-600 py-2">五</div><div class="text-center text-sm font-semibold text-gray-600 py-2">六</div></div><div id="expiryDateCalendar" class="grid grid-cols-7 gap-2"></div>
+                    <div class="mt-4 pt-3 border-t border-gray-200"><button type="button" id="expiryDateGoToToday" class="w-full px-3 py-2 text-sm text-indigo-600 hover:bg-indigo-50 rounded-md"><i class="fas fa-calendar-day mr-2"></i>回到今天</button></div>
                 </div>
               </div>
-            </div>
-            <div id="expiryDateLunar" class="lunar-display"></div>
-            <div class="error-message text-red-500"></div>
-            <div class="flex justify-end mt-2">
-              <button type="button" id="calculateExpiryBtn" 
-                class="btn-primary text-white px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap">
+              <div id="expiryDateLunar" class="lunar-display pl-1 mb-1"></div>
+              <div class="error-message text-red-500" data-for="expiryDate"></div>
+          </div>
+
+          <div class="flex items-start">
+              <button type="button" id="calculateExpiryBtn" class="mt-6 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md shadow-sm text-sm font-medium transition-colors flex items-center justify-center h-[42px] whitespace-nowrap">
                 <i class="fas fa-calculator mr-2"></i>自动计算到期日期
               </button>
-            </div>
           </div>
         </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label for="reminderValue" class="block text-sm font-medium text-gray-700 mb-1">提醒提前量</label>
-            <div class="flex space-x-3">
-              <input type="number" id="reminderValue" min="0" value="7"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-              <select id="reminderUnit"
-                class="w-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white">
-                <option value="day" selected>天</option>
-                <option value="hour">小时</option>
-              </select>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="reminderValue" class="block text-sm font-medium text-gray-700 mb-1">提醒提前量</label>
+              <div class="flex space-x-2">
+                <div class="relative flex-1">
+                  <input type="number" id="reminderValue" min="0" value="7"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                </div>
+                <div class="w-24 shrink-0">
+                  <select id="reminderUnit"
+                    class="w-full px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                    <option value="day" selected>天</option>
+                    <option value="hour">小时</option>
+                  </select>
+                </div>
+              </div>
+               <div class="error-message text-red-500" data-for="reminderValue"></div>
+               <p class="mt-2 text-xs text-gray-500 leading-tight">
+                 0 = 仅在到期时提醒; 选择"小时"需要将 Worker 定时任务调整为小时级执行
+               </p>
             </div>
-            <p class="text-xs text-gray-500 mt-1">0 = 仅在到期时提醒；选择“小时”需要将 Worker 定时任务调整为小时级执行</p>
-            <div class="error-message text-red-500"></div>
-          </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-3">选项设置</label>
-            <div class="space-y-2">
-              <label class="inline-flex items-center">
-                <input type="checkbox" id="isActive" checked 
-                  class="form-checkbox h-4 w-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500">
-                <span class="ml-2 text-sm text-gray-700">启用订阅</span>
-              </label>
-              <label class="inline-flex items-center">
-                <input type="checkbox" id="autoRenew" checked 
-                  class="form-checkbox h-4 w-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500">
-                <span class="ml-2 text-sm text-gray-700">自动续订</span>
-              </label>
+
+            <div>
+               <label class="block text-sm font-medium text-gray-700 mb-3">选项设置</label>
+               <div class="flex items-center space-x-6">
+                  <label class="inline-flex items-center cursor-pointer select-none group">
+                    <input type="checkbox" id="isActive" checked 
+                      class="form-checkbox h-5 w-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 transition duration-150 ease-in-out">
+                    <span class="ml-2 text-sm text-gray-700 font-medium group-hover:text-indigo-700">启用订阅</span>
+                  </label>
+                  
+                  <label class="inline-flex items-center cursor-pointer select-none group">
+                    <input type="checkbox" id="autoRenew" checked 
+                      class="form-checkbox h-5 w-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 transition duration-150 ease-in-out">
+                    <span class="ml-2 text-sm text-gray-700 font-medium group-hover:text-indigo-700">自动续订</span>
+                  </label>
+               </div>
             </div>
-          </div>
         </div>
-        
+
         <div>
           <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">备注</label>
-          <textarea id="notes" rows="3" placeholder="可添加相关备注信息..."
+          <textarea id="notes" rows="2" placeholder="可添加相关备注信息..."
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"></textarea>
           <div class="error-message text-red-500"></div>
         </div>
         
+        <input type="hidden" id="subscriptionId">
+
         <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
           <button type="button" id="cancelBtn" 
-            class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+            class="px-5 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 bg-white transition-colors">
             取消
           </button>
           <button type="submit" 
-            class="btn-primary text-white px-4 py-2 rounded-md text-sm font-medium">
+            class="btn-primary text-white px-6 py-2 rounded-md text-sm font-medium shadow-md hover:shadow-lg transform active:scale-95 transition-all">
             <i class="fas fa-save mr-2"></i>保存
           </button>
         </div>
@@ -1539,8 +1457,6 @@ const lunarBiz = {
     return Math.ceil((date - now) / (1000 * 60 * 60 * 24));
   }
 };
-
-
 
     // 农历显示相关函数
     function updateLunarDisplay(dateInputId, lunarDisplayId) {
@@ -1861,12 +1777,20 @@ const lunarBiz = {
       const keyword = searchInput ? searchInput.value.trim().toLowerCase() : '';
       const categorySelect = document.getElementById('categoryFilter');
       const selectedCategory = categorySelect ? categorySelect.value.trim().toLowerCase() : '';
+      const modeSelect = document.getElementById('modeFilter');
+      const selectedMode = modeSelect ? modeSelect.value : '';
 
       let filtered = Array.isArray(subscriptionsCache) ? [...subscriptionsCache] : [];
 
       if (selectedCategory) {
         filtered = filtered.filter(subscription =>
           normalizeCategoryTokens(subscription.category).some(token => token.toLowerCase() === selectedCategory)
+        );
+      }
+      
+      if (selectedMode) {
+        filtered = filtered.filter(subscription => 
+          (subscription.subscriptionMode || 'cycle') === selectedMode
         );
       }
 
@@ -1882,15 +1806,37 @@ const lunarBiz = {
         });
       }
 
+      // 清空表格
+      tbody.innerHTML = '';
+
       if (filtered.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-gray-500">没有符合条件的订阅</td></tr>';
         return;
       }
 
       filtered.sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
-      tbody.innerHTML = '';
 
       const currentTime = new Date();
+      // 将 Intl 对象实例化移出循环，避免重复创建（极大提升性能）
+      const currentDtf = new Intl.DateTimeFormat('en-US', {
+          timeZone: globalTimezone,
+          hour12: false,
+          year: 'numeric', month: '2-digit', day: '2-digit'
+      });
+      // 获取当前时区的午夜时间戳（复用）
+      const currentParts = currentDtf.formatToParts(currentTime);
+      const getCurrent = type => Number(currentParts.find(x => x.type === type).value);
+      const currentDateInTimezone = Date.UTC(getCurrent('year'), getCurrent('month') - 1, getCurrent('day'), 0, 0, 0);
+
+      const displayDtf = new Intl.DateTimeFormat('zh-CN', {
+        timeZone: globalTimezone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      });
+
+      // 使用 DocumentFragment 进行批量插入，减少页面重绘（移动端性能关键）
+      const fragment = document.createDocumentFragment();
 
       filtered.forEach(subscription => {
         const row = document.createElement('tr');
@@ -1901,21 +1847,9 @@ const lunarBiz = {
           : '<div class="text-xs text-gray-600 mt-1">日历类型：公历</div>';
 
         const expiryDate = new Date(subscription.expiryDate);
-        const currentDtf = new Intl.DateTimeFormat('en-US', {
-          timeZone: globalTimezone,
-          hour12: false,
-          year: 'numeric', month: '2-digit', day: '2-digit'
-        });
-        const currentParts = currentDtf.formatToParts(currentTime);
-        const getCurrent = type => Number(currentParts.find(x => x.type === type).value);
-        const currentDateInTimezone = Date.UTC(getCurrent('year'), getCurrent('month') - 1, getCurrent('day'), 0, 0, 0);
-
-        const expiryDtf = new Intl.DateTimeFormat('en-US', {
-          timeZone: globalTimezone,
-          hour12: false,
-          year: 'numeric', month: '2-digit', day: '2-digit'
-        });
-        const expiryParts = expiryDtf.formatToParts(expiryDate);
+        
+        // 计算到期天数
+        const expiryParts = currentDtf.formatToParts(expiryDate);
         const getExpiry = type => Number(expiryParts.find(x => x.type === type).value);
         const expiryDateInTimezone = Date.UTC(getExpiry('year'), getExpiry('month') - 1, getExpiry('day'), 0, 0, 0);
 
@@ -1946,16 +1880,16 @@ const lunarBiz = {
         }
 
         const autoRenewIcon = subscription.autoRenew !== false
-          ? '<i class="fas fa-sync-alt text-blue-500 ml-1" title="自动续订"></i>'
-          : '<i class="fas fa-ban text-gray-400 ml-1" title="不自动续订"></i>';
+          ? '<i class="fas fa-sync-alt text-blue-500 mr-1" title="自动续订"></i>'
+          : '<i class="fas fa-ban text-gray-400 mr-1" title="不自动续订"></i>';
 
         let lunarExpiryText = '';
         let startLunarText = '';
+        
+        // 农历计算只在需要时执行，且简化逻辑
         if (showLunar) {
-          // 【修复】列表显示农历时，直接解析字符串年月日，避免 new Date() 时区偏移导致少一天
           const getLunarParts = (dateStr) => {
             if (!dateStr) return null;
-            // 兼容 ISO 格式 (2025-07-25T00:00:00.000Z) 和 普通日期格式 (2025-07-25)
             const datePart = dateStr.split('T')[0]; 
             const parts = datePart.split('-');
             if (parts.length !== 3) return null;
@@ -1997,9 +1931,14 @@ const lunarBiz = {
           }
         }
 
+        // 构造HTML字符串 (减少了函数调用)
         const nameHtml = createHoverText(subscription.name, 20, 'text-sm font-medium text-gray-900');
         const typeHtml = createHoverText(subscription.customType || '其他', 15, 'text-sm text-gray-900');
         const periodHtml = periodText ? createHoverText('周期: ' + periodText, 20, 'text-xs text-gray-500 mt-1') : '';
+        const modeLabel = (subscription.subscriptionMode === 'reset') ? '到期重置' : '循环订阅';
+        const modeIconClass = (subscription.subscriptionMode === 'reset') ? 'fa-hourglass-end' : 'fa-sync';
+        const modeColorClass = (subscription.subscriptionMode === 'reset') ? 'text-orange-500' : 'text-blue-500';
+        const modeHtml = '<div class="text-xs ' + modeColorClass + ' mt-1"><i class="fas ' + modeIconClass + ' mr-1"></i>' + modeLabel + '</div>';
 
         const categoryTokens = normalizeCategoryTokens(subscription.category);
         const categoryHtml = categoryTokens.length
@@ -2008,16 +1947,8 @@ const lunarBiz = {
             ).join('') + '</div>'
           : '';
 
-        function formatDateInTimezone(date, timezone) {
-          return date.toLocaleDateString('zh-CN', {
-            timeZone: timezone,
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit'
-          });
-        }
-
-        const expiryDateText = formatDateInTimezone(new Date(subscription.expiryDate), globalTimezone);
+        // 复用外部的 format 对象
+        const expiryDateText = displayDtf.format(new Date(subscription.expiryDate));
         const lunarHtml = lunarExpiryText ? createHoverText('农历: ' + lunarExpiryText, 25, 'text-xs text-blue-600 mt-1') : '';
 
         let daysLeftText = '';
@@ -2037,7 +1968,7 @@ const lunarBiz = {
         }
 
         const startDateText = subscription.startDate
-          ? '开始: ' + formatDateInTimezone(new Date(subscription.startDate), globalTimezone) + (startLunarText ? ' (' + startLunarText + ')' : '')
+          ? '开始: ' + displayDtf.format(new Date(subscription.startDate)) + (startLunarText ? ' (' + startLunarText + ')' : '')
           : '';
         const startDateHtml = startDateText ? createHoverText(startDateText, 30, 'text-xs text-gray-500 mt-1') : '';
 
@@ -2069,7 +2000,8 @@ const lunarBiz = {
               '<i class="fas fa-layer-group text-gray-400"></i>' +
               typeHtml +
             '</div>' +
-            (periodHtml ? '<div class="flex items-center gap-1">' + periodHtml + autoRenewIcon + '</div>' : '') +
+            (periodHtml ? '<div class="flex items-center gap-1">' + autoRenewIcon + periodHtml + '</div>' : '') +
+            modeHtml +
             categoryHtml +
             calendarTypeHtml +
           '</div></td>' +
@@ -2099,9 +2031,10 @@ const lunarBiz = {
             '</div>' +
           '</td>';
 
-        tbody.appendChild(row);
+        fragment.appendChild(row);
       });
 
+      tbody.appendChild(fragment);
       document.querySelectorAll('.edit').forEach(button => {
         button.addEventListener('click', editSubscription);
       });
@@ -2126,7 +2059,9 @@ const lunarBiz = {
         button.addEventListener('click', viewPaymentHistory);
       });
 
-      attachHoverListeners();
+      if (window.matchMedia('(hover: hover)').matches) {
+          attachHoverListeners();
+      }
     }
 
     const searchInput = document.getElementById('searchKeyword');
@@ -2140,6 +2075,11 @@ const lunarBiz = {
     const categorySelect = document.getElementById('categoryFilter');
     if (categorySelect) {
       categorySelect.addEventListener('change', () => renderSubscriptionTable());
+    }
+
+    const modeSelect = document.getElementById('modeFilter');
+    if (modeSelect) {
+      modeSelect.addEventListener('change', () => renderSubscriptionTable());
     }
 
     // 获取所有订阅并按到期时间排序
@@ -2221,20 +2161,15 @@ const lunarBiz = {
         let currentExpiryDisplay = '无';
         if (subscription.expiryDate) {
             const datePart = subscription.expiryDate.split('T')[0];
-            
             currentExpiryDisplay = datePart;
-            
-            // 只有当订阅类型明确为“使用农历”时，才计算并显示农历日期文本
             if (subscription.useLunar) {
                 try {
                     const parts = datePart.split('-');
                     const y = parseInt(parts[0], 10);
                     const m = parseInt(parts[1], 10);
                     const d = parseInt(parts[2], 10);
-                    
                     const lunarObj = lunarCalendar.solar2lunar(y, m, d);
                     if (lunarObj) {
-                        // 统一格式
                         currentExpiryDisplay += ' (农历: ' + lunarObj.fullStr + ')';
                     }
                 } catch (e) {
@@ -2254,8 +2189,6 @@ const lunarBiz = {
         const symbol = currencySymbols[currency] || '¥';
         const currencyLabel = "(" + currency + " " + symbol + ")";
         
-        // 【修改点1】农历标记：移除 absolute 定位，改为普通 Flex 布局元素，优化移动端显示
-        // 移除了 absolute top-2 right-2，添加了 shrink-0 防止被压缩
         const lunarBadge = subscription.useLunar ? 
             '<span class="text-sm bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full border border-purple-200 shrink-0">农历周期</span>' : '';
 
@@ -2286,7 +2219,6 @@ const lunarBiz = {
             '            </div>' +
             '' +
             '            <div>' +
-            // 【修改点2】将农历徽标移动到这里，与 label 同行显示
             '                <div class="flex justify-between items-center mb-1">' +
             '                    <label class="block text-sm font-medium text-gray-700">续订周期数</label>' +
             '                    ' + lunarBadge + 
@@ -2300,15 +2232,14 @@ const lunarBiz = {
             '                <p class="mt-1 text-xs text-gray-500">一次性续订多个周期（如12个月）</p>' +
             '            </div>' +
             '' +
-            // 【修改点3】蓝色预览框中移除了原来的 lunarBadge 插入
-            '            <div class="bg-blue-50 rounded-lg p-3 relative">' +
-            '                <div class="flex justify-start items-center text-sm mb-2 gap-3">' +
-            '                    <span class="text-gray-600 whitespace-nowrap">当前到期:</span>' +
-            '                    <div class="font-medium break-all">' + currentExpiryDisplay + '</div>' + // 增加了 break-all 防止超长日期撑破布局
+            '            <div class="bg-blue-50 rounded-lg p-4 mb-4">' +
+            '                <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-3 sm:mb-2">' +
+            '                    <span class="text-gray-500 text-sm shrink-0">当前到期:</span>' +
+            '                    <span class="font-medium text-gray-900 text-sm break-words">' + currentExpiryDisplay + '</span>' +
             '                </div>' +
-            '                <div class="flex justify-start items-center text-sm gap-3">' +
-            '                    <span class="text-gray-600 whitespace-nowrap">新到期日:</span>' +
-            '                    <div class="font-medium text-blue-600 break-all" id="newExpiryPreview">计算中...</div>' +
+            '                <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">' +
+            '                    <span class="text-gray-500 text-sm shrink-0">新到期日:</span>' +
+            '                    <span class="font-medium text-blue-600 text-sm break-words" id="newExpiryPreview">计算中...</span>' +
             '                </div>' +
             '            </div>' +
             '' +
@@ -2333,15 +2264,9 @@ const lunarBiz = {
             '</div>';
 
         document.body.insertAdjacentHTML('beforeend', modalHtml);
-
-        // 保存订阅信息到表单
         document.getElementById('renewForm').dataset.subscriptionId = subscription.id;
         document.getElementById('renewForm').dataset.subscriptionData = JSON.stringify(subscription);
-
-        // 初始化新到期日预览
         updateNewExpiryPreview();
-
-        // 绑定表单提交事件
         document.getElementById('renewForm').addEventListener('submit', handleRenewFormSubmit);
         document.getElementById('renewPeriodMultiplier').addEventListener('input', updateNewExpiryPreview);
     }
@@ -3268,7 +3193,6 @@ const lunarBiz = {
           yearBtn.textContent = year;
           yearBtn.dataset.year = year;
           
-          // 高亮当前年份
           if (year === this.currentDate.getFullYear()) {
             yearBtn.classList.add('bg-indigo-100', 'text-indigo-600');
           }
@@ -3283,9 +3207,7 @@ const lunarBiz = {
           
           this.yearGrid.appendChild(yearBtn);
         }
-      }
-      
-      // 回到今天
+      }     
       goToToday() {
         this.currentDate = new Date();
         this.yearDecade = Math.floor(this.currentDate.getFullYear() / 10) * 10;
@@ -3293,10 +3215,9 @@ const lunarBiz = {
       }
       
       destroy() {
-        this.hide();
+        this.hide();       
         
-        // 清理事件监听器
-        if (this.input && this._forceShowHandler) {
+        if (this.input && this._forceShowHandler) {  // 清理事件监听器
           this.input.removeEventListener('click', this._forceShowHandler);
         }
         if (this.input && this._manualInputHandler) {
@@ -3341,84 +3262,104 @@ const lunarBiz = {
       }
     }
     
-    function setupModalEventListeners() {
-      // 获取DOM元素
-      const calculateExpiryBtn = document.getElementById('calculateExpiryBtn');
+    // === 自定义下拉菜单逻辑 ===
+    const TYPE_OPTIONS = [
+      "流媒体", "视频平台", "音乐平台", "云服务", "软件订阅", 
+      "域名", "服务器", "会员服务", "学习平台", "健身/运动", 
+      "游戏", "新闻/杂志", "生日", "纪念日", "其他"
+    ];
+    
+    const CATEGORY_OPTIONS = [
+      "个人", "家庭", "工作", "公司", "娱乐", "学习", 
+      "开发", "生产力", "社交", "健康", "财务"
+    ];
+
+    function initCustomDropdown(inputId, listId, options) {
+      const input = document.getElementById(inputId);
+      const list = document.getElementById(listId);
+      
+      if (!input || !list) return;
+      list.innerHTML = options.map(opt => 
+        '<div class="dropdown-item">' + opt + '</div>'
+      ).join('');
+      const showList = (e) => {
+        e.stopPropagation();
+        document.querySelectorAll('.custom-dropdown-list').forEach(el => el.classList.remove('show'));
+        list.classList.add('show');
+      };
+
+      input.addEventListener('focus', showList);
+      input.addEventListener('click', showList); // 适配移动端点击
+
+      list.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (e.target.classList.contains('dropdown-item')) {
+          input.value = e.target.textContent;
+          input.dispatchEvent(new Event('input'));
+          list.classList.remove('show');
+        }
+      });
+    }
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.custom-dropdown-wrapper')) {
+        document.querySelectorAll('.custom-dropdown-list').forEach(el => el.classList.remove('show'));
+      }
+    });
+
+    function setupModalEventListeners() {     
+      const calculateExpiryBtn = document.getElementById('calculateExpiryBtn'); // 获取DOM元素
       const useLunar = document.getElementById('useLunar');
       const showLunar = document.getElementById('showLunar');
       const startDate = document.getElementById('startDate');
       const expiryDate = document.getElementById('expiryDate');
       const cancelBtn = document.getElementById('cancelBtn');
       
-      // 直接绑定事件监听器（简化处理，避免重复移除的问题）
-      if (calculateExpiryBtn) {
-        calculateExpiryBtn.addEventListener('click', calculateExpiryDate);
-      }
-      if (useLunar) {
-        useLunar.addEventListener('change', calculateExpiryDate);
-      }
-      if (showLunar) {
-        showLunar.addEventListener('change', toggleLunarDisplay);
-      }
-      if (startDate) {
-        startDate.addEventListener('change', () => updateLunarDisplay('startDate', 'startDateLunar'));
-      }
-      if (expiryDate) {
-        expiryDate.addEventListener('change', () => updateLunarDisplay('expiryDate', 'expiryDateLunar'));
-      }
-      if (cancelBtn) {
-        cancelBtn.addEventListener('click', () => {
-          document.getElementById('subscriptionModal').classList.add('hidden');
-        });
-      }
-      // 为周期相关字段添加事件监听
-      ['startDate', 'periodValue', 'periodUnit'].forEach(id => {
-        const element = document.getElementById(id);
-        if (element) {
-          element.addEventListener('change', calculateExpiryDate);
-        }
+      initCustomDropdown('customType', 'customTypeDropdown', TYPE_OPTIONS); // 初始化自定义下拉菜单
+      initCustomDropdown('category', 'categoryDropdown', CATEGORY_OPTIONS);    
+      
+      if (calculateExpiryBtn) calculateExpiryBtn.addEventListener('click', calculateExpiryDate); // 绑定事件
+      if (useLunar) useLunar.addEventListener('change', calculateExpiryDate);
+      if (showLunar) showLunar.addEventListener('change', toggleLunarDisplay);
+      if (startDate) startDate.addEventListener('change', () => updateLunarDisplay('startDate', 'startDateLunar'));
+      if (expiryDate) expiryDate.addEventListener('change', () => updateLunarDisplay('expiryDate', 'expiryDateLunar'));
+      if (cancelBtn) cancelBtn.addEventListener('click', () => {
+        document.getElementById('subscriptionModal').classList.add('hidden');
       });
 
-      // 初始化自定义日期选择器
+      ['startDate', 'periodValue', 'periodUnit'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) element.addEventListener('change', calculateExpiryDate);
+      });
+      // 初始化日期选择器
       try {
-        // 安全地清理之前的实例
-        if (window.startDatePicker && typeof window.startDatePicker.destroy === 'function') {
-          window.startDatePicker.destroy();
-        }
-        if (window.expiryDatePicker && typeof window.expiryDatePicker.destroy === 'function') {
-          window.expiryDatePicker.destroy();
-        }
+        if (window.startDatePicker && typeof window.startDatePicker.destroy === 'function') window.startDatePicker.destroy();
+        if (window.expiryDatePicker && typeof window.expiryDatePicker.destroy === 'function') window.expiryDatePicker.destroy();
         
-        // 清理全局变量
         window.startDatePicker = null;
         window.expiryDatePicker = null;
         
-        // 确保DOM元素存在后再创建选择器
         setTimeout(() => {
-          console.log('创建开始日期选择器...');
           window.startDatePicker = new CustomDatePicker(
             'startDate', 'startDatePicker', 'startDateCalendar', 
             'startDateMonth', 'startDateYear', 'startDatePrevMonth', 'startDateNextMonth'
           );
-          
-          console.log('创建到期日期选择器...');
           window.expiryDatePicker = new CustomDatePicker(
             'expiryDate', 'expiryDatePicker', 'expiryDateCalendar', 
             'expiryDateMonth', 'expiryDateYear', 'expiryDatePrevMonth', 'expiryDateNextMonth'
           );
-          
-          console.log('日期选择器初始化完成');
         }, 50);
       } catch (error) {
         console.error('初始化日期选择器失败:', error);
-        // 确保清理失败的实例
-        window.startDatePicker = null;
-        window.expiryDatePicker = null;
       }
     }
 
-	// 3. 新增修改， calculateExpiryDate 函数，支持农历周期推算     
+	// 在 script 标签顶部定义全局变量
+  let isEditingLoading = false;
+    // 3. 新增修改， calculateExpiryDate 函数，支持农历周期推算     
 	function calculateExpiryDate() {
+    if (isEditingLoading) return;
+
 	  const startDate = document.getElementById('startDate').value;
 	  const periodValue = parseInt(document.getElementById('periodValue').value);
 	  const periodUnit = document.getElementById('periodUnit').value;
@@ -3478,17 +3419,6 @@ const lunarBiz = {
       document.getElementById('subscriptionModal').classList.add('hidden');
     });
     
-    // 禁止点击弹窗外区域关闭弹窗，防止误操作丢失内容
-    // document.getElementById('subscriptionModal').addEventListener('click', (event) => {
-    //   if (event.target === document.getElementById('subscriptionModal')) {
-    //     document.getElementById('subscriptionModal').classList.add('hidden');
-    //   }
-    // });
-    
-	
-	// 4. 新增修改，监听 useLunar 复选框变化时也自动重新计算
-	// 注意：这个事件监听器已经在 setupModalEventListeners 中处理了   
-   // 新增修改，表单提交时带上 useLunar 字段
     document.getElementById('subscriptionForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       
@@ -3504,6 +3434,7 @@ const lunarBiz = {
         name: document.getElementById('name').value.trim(),
         customType: document.getElementById('customType').value.trim(),
         category: document.getElementById('category').value.trim(),
+        subscriptionMode: document.getElementById('subscriptionMode').value, // 新增修改，表单提交时带上 subscriptionMode 字段
         notes: document.getElementById('notes').value.trim() || '',
         currency: document.getElementById('currency').value, // 新增修改，表单提交时带上 currency 字段
         amount: document.getElementById('amount').value ? parseFloat(document.getElementById('amount').value) : null,
@@ -3565,6 +3496,7 @@ const lunarBiz = {
           document.getElementById('modalTitle').textContent = '编辑订阅';
           document.getElementById('subscriptionId').value = subscription.id;
           document.getElementById('name').value = subscription.name;
+          document.getElementById('subscriptionMode').value = subscription.subscriptionMode || 'cycle'; // 默认为 cycle
           document.getElementById('customType').value = subscription.customType || '';
           document.getElementById('category').value = subscription.category || '';
           document.getElementById('notes').value = subscription.notes || '';
@@ -3610,11 +3542,16 @@ const lunarBiz = {
           setTimeout(() => {
             updateLunarDisplay('startDate', 'startDateLunar');
             updateLunarDisplay('expiryDate', 'expiryDateLunar');
+            // 重要：延迟释放加载锁，等待 DatePicker 初始化触发的 change 事件结束
+            setTimeout(() => {
+                isEditingLoading = false;
+            }, 200);
           }, 100);
         }
       } catch (error) {
         console.error('获取订阅信息失败:', error);
         showToast('获取订阅信息失败', 'error');
+        isEditingLoading = false; // 异常时也要释放锁
       }
     }
     
@@ -3744,6 +3681,11 @@ const lunarBiz = {
           if (el) {
             el.textContent = timeStr + '  ' + tzStr;
           }
+          // 更新移动端显示
+          const mobileEl = document.getElementById('mobileTimeDisplay');
+          if (mobileEl) {
+            mobileEl.textContent = timeStr + ' ' + tzStr;
+          }
         }
         update();
         // 每秒刷新
@@ -3778,6 +3720,28 @@ const lunarBiz = {
       }
     }
     showSystemTime();
+    // --- 新增：移动端菜单控制脚本 ---
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+        const icon = mobileMenuBtn.querySelector('i');
+        if (mobileMenu.classList.contains('hidden')) {
+          icon.classList.remove('fa-times');
+          icon.classList.add('fa-bars');
+        } else {
+          icon.classList.remove('fa-bars');
+          icon.classList.add('fa-times');
+        }
+      });           
+      mobileMenu.querySelectorAll('a').forEach(link => {  // 点击菜单项自动关闭
+        link.addEventListener('click', () => {
+          mobileMenu.classList.add('hidden');
+        });
+      });
+    }
   </script>
 </body>
 </html>
@@ -3828,28 +3792,55 @@ const configPage = `
 <body class="bg-gray-100 min-h-screen">
   <div id="toast-container"></div>
 
-  <nav class="bg-white shadow-md">
+  <nav class="bg-white shadow-md relative z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between h-16">
-        <div class="flex items-center">
-          <i class="fas fa-calendar-check text-indigo-600 text-2xl mr-2"></i>
-          <span class="font-bold text-xl text-gray-800">订阅管理系统</span>
-          <span id="systemTimeDisplay" class="ml-4 text-base text-indigo-600 font-normal"></span>
+        <div class="flex items-center shrink-0">
+          <div class="flex items-center">
+            <i class="fas fa-calendar-check text-indigo-600 text-2xl mr-2"></i>
+            <span class="font-bold text-xl text-gray-800">订阅管理系统</span>
+          </div>
+          <span id="systemTimeDisplay" class="ml-4 text-base text-indigo-600 font-normal hidden md:block pt-1"></span>
         </div>
-        <div class="flex items-center space-x-4">
-          <a href="/admin/dashboard" class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+          
+        <div class="hidden md:flex items-center space-x-4 ml-auto">
+          <a href="/admin/dashboard" class="text-gray-700 hover:text-gray-900 border-b-2 border-transparent hover:border-gray-300 px-3 py-2 rounded-md text-sm font-medium transition">
             <i class="fas fa-chart-line mr-1"></i>仪表盘
           </a>
-          <a href="/admin" class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+          <a href="/admin" class="text-gray-700 hover:text-gray-900 border-b-2 border-transparent hover:border-gray-300 px-3 py-2 rounded-md text-sm font-medium transition">
             <i class="fas fa-list mr-1"></i>订阅列表
           </a>
-          <a href="/admin/config" class="text-indigo-600 border-b-2 border-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
+          <a href="/admin/config" class="text-indigo-600 border-b-2 border-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition">
             <i class="fas fa-cog mr-1"></i>系统配置
           </a>
-          <a href="/api/logout" class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+          <a href="/api/logout" class="text-gray-700 hover:text-red-600 border-b-2 border-transparent hover:border-red-300 px-3 py-2 rounded-md text-sm font-medium transition">
             <i class="fas fa-sign-out-alt mr-1"></i>退出登录
           </a>
         </div>
+
+        <div class="flex items-center md:hidden ml-auto">
+          <button id="mobile-menu-btn" type="button" class="text-gray-600 hover:text-indigo-600 focus:outline-none p-2 rounded-md hover:bg-gray-100 active:bg-gray-200 transition-colors">
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-b border-gray-200 w-full">
+      <div class="px-4 pt-2 pb-4 space-y-2">
+        <div id="mobileTimeDisplay" class="px-3 py-2 text-xs text-indigo-600 text-right border-b border-gray-100 mb-2"></div>
+        <a href="/admin/dashboard" class="block px-3 py-3 rounded-md text-base font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 active:bg-indigo-100 transition-colors">
+          <i class="fas fa-chart-line w-6 text-center mr-2"></i>仪表盘
+        </a>
+        <a href="/admin" class="block px-3 py-3 rounded-md text-base font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 active:bg-indigo-100 transition-colors">
+          <i class="fas fa-list w-6 text-center mr-2"></i>订阅列表
+        </a>
+        <a href="/admin/config" class="block px-3 py-3 rounded-md text-base font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 active:bg-indigo-100 transition-colors">
+          <i class="fas fa-cog w-6 text-center mr-2"></i>系统配置
+        </a>
+        <a href="/api/logout" class="block px-3 py-3 rounded-md text-base font-medium text-gray-700 hover:bg-red-50 hover:text-red-600 active:bg-red-100 transition-colors">
+          <i class="fas fa-sign-out-alt w-6 text-center mr-2"></i>退出登录
+        </a>
       </div>
     </div>
   </nav>
@@ -4640,6 +4631,11 @@ const configPage = `
           if (el) {
             el.textContent = timeStr + '  ' + tzStr;
           }
+          // 更新移动端显示 (新增)
+          const mobileEl = document.getElementById('mobileTimeDisplay');
+          if (mobileEl) {
+            mobileEl.textContent = timeStr + ' ' + tzStr;
+          }
         }
         update();
         // 每秒刷新
@@ -4671,6 +4667,29 @@ const configPage = `
       }
     }
     showSystemTime();
+    // --- 新增：移动端菜单控制脚本 ---
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+        const icon = mobileMenuBtn.querySelector('i');
+        if (mobileMenu.classList.contains('hidden')) {
+          icon.classList.remove('fa-times');
+          icon.classList.add('fa-bars');
+        } else {
+          icon.classList.remove('fa-bars');
+          icon.classList.add('fa-times');
+        }
+      });
+      
+      mobileMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+          mobileMenu.classList.add('hidden');
+        });
+      });
+    }
   </script>
 </body>
 </html>
@@ -4731,27 +4750,55 @@ function dashboardPage() {
   </style>
 </head>
 <body class="bg-gray-50">
-  <nav class="bg-white shadow-md">
+  <nav class="bg-white shadow-md relative z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between h-16">
-        <div class="flex items-center">
-          <i class="fas fa-calendar-check text-indigo-600 text-2xl mr-2"></i>
-          <span class="font-bold text-xl text-gray-800">订阅管理系统</span>
+        <div class="flex items-center shrink-0">
+          <div class="flex items-center">
+            <i class="fas fa-calendar-check text-indigo-600 text-2xl mr-2"></i>
+            <span class="font-bold text-xl text-gray-800">订阅管理系统</span>
+          </div>
+          <span id="systemTimeDisplay" class="ml-4 text-base text-indigo-600 font-normal hidden md:block pt-1"></span>
         </div>
-        <div class="flex items-center space-x-4">
-          <a href="/admin/dashboard" class="text-indigo-600 border-b-2 border-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
+        
+        <div class="hidden md:flex items-center space-x-4 ml-auto">
+          <a href="/admin/dashboard" class="text-indigo-600 border-b-2 border-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition">
             <i class="fas fa-chart-line mr-1"></i>仪表盘
           </a>
-          <a href="/admin" class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+          <a href="/admin" class="text-gray-700 hover:text-gray-900 border-b-2 border-transparent hover:border-gray-300 px-3 py-2 rounded-md text-sm font-medium transition">
             <i class="fas fa-list mr-1"></i>订阅列表
           </a>
-          <a href="/admin/config" class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+          <a href="/admin/config" class="text-gray-700 hover:text-gray-900 border-b-2 border-transparent hover:border-gray-300 px-3 py-2 rounded-md text-sm font-medium transition">
             <i class="fas fa-cog mr-1"></i>系统配置
           </a>
-          <a href="/api/logout" class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+          <a href="/api/logout" class="text-gray-700 hover:text-red-600 border-b-2 border-transparent hover:border-red-300 px-3 py-2 rounded-md text-sm font-medium transition">
             <i class="fas fa-sign-out-alt mr-1"></i>退出登录
           </a>
         </div>
+
+        <div class="flex items-center md:hidden ml-auto">
+          <button id="mobile-menu-btn" type="button" class="text-gray-600 hover:text-indigo-600 focus:outline-none p-2 rounded-md hover:bg-gray-100 active:bg-gray-200 transition-colors">
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-b border-gray-200 w-full">
+      <div class="px-4 pt-2 pb-4 space-y-2">
+        <div id="mobileTimeDisplay" class="px-3 py-2 text-xs text-indigo-600 text-right border-b border-gray-100 mb-2"></div>
+        <a href="/admin/dashboard" class="block px-3 py-3 rounded-md text-base font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 active:bg-indigo-100 transition-colors">
+          <i class="fas fa-chart-line w-6 text-center mr-2"></i>仪表盘
+        </a>
+        <a href="/admin" class="block px-3 py-3 rounded-md text-base font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 active:bg-indigo-100 transition-colors">
+          <i class="fas fa-list w-6 text-center mr-2"></i>订阅列表
+        </a>
+        <a href="/admin/config" class="block px-3 py-3 rounded-md text-base font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 active:bg-indigo-100 transition-colors">
+          <i class="fas fa-cog w-6 text-center mr-2"></i>系统配置
+        </a>
+        <a href="/api/logout" class="block px-3 py-3 rounded-md text-base font-medium text-gray-700 hover:bg-red-50 hover:text-red-600 active:bg-red-100 transition-colors">
+          <i class="fas fa-sign-out-alt w-6 text-center mr-2"></i>退出登录
+        </a>
       </div>
     </div>
   </nav>
@@ -4833,6 +4880,83 @@ function dashboardPage() {
       return currencySymbols[currency] || '¥';
     }
 
+    // 修复：添加全局时区变量和时间显示逻辑
+    let globalTimezone = 'UTC';
+
+    async function showSystemTime() {
+      try {
+        const response = await fetch('/api/config');
+        const config = await response.json();
+        globalTimezone = config.TIMEZONE || 'UTC';
+        
+        function formatTime(dt, tz) {
+          return dt.toLocaleString('zh-CN', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        }
+        function formatTimezoneDisplay(tz) {
+          try {
+            const now = new Date();
+            const dtf = new Intl.DateTimeFormat('en-US', {
+              timeZone: tz,
+              hour12: false,
+              year: 'numeric', month: '2-digit', day: '2-digit',
+              hour: '2-digit', minute: '2-digit', second: '2-digit'
+            });
+            const parts = dtf.formatToParts(now);
+            const get = type => Number(parts.find(x => x.type === type).value);
+            const target = Date.UTC(get('year'), get('month') - 1, get('day'), get('hour'), get('minute'), get('second'));
+            const utc = now.getTime();
+            const offset = Math.round((target - utc) / (1000 * 60 * 60));
+            
+            const timezoneNames = {
+              'UTC': '世界标准时间',
+              'Asia/Shanghai': '中国标准时间',
+              'Asia/Hong_Kong': '香港时间',
+              'Asia/Taipei': '台北时间',
+              'Asia/Singapore': '新加坡时间',
+              'Asia/Tokyo': '日本时间',
+              'Asia/Seoul': '韩国时间',
+              'America/New_York': '美国东部时间',
+              'America/Los_Angeles': '美国太平洋时间',
+              'America/Chicago': '美国中部时间',
+              'America/Denver': '美国山地时间',
+              'Europe/London': '英国时间',
+              'Europe/Paris': '巴黎时间',
+              'Europe/Berlin': '柏林时间',
+              'Europe/Moscow': '莫斯科时间',
+              'Australia/Sydney': '悉尼时间',
+              'Australia/Melbourne': '墨尔本时间',
+              'Pacific/Auckland': '奥克兰时间'
+            };
+            
+            const offsetStr = offset >= 0 ? '+' + offset : offset;
+            const timezoneName = timezoneNames[tz] || tz;
+            return timezoneName + ' (UTC' + offsetStr + ')';
+          } catch (error) {
+            console.error('格式化时区显示失败:', error);
+            return tz;
+          }
+        }
+        function update() {
+          const now = new Date();
+          const timeStr = formatTime(now, globalTimezone);
+          const tzStr = formatTimezoneDisplay(globalTimezone);
+          const el = document.getElementById('systemTimeDisplay');
+          if (el) {
+            el.textContent = timeStr + '  ' + tzStr;
+          }
+          // 更新移动端显示
+          const mobileEl = document.getElementById('mobileTimeDisplay');
+          if (mobileEl) {
+            mobileEl.textContent = timeStr + ' ' + tzStr;
+          }
+        }
+        update();
+        setInterval(update, 1000);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
     async function loadDashboardData(){
       try {
         const r=await fetch('/api/dashboard/stats');
@@ -4894,7 +5018,6 @@ function dashboardPage() {
           </div>
         \`).join('');
         
-        // 支出排行仍然显示 CNY
         const et=document.getElementById('expenseByType');
         et.innerHTML=data.expenseByType.length===0?'<div class="empty-state"><div class="empty-state-icon">📊</div><div class="empty-state-text">暂无支出数据</div></div>':
         data.expenseByType.map((item,i)=>\`
@@ -4933,12 +5056,40 @@ function dashboardPage() {
         document.getElementById('statsGrid').innerHTML='<div class="empty-state"><div class="empty-state-icon">❌</div><div class="empty-state-text">加载失败:'+e.message+'</div></div>';
       }
     }
+    
+    // 初始化时间显示和数据加载
+    showSystemTime();
     loadDashboardData();
     setInterval(loadDashboardData, 60000);
+
+    // --- 移动端菜单控制脚本 ---
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+        const icon = mobileMenuBtn.querySelector('i');
+        if (mobileMenu.classList.contains('hidden')) {
+          icon.classList.remove('fa-times');
+          icon.classList.add('fa-bars');
+        } else {
+          icon.classList.remove('fa-bars');
+          icon.classList.add('fa-times');
+        }
+      });
+      
+      mobileMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+          mobileMenu.classList.add('hidden');
+        });
+      });
+    }
   </script>
 </body>
 </html>`;
 }
+
 function extractTagsFromSubscriptions(subscriptions = []) {
   const tagSet = new Set();
   (subscriptions || []).forEach(sub => {
@@ -5159,13 +5310,14 @@ const api = {
       try {
         const subscriptions = await getAllSubscriptions(env);
         const timezone = config?.TIMEZONE || 'UTC';
-
-        const monthlyExpense = calculateMonthlyExpense(subscriptions, timezone);
-        const yearlyExpense = calculateYearlyExpense(subscriptions, timezone);
-        const recentPayments = getRecentPayments(subscriptions, timezone);
-        const upcomingRenewals = getUpcomingRenewals(subscriptions, timezone);
-        const expenseByType = getExpenseByType(subscriptions, timezone);
-        const expenseByCategory = getExpenseByCategory(subscriptions, timezone);
+        
+        const rates = await getDynamicRates(env); // 获取动态汇率
+        const monthlyExpense = calculateMonthlyExpense(subscriptions, timezone, rates);
+        const yearlyExpense = calculateYearlyExpense(subscriptions, timezone, rates);
+        const recentPayments = getRecentPayments(subscriptions, timezone); // 不需要汇率
+        const upcomingRenewals = getUpcomingRenewals(subscriptions, timezone); // 不需要汇率
+        const expenseByType = getExpenseByType(subscriptions, timezone, rates);
+        const expenseByCategory = getExpenseByCategory(subscriptions, timezone, rates);
 
         const activeSubscriptions = subscriptions.filter(s => s.isActive);
         const now = getCurrentTimeInTimezone(timezone);
@@ -5706,6 +5858,7 @@ async function createSubscription(subscription, env) {
     const newSubscription = {
       id: Date.now().toString(), // 前端使用本地时间戳
       name: subscription.name,
+      subscriptionMode: subscription.subscriptionMode || 'cycle', // 默认循环订阅
       customType: subscription.customType || '',
       category: subscription.category ? subscription.category.trim() : '',
       startDate: subscription.startDate || null,
@@ -5807,15 +5960,11 @@ if (useLunar) {
     };
     const reminderSetting = resolveReminderSetting(reminderSource);
 
-    // --- 新增/修改逻辑开始 ---
-    // 获取旧的订阅信息以便比较
     const oldSubscription = subscriptions[index];
     const newAmount = subscription.amount !== undefined ? subscription.amount : oldSubscription.amount;
     
     let paymentHistory = oldSubscription.paymentHistory || [];
     
-    // 核心修复：如果金额发生了变化，且存在初始支付记录，则同步更新初始支付记录的金额
-    // 这解决了"修改订阅金额后，仪表盘统计不更新"的问题
     if (newAmount !== oldSubscription.amount) {
       const initialPaymentIndex = paymentHistory.findIndex(p => p.type === 'initial');
       if (initialPaymentIndex !== -1) {
@@ -5825,11 +5974,11 @@ if (useLunar) {
         };
       }
     }
-    // --- 新增/修改逻辑结束 ---
 
     subscriptions[index] = {
       ...subscriptions[index],
       name: subscription.name,
+      subscriptionMode: subscription.subscriptionMode || subscriptions[index].subscriptionMode || 'cycle', // 如果没有提供 subscriptionMode，则使用旧的 subscriptionMode
       customType: subscription.customType || subscriptions[index].customType || '',
       category: subscription.category !== undefined ? subscription.category.trim() : (subscriptions[index].category || ''),
       startDate: subscription.startDate || subscriptions[index].startDate,
@@ -5894,39 +6043,62 @@ async function manualRenewSubscription(id, env, options = {}) {
     const config = await getConfig(env);
     const timezone = config?.TIMEZONE || 'UTC';
     const currentTime = getCurrentTimeInTimezone(timezone);
+    const todayMidnight = getTimezoneMidnightTimestamp(currentTime, timezone);
 
-    // 支持自定义参数
+    // 参数处理
     const paymentDate = options.paymentDate ? new Date(options.paymentDate) : currentTime;
     const amount = options.amount !== undefined ? options.amount : subscription.amount || 0;
-    const periodMultiplier = options.periodMultiplier || 1; // 支持续订多个周期
+    const periodMultiplier = options.periodMultiplier || 1;
     const note = options.note || '手动续订';
+    const mode = subscription.subscriptionMode || 'cycle'; // 获取订阅模式
 
-    let expiryDate = new Date(subscription.expiryDate);
-    let newExpiryDate;
+    let newStartDate;
+    let currentExpiryDate = new Date(subscription.expiryDate);
 
-    if (subscription.useLunar) {
-      const lunar = lunarCalendar.solar2lunar(
-        expiryDate.getFullYear(),
-        expiryDate.getMonth() + 1,
-        expiryDate.getDate()
-      );
-      // 支持多周期续订
-      let nextLunar = lunar;
-      for (let i = 0; i < periodMultiplier; i++) {
-        nextLunar = lunarBiz.addLunarPeriod(nextLunar, subscription.periodValue, subscription.periodUnit);
-      }
-      const solar = lunarBiz.lunar2solar(nextLunar);
-      newExpiryDate = new Date(solar.year, solar.month - 1, solar.day);
+    // 1. 确定新的周期起始日 (New Start Date)
+    if (mode === 'reset') {
+      // 重置模式：忽略旧的到期日，从今天（或支付日）开始
+      newStartDate = new Date(paymentDate);
     } else {
-      newExpiryDate = new Date(expiryDate);
-      const totalPeriodValue = subscription.periodValue * periodMultiplier;
-      if (subscription.periodUnit === 'day') {
-        newExpiryDate.setDate(expiryDate.getDate() + totalPeriodValue);
-      } else if (subscription.periodUnit === 'month') {
-        newExpiryDate.setMonth(expiryDate.getMonth() + totalPeriodValue);
-      } else if (subscription.periodUnit === 'year') {
-        newExpiryDate.setFullYear(expiryDate.getFullYear() + totalPeriodValue);
+      // 循环模式 (Cycle)
+      // 如果当前还没过期，从旧的 expiryDate 接着算 (无缝衔接)
+      // 如果已经过期了，为了避免补交过去空窗期的费，通常从今天开始算（或者你可以选择补齐，这里采用通用逻辑：过期则从今天开始）
+      if (currentExpiryDate.getTime() > paymentDate.getTime()) {
+        newStartDate = new Date(currentExpiryDate);
+      } else {
+        newStartDate = new Date(paymentDate);
       }
+    }
+
+    // 2. 计算新的到期日 (New Expiry Date)
+    let newExpiryDate;
+    if (subscription.useLunar) {
+       // 农历逻辑
+       const solarStart = {
+          year: newStartDate.getFullYear(),
+          month: newStartDate.getMonth() + 1,
+          day: newStartDate.getDate()
+       };
+       let lunar = lunarCalendar.solar2lunar(solarStart.year, solarStart.month, solarStart.day);
+       
+       let nextLunar = lunar;
+       for (let i = 0; i < periodMultiplier; i++) {
+          nextLunar = lunarBiz.addLunarPeriod(nextLunar, subscription.periodValue, subscription.periodUnit);
+       }
+       const solar = lunarBiz.lunar2solar(nextLunar);
+       newExpiryDate = new Date(solar.year, solar.month - 1, solar.day);
+    } else {
+       // 公历逻辑
+       newExpiryDate = new Date(newStartDate);
+       const totalPeriodValue = subscription.periodValue * periodMultiplier;
+       
+       if (subscription.periodUnit === 'day') {
+          newExpiryDate.setDate(newExpiryDate.getDate() + totalPeriodValue);
+       } else if (subscription.periodUnit === 'month') {
+          newExpiryDate.setMonth(newExpiryDate.getMonth() + totalPeriodValue);
+       } else if (subscription.periodUnit === 'year') {
+          newExpiryDate.setFullYear(newExpiryDate.getFullYear() + totalPeriodValue);
+       }
     }
 
     const paymentRecord = {
@@ -5935,7 +6107,7 @@ async function manualRenewSubscription(id, env, options = {}) {
       amount: amount,
       type: 'manual',
       note: note,
-      periodStart: expiryDate.toISOString(),
+      periodStart: newStartDate.toISOString(), // 记录实际的计费开始日
       periodEnd: newExpiryDate.toISOString()
     };
 
@@ -5944,6 +6116,7 @@ async function manualRenewSubscription(id, env, options = {}) {
 
     subscriptions[index] = {
       ...subscription,
+      startDate: newStartDate.toISOString(), // 关键修复：更新 startDate，这样下次编辑时，Start + Period = Expiry 成立
       expiryDate: newExpiryDate.toISOString(),
       lastPaymentDate: paymentDate.toISOString(),
       paymentHistory
@@ -6692,226 +6865,219 @@ async function checkExpiringSubscriptions(env) {
     const config = await getConfig(env);
     const timezone = config?.TIMEZONE || 'UTC';
     const currentTime = getCurrentTimeInTimezone(timezone);
-    console.log('[定时任务] 开始检查即将到期的订阅 UTC: ' + new Date().toISOString() + ', ' + timezone + ': ' + currentTime.toLocaleString('zh-CN', {timeZone: timezone}));
+    
+    // 统一计算当天的零点时间，用于比较天数差异
+    const currentMidnight = getTimezoneMidnightTimestamp(currentTime, timezone);
 
-    const currentMidnight = getTimezoneMidnightTimestamp(currentTime, timezone); // 统一计算当天的零点时间，避免多次格式化
+    console.log(`[定时任务] 开始检查 - 当前时间: ${currentTime.toISOString()} (${timezone})`);
 
+    // --- 检查当前小时是否允许发送通知 ---
     const rawNotificationHours = Array.isArray(config.NOTIFICATION_HOURS) ? config.NOTIFICATION_HOURS : [];
     const normalizedNotificationHours = rawNotificationHours
       .map(value => String(value).trim())
       .filter(value => value.length > 0)
       .map(value => value === '*' ? '*' : value.toUpperCase() === 'ALL' ? 'ALL' : value.padStart(2, '0'));
+    
     const allowAllHours = normalizedNotificationHours.includes('*') || normalizedNotificationHours.includes('ALL');
     const hourFormatter = new Intl.DateTimeFormat('en-US', { timeZone: timezone, hour12: false, hour: '2-digit' });
     const currentHour = hourFormatter.format(currentTime);
     const shouldNotifyThisHour = allowAllHours || normalizedNotificationHours.length === 0 || normalizedNotificationHours.includes(currentHour);
 
     const subscriptions = await getAllSubscriptions(env);
-    console.log('[定时任务] 共找到 ' + subscriptions.length + ' 个订阅');
     const expiringSubscriptions = [];
     const updatedSubscriptions = [];
     let hasUpdates = false;
 
-for (const subscription of subscriptions) {
-  if (subscription.isActive === false) {
-    console.log('[定时任务] 订阅 "' + subscription.name + '" 已停用，跳过');
-    continue;
-  }
+    for (const subscription of subscriptions) {
+      // 1. 跳过未启用的订阅
+      if (subscription.isActive === false) {
+        continue;
+      }
 
-  const reminderSetting = resolveReminderSetting(subscription);
-  let diffMs = 0;
-  let diffHours = 0;
-  let daysDiff;
-  if (subscription.useLunar) {
-    const expiryDate = new Date(subscription.expiryDate);
-    let lunar = lunarCalendar.solar2lunar(
-      expiryDate.getFullYear(),
-      expiryDate.getMonth() + 1,
-      expiryDate.getDate()
-    );
-    const solar = lunarBiz.lunar2solar(lunar);
-    const lunarDate = new Date(solar.year, solar.month - 1, solar.day);
-    const lunarMidnight = getTimezoneMidnightTimestamp(lunarDate, timezone);
-    
-    daysDiff = Math.round((lunarMidnight - currentMidnight) / MS_PER_DAY);
+      const reminderSetting = resolveReminderSetting(subscription);
+      
+      // 计算当前剩余时间（基础计算）
+      let expiryDate = new Date(subscription.expiryDate);
+      
+      // 为了准确计算 daysDiff，需要根据农历或公历获取"逻辑上的午夜时间"
+      let expiryMidnight;
+      if (subscription.useLunar) {
+        const lunar = lunarCalendar.solar2lunar(expiryDate.getFullYear(), expiryDate.getMonth() + 1, expiryDate.getDate());
+        // 如果转换失败（超出范围），降级为公历处理
+        if(lunar) {
+             const solar = lunarBiz.lunar2solar(lunar);
+             const lunarDate = new Date(solar.year, solar.month - 1, solar.day);
+             expiryMidnight = getTimezoneMidnightTimestamp(lunarDate, timezone);
+        } else {
+             expiryMidnight = getTimezoneMidnightTimestamp(expiryDate, timezone);
+        }
+      } else {
+        expiryMidnight = getTimezoneMidnightTimestamp(expiryDate, timezone);
+      }
 
-    console.log('[定时任务] 订阅 "' + subscription.name + '" 到期日期: ' + expiryDate.toISOString() + ', 农历转换后午夜时间: ' + new Date(lunarMidnight).toISOString() + ', 剩余天数: ' + daysDiff);
+      let daysDiff = Math.round((expiryMidnight - currentMidnight) / MS_PER_DAY);
+      let diffMs = expiryDate.getTime() - currentTime.getTime();
+      let diffHours = diffMs / MS_PER_HOUR;
 
-    diffMs = expiryDate.getTime() - currentTime.getTime();
-    diffHours = diffMs / MS_PER_HOUR;
+      // ==========================================
+      // 核心逻辑：自动续费处理
+      // ==========================================
+      if (daysDiff < 0 && subscription.periodValue && subscription.periodUnit && subscription.autoRenew !== false) {
+        console.log(`[定时任务] 订阅 "${subscription.name}" 已过期 (${daysDiff}天)，准备自动续费...`);
+        
+        const mode = subscription.subscriptionMode || 'cycle'; // cycle | reset
+        
+        // 1. 确定计算基准点 (Base Point)
+        // newStartDate 将作为新周期的"开始日期"保存到数据库，解决前端编辑时日期错乱问题
+        let newStartDate;
+        
+        if (mode === 'reset') {
+          // Reset 模式：无视过去，从"现在"重新开始
+          // 注意：为了整洁，通常从当天的 00:00 或当前时间开始，这里取 currentTime 保持精确
+          newStartDate = new Date(currentTime);
+        } else {
+          // Cycle 模式：无缝接续，从"旧的到期日"开始
+          newStartDate = new Date(subscription.expiryDate);
+        }
 
-    if (daysDiff < 0 && subscription.periodValue && subscription.periodUnit && subscription.autoRenew !== false) {
-      let nextLunar = lunar;
-      do {
-        nextLunar = lunarBiz.addLunarPeriod(nextLunar, subscription.periodValue, subscription.periodUnit);
-        const solar = lunarBiz.lunar2solar(nextLunar);
-        var newExpiryDate = new Date(solar.year, solar.month - 1, solar.day);
-        const newLunarMidnight = getTimezoneMidnightTimestamp(newExpiryDate, timezone);
-        daysDiff = Math.round((newLunarMidnight - currentMidnight) / MS_PER_DAY);
-        console.log('[定时任务] 订阅 "' + subscription.name + '" 更新到期日期: ' + newExpiryDate.toISOString() + ', 农历转换后午夜时间: ' + new Date(newLunarMidnight).toISOString() + ', 剩余天数: ' + daysDiff);
-      } while (daysDiff < 0);
+        // 2. 计算新的到期日 (循环补齐直到未来)
+        let newExpiryDate = new Date(newStartDate); // 初始化
+        let periodsAdded = 0;
 
-      diffMs = newExpiryDate.getTime() - currentTime.getTime();
-      diffHours = diffMs / MS_PER_HOUR;
+        // 定义增加一个周期的函数 (同时处理 newStartDate 和 newExpiryDate 的推进)
+        const addOnePeriod = (baseDate) => {
+           let targetDate; 
+           if (subscription.useLunar) {
+              const solarBase = { year: baseDate.getFullYear(), month: baseDate.getMonth() + 1, day: baseDate.getDate() };
+              let lunarBase = lunarCalendar.solar2lunar(solarBase.year, solarBase.month, solarBase.day);
+              // 农历加周期
+              let nextLunar = lunarBiz.addLunarPeriod(lunarBase, subscription.periodValue, subscription.periodUnit);
+              const solarNext = lunarBiz.lunar2solar(nextLunar);
+              targetDate = new Date(solarNext.year, solarNext.month - 1, solarNext.day);
+           } else {
+              targetDate = new Date(baseDate);
+              if (subscription.periodUnit === 'day') targetDate.setDate(targetDate.getDate() + subscription.periodValue);
+              else if (subscription.periodUnit === 'month') targetDate.setMonth(targetDate.getMonth() + subscription.periodValue);
+              else if (subscription.periodUnit === 'year') targetDate.setFullYear(targetDate.getFullYear() + subscription.periodValue);
+           }
+           return targetDate;
+        };
 
-      const paymentRecord = {
-        id: Date.now().toString() + '_' + Math.random().toString(36).substr(2, 9),
-        date: currentTime.toISOString(),
-        amount: subscription.amount || 0,
-        type: 'auto',
-        note: '自动续订',
-        periodStart: expiryDate.toISOString(),
-        periodEnd: newExpiryDate.toISOString()
-      };
+        // 执行计算：如果计算出的到期日还在过去，继续往后推（Cycle模式下的补齐逻辑）
+        // Reset模式下 newStartDate 是今天，加一次肯定在未来，循环只会执行一次
+        do {
+            // 在推进到期日之前，现有的 newExpiryDate 就变成了这一轮的"开始日"
+            // (仅在非第一次循环时有效，用于 Cycle 模式推进 start 日期)
+            if (periodsAdded > 0) {
+                newStartDate = new Date(newExpiryDate);
+            }
+            
+            // 计算下一个到期日
+            newExpiryDate = addOnePeriod(newStartDate);
+            periodsAdded++;
+            
+            // 获取新到期日的午夜时间用于判断是否仍过期
+            const newExpiryMidnight = getTimezoneMidnightTimestamp(newExpiryDate, timezone);
+            daysDiff = Math.round((newExpiryMidnight - currentMidnight) / MS_PER_DAY);
+            
+        } while (daysDiff < 0); // 只要还过期，就继续加
 
-      const paymentHistory = subscription.paymentHistory || [];
-      paymentHistory.push(paymentRecord);
+        console.log(`[定时任务] 续费完成. 新开始日: ${newStartDate.toISOString()}, 新到期日: ${newExpiryDate.toISOString()}`);
 
-      const updatedSubscription = {
-        ...subscription,
-        expiryDate: newExpiryDate.toISOString(),
-        lastPaymentDate: currentTime.toISOString(),
-        paymentHistory
-      };
-      updatedSubscriptions.push(updatedSubscription);
-      hasUpdates = true;
+        // 3. 生成支付记录
+        const paymentRecord = {
+          id: Date.now().toString() + '_' + Math.random().toString(36).substr(2, 9),
+          date: currentTime.toISOString(), // 实际扣款时间是现在
+          amount: subscription.amount || 0,
+          type: 'auto',
+          note: `自动续订 (${mode === 'reset' ? '重置模式' : '接续模式'}${periodsAdded > 1 ? ', 补齐' + periodsAdded + '周期' : ''})`,
+          periodStart: newStartDate.toISOString(), // 记录准确的计费周期开始
+          periodEnd: newExpiryDate.toISOString()
+        };
 
-      const shouldRemindAfterRenewal = shouldTriggerReminder(reminderSetting, daysDiff, diffHours);
-      if (shouldRemindAfterRenewal) {
-        console.log('[定时任务] 订阅 "' + subscription.name + '" 在提醒范围内，将发送通知');
+        const paymentHistory = subscription.paymentHistory || [];
+        paymentHistory.push(paymentRecord);
+
+        // 4. 更新订阅对象
+        // 关键：同时更新 startDate 和 expiryDate
+        const updatedSubscription = {
+          ...subscription,
+          startDate: newStartDate.toISOString(), 
+          expiryDate: newExpiryDate.toISOString(),
+          lastPaymentDate: currentTime.toISOString(),
+          paymentHistory
+        };
+        
+        updatedSubscriptions.push(updatedSubscription);
+        hasUpdates = true;
+
+        // 5. 检查续费后是否需要立即提醒 (例如续费后只剩1天)
+        diffMs = newExpiryDate.getTime() - currentTime.getTime();
+        diffHours = diffMs / MS_PER_HOUR;
+        const shouldRemindAfterRenewal = shouldTriggerReminder(reminderSetting, daysDiff, diffHours);
+        
+        if (shouldRemindAfterRenewal) {
+          expiringSubscriptions.push({
+            ...updatedSubscription,
+            daysRemaining: daysDiff,
+            hoursRemaining: Math.round(diffHours)
+          });
+        }
+        
+        continue; // 处理下一个订阅
+      }
+
+      // ==========================================
+      // 普通提醒逻辑 (未过期，或过期但不自动续费)
+      // ==========================================
+      const shouldRemind = shouldTriggerReminder(reminderSetting, daysDiff, diffHours);
+
+      if (daysDiff < 0 && subscription.autoRenew === false) {
+        // 已过期且不自动续费 -> 发送过期通知
         expiringSubscriptions.push({
-          ...updatedSubscription,
+          ...subscription,
+          daysRemaining: daysDiff,
+          hoursRemaining: Math.round(diffHours)
+        });
+      } else if (shouldRemind) {
+        // 正常到期提醒
+        expiringSubscriptions.push({
+          ...subscription,
           daysRemaining: daysDiff,
           hoursRemaining: Math.round(diffHours)
         });
       }
-      continue;
     }
-  } else {
-    const expiryDate = new Date(subscription.expiryDate);
-    const expiryMidnight = getTimezoneMidnightTimestamp(expiryDate, timezone);
 
-    daysDiff = Math.round((expiryMidnight - currentMidnight) / MS_PER_DAY);
-
-    console.log('[定时任务] 订阅 "' + subscription.name + '" 到期日期: ' + expiryDate.toISOString() + ', 时区午夜时间: ' + new Date(expiryMidnight).toISOString() + ', 剩余天数: ' + daysDiff);
-
-    diffMs = expiryDate.getTime() - currentTime.getTime();
-    diffHours = diffMs / MS_PER_HOUR;
-
-    if (daysDiff < 0 && subscription.periodValue && subscription.periodUnit && subscription.autoRenew !== false) {
-      const newExpiryDate = new Date(expiryDate);
-
-      if (subscription.periodUnit === 'day') {
-        newExpiryDate.setDate(expiryDate.getDate() + subscription.periodValue);
-      } else if (subscription.periodUnit === 'month') {
-        newExpiryDate.setMonth(expiryDate.getMonth() + subscription.periodValue);
-      } else if (subscription.periodUnit === 'year') {
-        newExpiryDate.setFullYear(expiryDate.getFullYear() + subscription.periodValue);
-      }
-
-      let newExpiryMidnight = getTimezoneMidnightTimestamp(newExpiryDate, timezone);
-      while (newExpiryMidnight < currentMidnight) {
-        console.log('[定时任务] 新计算的到期日期 ' + newExpiryDate.toISOString() + ' (时区转换后午夜: ' + new Date(newExpiryMidnight).toISOString() + ') 仍然过期，继续计算下一个周期');
-        if (subscription.periodUnit === 'day') {
-          newExpiryDate.setDate(newExpiryDate.getDate() + subscription.periodValue);
-        } else if (subscription.periodUnit === 'month') {
-          newExpiryDate.setMonth(newExpiryDate.getMonth() + subscription.periodValue);
-        } else if (subscription.periodUnit === 'year') {
-          newExpiryDate.setFullYear(newExpiryDate.getFullYear() + subscription.periodValue);
-        }
-        newExpiryMidnight = getTimezoneMidnightTimestamp(newExpiryDate, timezone);
-      }
-
-      console.log('[定时任务] 订阅 "' + subscription.name + '" 更新到期日期: ' + newExpiryDate.toISOString());
-
-      diffMs = newExpiryDate.getTime() - currentTime.getTime();
-      diffHours = diffMs / MS_PER_HOUR;
-
-      const paymentRecord = {
-        id: Date.now().toString() + '_' + Math.random().toString(36).substr(2, 9),
-        date: currentTime.toISOString(),
-        amount: subscription.amount || 0,
-        type: 'auto',
-        note: '自动续订',
-        periodStart: expiryDate.toISOString(),
-        periodEnd: newExpiryDate.toISOString()
-      };
-
-      const paymentHistory = subscription.paymentHistory || [];
-      paymentHistory.push(paymentRecord);
-
-      const updatedSubscription = {
-        ...subscription,
-        expiryDate: newExpiryDate.toISOString(),
-        lastPaymentDate: currentTime.toISOString(),
-        paymentHistory
-      };
-      updatedSubscriptions.push(updatedSubscription);
-      hasUpdates = true;
-
-      const newDaysDiff = Math.round((newExpiryMidnight - currentMidnight) / MS_PER_DAY);
-      const shouldRemindAfterRenewal = shouldTriggerReminder(reminderSetting, newDaysDiff, diffHours);
-      if (shouldRemindAfterRenewal) {
-        console.log('[定时任务] 订阅 "' + subscription.name + '" 在提醒范围内，将发送通知');
-        expiringSubscriptions.push({
-          ...updatedSubscription,
-          daysRemaining: newDaysDiff,
-          hoursRemaining: Math.round(diffHours)
-        });
-      }
-      continue;
-    }
-  }
-
-  diffMs = new Date(subscription.expiryDate).getTime() - currentTime.getTime();
-  diffHours = diffMs / MS_PER_HOUR;
-  const shouldRemind = shouldTriggerReminder(reminderSetting, daysDiff, diffHours);
-
-  if (daysDiff < 0 && subscription.autoRenew === false) {
-    console.log('[定时任务] 订阅 "' + subscription.name + '" 已过期且未启用自动续订，将发送过期通知');
-    expiringSubscriptions.push({
-      ...subscription,
-      daysRemaining: daysDiff,
-      hoursRemaining: Math.round(diffHours)
-    });
-  } else if (shouldRemind) {
-    console.log('[定时任务] 订阅 "' + subscription.name + '" 在提醒范围内，将发送通知');
-    expiringSubscriptions.push({
-      ...subscription,
-      daysRemaining: daysDiff,
-      hoursRemaining: Math.round(diffHours)
-    });
-  }
-}
-
+    // --- 保存更改 ---
     if (hasUpdates) {
       const mergedSubscriptions = subscriptions.map(sub => {
         const updated = updatedSubscriptions.find(u => u.id === sub.id);
         return updated || sub;
       });
       await env.SUBSCRIPTIONS_KV.put('subscriptions', JSON.stringify(mergedSubscriptions));
+      console.log(`[定时任务] 已更新 ${updatedSubscriptions.length} 个自动续费订阅`);
     }
 
+    // --- 发送通知 ---
     if (expiringSubscriptions.length > 0) {
       if (!shouldNotifyThisHour) {
-        console.log('[定时任务] 当前小时 ' + currentHour + ' 未配置为推送时间，跳过发送通知');
-        expiringSubscriptions.length = 0;
+        console.log(`[定时任务] 当前小时 ${currentHour} 未在通知时段内 (${normalizedNotificationHours.join(',')})，跳过发送`);
       } else {
+        console.log(`[定时任务] 发送 ${expiringSubscriptions.length} 条提醒通知`);
         // 按到期时间排序
         expiringSubscriptions.sort((a, b) => a.daysRemaining - b.daysRemaining);
 
-        // 使用优化的格式化函数
         const commonContent = formatNotificationContent(expiringSubscriptions, config);
         const metadataTags = extractTagsFromSubscriptions(expiringSubscriptions);
 
-        const title = '订阅到期提醒';
-        await sendNotificationToAllChannels(title, commonContent, config, '[定时任务]', {
+        await sendNotificationToAllChannels('订阅到期/续费提醒', commonContent, config, '[定时任务]', {
           metadata: { tags: metadataTags }
         });
       }
     }
   } catch (error) {
-    console.error('[定时任务] 检查即将到期的订阅失败:', error);
+    console.error('[定时任务] 执行失败:', error);
   }
 }
 
@@ -7050,12 +7216,10 @@ export default {
     await checkExpiringSubscriptions(env);
   }
 };
-
 // ==================== 仪表盘统计函数 ====================
-
-// 汇率配置 (以 CNY 为基准)
+// 汇率配置 (以 CNY 为基准，当 API 不可用或缺少特定币种如 TWD 时使用，属于兜底汇率)
 // 您可以根据需要修改此处的汇率
-const EXCHANGE_RATES = {
+const FALLBACK_RATES = {
   'CNY': 1,
   'USD': 6.98,
   'HKD': 0.90,
@@ -7065,17 +7229,51 @@ const EXCHANGE_RATES = {
   'GBP': 9.40,
   'KRW': 0.0048
 };
+// 获取动态汇率 (核心逻辑：KV缓存 -> API请求 -> 兜底合并)
+async function getDynamicRates(env) {
+  const CACHE_KEY = 'SYSTEM_EXCHANGE_RATES';
+  const CACHE_TTL = 86400000; // 24小时 (毫秒)
+  
+  try {  
+    const cached = await env.SUBSCRIPTIONS_KV.get(CACHE_KEY, { type: 'json' }); // A. 尝试从 KV 读取缓存
+    if (cached && cached.ts && (Date.now() - cached.ts < CACHE_TTL)) {
+      return cached.rates;  // console.log('[汇率] 使用 KV 缓存');
+    }
+    const response = await fetch('https://api.frankfurter.dev/v1/latest?base=CNY'); // B. 缓存失效或不存在，请求 Frankfurter API  
+    if (response.ok) {
+      const data = await response.json();
+      const newRates = {  // C. 合并逻辑：以 API 数据覆盖兜底数据 (保留 API 没有的币种，如 TWD)
+        ...FALLBACK_RATES, 
+        ...data.rates, 
+        'CNY': 1
+      };
 
-// 辅助函数：将金额转换为基准货币 (CNY)
-function convertToCNY(amount, currency) {
-  if (!amount || amount <= 0) return 0;
-  // 如果没有币种信息，默认视为 CNY
-  const code = currency || 'CNY';
-  const rate = EXCHANGE_RATES[code] || 1; 
-  return amount * rate;
+      await env.SUBSCRIPTIONS_KV.put(CACHE_KEY, JSON.stringify({  // D. 写入 KV 缓存
+        ts: Date.now(),
+        rates: newRates
+      }));
+      
+      return newRates;
+    } else {
+      console.warn('[汇率] API 请求失败，使用兜底汇率');
+    }
+  } catch (error) {
+    console.error('[汇率] 获取过程出错:', error);
+  }
+  return FALLBACK_RATES; // E. 发生任何错误，返回兜底汇率
 }
-
-function calculateMonthlyExpense(subscriptions, timezone) {
+// 辅助函数：将金额转换为基准货币 (CNY)
+function convertToCNY(amount, currency, rates) {
+  if (!amount || amount <= 0) return 0;
+  
+  const code = currency || 'CNY';
+  if (code === 'CNY') return amount; // 如果是基准货币，直接返回
+  const rate = rates[code];  // 获取汇率
+  if (!rate) return amount;  // 如果没有汇率，原样返回（或者你可以选择抛出错误/返回0）
+  return amount / rate;
+}
+// 修改函数签名，增加 rates 参数
+function calculateMonthlyExpense(subscriptions, timezone, rates) {
   const now = getCurrentTimeInTimezone(timezone);
   const parts = getTimezoneDateParts(now, timezone);
   const currentYear = parts.year;
@@ -7091,12 +7289,10 @@ function calculateMonthlyExpense(subscriptions, timezone) {
       const paymentDate = new Date(payment.date);
       const paymentParts = getTimezoneDateParts(paymentDate, timezone);
       if (paymentParts.year === currentYear && paymentParts.month === currentMonth) {
-        // 【核心修改】使用 convertToCNY 进行汇率转换
-        amount += convertToCNY(payment.amount, sub.currency);
+        amount += convertToCNY(payment.amount, sub.currency, rates); // 传入 rates 参数
       }
     });
   });
-
   // 计算上月数据用于趋势对比
   const lastMonth = currentMonth === 1 ? 12 : currentMonth - 1;
   const lastMonthYear = currentMonth === 1 ? currentYear - 1 : currentYear;
@@ -7107,9 +7303,8 @@ function calculateMonthlyExpense(subscriptions, timezone) {
       if (!payment.amount || payment.amount <= 0) return;
       const paymentDate = new Date(payment.date);
       const paymentParts = getTimezoneDateParts(paymentDate, timezone);
-      if (paymentParts.year === lastMonthYear && paymentParts.month === lastMonth) {
-        // 【核心修改】使用 convertToCNY 进行汇率转换
-        lastMonthAmount += convertToCNY(payment.amount, sub.currency);
+      if (paymentParts.year === lastMonthYear && paymentParts.month === lastMonth) {       
+        lastMonthAmount += convertToCNY(payment.amount, sub.currency, rates); // 使用 convertToCNY 进行汇率转换
       }
     });
   });
@@ -7121,21 +7316,18 @@ function calculateMonthlyExpense(subscriptions, timezone) {
     if (trend > 0) trendDirection = 'up';
     else if (trend < 0) trendDirection = 'down';
   } else if (amount > 0) {
-    // 上月无支出，本月有支出，视为增长
-    trend = 100;
+    trend = 100;  // 上月无支出，本月有支出，视为增长
     trendDirection = 'up';
   }
-
   return { amount, trend: Math.abs(trend), trendDirection };
 }
 
-function calculateYearlyExpense(subscriptions, timezone) {
+function calculateYearlyExpense(subscriptions, timezone, rates) {
   const now = getCurrentTimeInTimezone(timezone);
   const parts = getTimezoneDateParts(now, timezone);
   const currentYear = parts.year;
 
   let amount = 0;
-
   // 遍历所有订阅的支付历史
   subscriptions.forEach(sub => {
     const paymentHistory = sub.paymentHistory || [];
@@ -7144,13 +7336,11 @@ function calculateYearlyExpense(subscriptions, timezone) {
       const paymentDate = new Date(payment.date);
       const paymentParts = getTimezoneDateParts(paymentDate, timezone);
       if (paymentParts.year === currentYear) {
-        // 【核心修改】使用 convertToCNY 进行汇率转换
-        amount += convertToCNY(payment.amount, sub.currency);
+        amount += convertToCNY(payment.amount, sub.currency, rates);
       }
     });
   });
 
-  // 简单的月均计算：总额 / 当前月份（或者12，取决于您的统计逻辑，此处保持原逻辑）
   const monthlyAverage = amount / parts.month; 
   return { amount, monthlyAverage };
 }
@@ -7158,9 +7348,7 @@ function calculateYearlyExpense(subscriptions, timezone) {
 function getRecentPayments(subscriptions, timezone) {
   const now = getCurrentTimeInTimezone(timezone);
   const sevenDaysAgo = new Date(now.getTime() - 7 * MS_PER_DAY);
-
   const recentPayments = [];
-
   // 遍历所有订阅的支付历史
   subscriptions.forEach(sub => {
     const paymentHistory = sub.paymentHistory || [];
@@ -7171,7 +7359,7 @@ function getRecentPayments(subscriptions, timezone) {
         recentPayments.push({
           name: sub.name,
           amount: payment.amount,
-          currency: sub.currency || 'CNY', // 【核心修改】传递币种给前端显示
+          currency: sub.currency || 'CNY', // 传递币种给前端显示
           customType: sub.customType,
           paymentDate: payment.date,
           note: payment.note
@@ -7179,14 +7367,12 @@ function getRecentPayments(subscriptions, timezone) {
       }
     });
   });
-
   return recentPayments.sort((a, b) => new Date(b.paymentDate) - new Date(a.paymentDate));
 }
 
 function getUpcomingRenewals(subscriptions, timezone) {
   const now = getCurrentTimeInTimezone(timezone);
   const sevenDaysLater = new Date(now.getTime() + 7 * MS_PER_DAY);
-
   return subscriptions
     .filter(sub => {
       if (!sub.isActive) return false;
@@ -7199,7 +7385,7 @@ function getUpcomingRenewals(subscriptions, timezone) {
       return {
         name: sub.name,
         amount: sub.amount || 0,
-        currency: sub.currency || 'CNY', // 【核心修改】传递币种给前端显示
+        currency: sub.currency || 'CNY',
         customType: sub.customType,
         renewalDate: sub.expiryDate,
         daysUntilRenewal
@@ -7208,14 +7394,12 @@ function getUpcomingRenewals(subscriptions, timezone) {
     .sort((a, b) => a.daysUntilRenewal - b.daysUntilRenewal);
 }
 
-function getExpenseByType(subscriptions, timezone) {
+function getExpenseByType(subscriptions, timezone, rates) {
   const now = getCurrentTimeInTimezone(timezone);
   const parts = getTimezoneDateParts(now, timezone);
   const currentYear = parts.year;
-
   const typeMap = {};
   let total = 0;
-
   // 遍历所有订阅的支付历史
   subscriptions.forEach(sub => {
     const paymentHistory = sub.paymentHistory || [];
@@ -7225,9 +7409,7 @@ function getExpenseByType(subscriptions, timezone) {
       const paymentParts = getTimezoneDateParts(paymentDate, timezone);
       if (paymentParts.year === currentYear) {
         const type = sub.customType || '未分类';
-        // 【核心修改】先转换为 CNY 再统计
-        const amountCNY = convertToCNY(payment.amount, sub.currency);
-        
+        const amountCNY = convertToCNY(payment.amount, sub.currency, rates);  
         typeMap[type] = (typeMap[type] || 0) + amountCNY;
         total += amountCNY;
       }
@@ -7243,14 +7425,13 @@ function getExpenseByType(subscriptions, timezone) {
     .sort((a, b) => b.amount - a.amount);
 }
 
-function getExpenseByCategory(subscriptions, timezone) {
+function getExpenseByCategory(subscriptions, timezone, rates) {
   const now = getCurrentTimeInTimezone(timezone);
   const parts = getTimezoneDateParts(now, timezone);
   const currentYear = parts.year;
 
   const categoryMap = {};
   let total = 0;
-
   // 遍历所有订阅的支付历史
   subscriptions.forEach(sub => {
     const paymentHistory = sub.paymentHistory || [];
@@ -7260,9 +7441,7 @@ function getExpenseByCategory(subscriptions, timezone) {
       const paymentParts = getTimezoneDateParts(paymentDate, timezone);
       if (paymentParts.year === currentYear) {
         const categories = sub.category ? sub.category.split(CATEGORY_SEPARATOR_REGEX).filter(c => c.trim()) : ['未分类'];
-
-        // 先转换为 CNY 再分配给各个分类
-        const amountCNY = convertToCNY(payment.amount, sub.currency);
+        const amountCNY = convertToCNY(payment.amount, sub.currency, rates);
 
         categories.forEach(category => {
           const cat = category.trim() || '未分类';
