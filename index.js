@@ -417,79 +417,84 @@ const lunarBiz = {
 // === 新增：主题模式公共资源 (CSS覆盖 + JS逻辑) ===
 const themeResources = `
 <style>
-  /* 暗黑模式样式覆盖 */
-  html.dark body { background-color: #111827; color: #f3f4f6; }
-  
-  /* 基础容器与背景变暗 */
-  html.dark .bg-white { background-color: #1f2937 !important; color: #f3f4f6; }
-  html.dark .bg-gray-50 { background-color: #111827 !important; }
-  html.dark .bg-gray-100 { background-color: #374151 !important; }
-  html.dark .shadow-md, html.dark .shadow-lg { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3); }
-  
-  /* 文本颜色反转 */
-  html.dark .text-gray-900 { color: #f9fafb !important; }
-  html.dark .text-gray-800 { color: #f3f4f6 !important; }
+  /* === 全局暗黑模式核心变量与覆盖 === */
+  :root {
+    --dark-bg-primary: #111827;   /* 深灰/黑背景 */
+    --dark-bg-secondary: #1f2937; /* 卡片/容器背景 */
+    --dark-border: #374151;       /* 边框颜色 */
+    --dark-text-main: #f9fafb;    /* 主要文字 */
+    --dark-text-muted: #9ca3af;   /* 次要文字 */
+  }
+  html.dark body { background-color: var(--dark-bg-primary); color: var(--dark-text-muted); }
+  html.dark .bg-white { background-color: var(--dark-bg-secondary) !important; color: var(--dark-text-main); }
+  html.dark .bg-gray-50 { background-color: var(--dark-bg-primary) !important; }
+  html.dark .bg-gray-100 { background-color: var(--dark-border) !important; }
+  html.dark .shadow-md, html.dark .shadow-lg, html.dark .shadow-xl { 
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3); 
+  }
+  html.dark .text-gray-900, html.dark .text-gray-800 { color: var(--dark-text-main) !important; }
   html.dark .text-gray-700 { color: #d1d5db !important; }
-  html.dark .text-gray-600 { color: #9ca3af !important; }
-  html.dark .text-gray-500 { color: #9ca3af !important; }
-  
-  /* 边框颜色 */
-  html.dark .border-gray-200, html.dark .border-gray-300 { border-color: #374151 !important; }
-  html.dark .divide-gray-200 > :not([hidden]) ~ :not([hidden]) { border-color: #374151 !important; }
-  
-  /* 表单元素 */
+  html.dark .text-gray-600, html.dark .text-gray-500 { color: var(--dark-text-muted) !important; }
+  html.dark .text-indigo-600 { color: #818cf8 !important; }
+  html.dark .border-gray-200, html.dark .border-gray-300 { border-color: var(--dark-border) !important; }
+  html.dark .divide-y > :not([hidden]) ~ :not([hidden]) { border-color: var(--dark-border) !important; }
+  html.dark .divide-gray-200 > :not([hidden]) ~ :not([hidden]) { border-color: var(--dark-border) !important; }
   html.dark input, html.dark select, html.dark textarea {
-    background-color: #374151;
-    border-color: #4b5563;
-    color: white;
+    background-color: #374151 !important;
+    border-color: #4b5563 !important;
+    color: white !important;
   }
+  html.dark input::placeholder, html.dark textarea::placeholder { color: #9ca3af; }
   html.dark input:focus, html.dark select:focus, html.dark textarea:focus {
-    border-color: #6366f1;
-    background-color: #4b5563;
+    border-color: #818cf8 !important;
+    background-color: #4b5563 !important;
   }
-  
-  /* 特定组件适配 */
-  html.dark nav { background-color: #1f2937 !important; border-bottom: 1px solid #374151; }
-  html.dark .login-container { background: linear-gradient(135deg, #1f2937 0%, #111827 100%); }
-  html.dark .login-box { background-color: rgba(31, 41, 55, 0.95); }
-  
-  /* 表格与列表 */
-  html.dark tr.hover\\:bg-gray-50:hover { background-color: #374151 !important; }
-  html.dark .bg-gray-50 thead { background-color: #1f2937 !important; }
-  /* 强制调亮表头文字颜色 */
-  html.dark thead th { 
-    color: #e5e7eb !important; /* 亮灰色 */
-    background-color: #374151 !important; /* 加深表头背景以增加对比 */
-  }
-  
-  /* 弹窗与悬浮层 */
-  html.dark .custom-date-picker { background-color: #1f2937; border-color: #4b5563; }
+  html.dark nav { background-color: var(--dark-bg-secondary) !important; border-bottom: 1px solid var(--dark-border); }
+  html.dark thead { background-color: #374151 !important; }
+  html.dark thead th { color: #e5e7eb !important; background-color: #374151 !important; }
+  html.dark tbody tr:hover { background-color: #374151 !important; }
+  html.dark tbody tr.bg-gray-100 { background-color: #374151 !important; }
+  /* 弹窗与日期选择器 */
+  html.dark .custom-date-picker { background-color: var(--dark-bg-secondary); border-color: var(--dark-border); }
+  html.dark .custom-date-picker .calendar-day { color: #e5e7eb; }
+  html.dark .custom-date-picker .calendar-day:hover { background-color: #374151; }
+  html.dark .custom-date-picker .calendar-day.other-month { color: #4b5563; }
+  html.dark .month-option, html.dark .year-option { color: #e5e7eb; }
   html.dark .month-option:hover, html.dark .year-option:hover { background-color: #374151 !important; }
-  html.dark .custom-dropdown-list { background-color: #1f2937; border-color: #4b5563; }
-  html.dark .dropdown-item { color: #d1d5db; border-bottom-color: #374151; }
+  html.dark .custom-dropdown-list { background-color: var(--dark-bg-secondary); border-color: var(--dark-border); }
+  html.dark .dropdown-item { color: #d1d5db; border-bottom-color: var(--dark-border); }
   html.dark .dropdown-item:hover { background-color: #374151; color: #818cf8; }
-  
-  /* 骨架屏 */
+  html.dark #mobile-menu { background-color: var(--dark-bg-secondary); border-color: var(--dark-border); }
+  html.dark #mobile-menu a { color: #e5e7eb; }
+  html.dark #mobile-menu a:hover { background-color: #374151; }
+  html.dark #mobile-menu-btn { color: #e5e7eb; }
+  html.dark #mobile-menu-btn:hover { background-color: #374151; }
   html.dark .loading-skeleton { background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%); }
   
-  /* 移动端表格“标签名”颜色 */
-  @media (max-width: 767px) {
-    html.dark .responsive-table td::before {
-      color: #d1d5db !important; /* 亮灰色，确保在深色背景下清晰可见 */
+  @media (max-width: 767px) {   /* === 移动端表格样式(高对比度版) === */
+    html.dark .responsive-table td:before {  /* 强制提亮移动端表格的 Label */
+      color: #e5e7eb !important;    /* 改为极亮的浅灰色 (接近纯白) */
+      font-weight: 700 !important;  /* 加粗字体 */
+      opacity: 1 !important;
+      text-transform: uppercase;    /* 可选：增加大写使其更突出 */
+      letter-spacing: 0.05em;
     }
-    
-    /* 移动端每一行的边框也调暗一点，避免太刺眼 */
     html.dark .responsive-table tr {
       border-color: #374151 !important;
       background-color: #1f2937 !important;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3) !important; /* 阴影稍微加深 */
     }
+    
     html.dark .responsive-table td {
       border-bottom-color: #374151 !important;
     }
+    
+    html.dark .td-content-wrapper {
+        color: #f3f4f6;
+    }
   }
-  </style>
+</style>
 <script>
-  // 主题初始化逻辑
   (function() {
     function applyTheme(mode) {
       const html = document.documentElement;
@@ -502,11 +507,9 @@ const themeResources = `
       }
     }
 
-    // 1. 优先读取本地缓存，防止闪烁
     const savedTheme = localStorage.getItem('themeMode') || 'system';
     applyTheme(savedTheme);
 
-    // 2. 监听系统变化
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
       const currentMode = localStorage.getItem('themeMode') || 'system';
       if (currentMode === 'system') {
@@ -514,9 +517,7 @@ const themeResources = `
       }
     });
 
-    // 3. 页面加载后从后端获取最新配置并同步到本地 (仅在登录后有效)
     window.addEventListener('load', async () => {
-      // 只有在非登录页才尝试获取配置
       if (window.location.pathname.startsWith('/admin')) {
         try {
           const res = await fetch('/api/config');
@@ -524,7 +525,6 @@ const themeResources = `
           if (config.THEME_MODE && config.THEME_MODE !== localStorage.getItem('themeMode')) {
             localStorage.setItem('themeMode', config.THEME_MODE);
             applyTheme(config.THEME_MODE);
-            // 如果是配置页，更新下拉框
             const select = document.getElementById('themeModeSelect');
             if (select) select.value = config.THEME_MODE;
           }
@@ -532,7 +532,6 @@ const themeResources = `
       }
     });
     
-    // 暴露全局切换函数供配置页使用
     window.updateAppTheme = function(mode) {
       localStorage.setItem('themeMode', mode);
       applyTheme(mode);
@@ -540,7 +539,6 @@ const themeResources = `
   })();
 </script>
 `;
-
 // 定义HTML模板
 const loginPage = `
 <!DOCTYPE html>
@@ -3889,7 +3887,7 @@ const configPage = `
   <title>系统配置 - 订阅管理系统</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-  <style>
+  ${themeResources} <style>
     .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); transition: all 0.3s; }
     .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); }
     .btn-secondary { background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); transition: all 0.3s; }
@@ -3919,6 +3917,25 @@ const configPage = `
     .config-section.inactive { 
       background-color: #f9fafb; 
       opacity: 0.7; 
+    }
+    /* === Config Page 暗黑模式修复 === */
+    html.dark .config-section {
+      border-color: #374151;
+    }
+    html.dark .config-section.active {
+      background-color: rgba(31, 41, 55, 0.5); /* #1f2937 with opacity */
+      border-color: #818cf8;
+    }
+    html.dark .config-section.inactive {
+      background-color: #111827;
+      opacity: 0.5;
+    }
+    html.dark .bg-indigo-50 {
+        background-color: rgba(55, 65, 81, 0.5) !important; /* 深灰色带透明 */
+        border-color: #4b5563 !important;
+    }
+    html.dark .text-indigo-700 {
+        color: #a5b4fc !important; /* 浅靛蓝 */
     }
   </style>
 </head>
@@ -4892,7 +4909,31 @@ function dashboardPage() {
     .empty-state{text-align:center;padding:3rem 1rem;color:#9ca3af}
     .empty-state-icon{font-size:3rem;margin-bottom:1rem;opacity:0.5}
     .empty-state-text{font-size:0.875rem}
+    /* === Dashboard 暗黑模式修复 === */
+    html.dark .stat-card {
+      background: #1f2937; /* 深色卡片背景 */
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+    }
+    html.dark .stat-card-header { color: #9ca3af; }
+    html.dark .stat-card-value { color: #f3f4f6; } /* 白色文字 */
+    html.dark .stat-card-subtitle { color: #6b7280; } 
+    html.dark .stat-card-trend.flat { background: #374151; color: #9ca3af; }
+    html.dark .stat-card-trend.up { background: rgba(16, 185, 129, 0.2); }
+    html.dark .stat-card-trend.down { background: rgba(239, 68, 68, 0.2); }
+    html.dark .list-item:hover { background: #374151; }
+    html.dark .list-item:not(:last-child) { border-bottom-color: #374151; }
+    html.dark .list-item-name { color: #f3f4f6; } /* 列表项名称变白 */
+    html.dark .list-item-meta { color: #9ca3af; }
+    html.dark .list-item-badge { background: #3730a3; color: #c7d2fe; }
+    html.dark .ranking-item-name { color: #f3f4f6; } /* 排行榜名称变白 */
+    html.dark .ranking-item-amount { color: #e5e7eb; } /* 金额变白 */
+    html.dark .ranking-progress { background: #374151; }
+    /* 修复右上角的标签 */
+    html.dark .bg-indigo-100 { background-color: rgba(99, 102, 241, 0.2) !important; color: #a5b4fc !important; }
+    html.dark .text-indigo-800 { color: #c7d2fe !important; }
     .loading-skeleton{background:linear-gradient(90deg,#f3f4f6 25%,#e5e7eb 50%,#f3f4f6 75%);background-size:200% 100%;animation:loading 1.5s infinite;height:100px;border-radius:8px}
+    /* 暗黑模式骨架屏 */
+    html.dark .loading-skeleton { background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%); }
     @keyframes loading{0%{background-position:200% 0}100%{background-position:-200% 0}}
   </style>
 </head>
